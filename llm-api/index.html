@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="dark light">
-<title>Prompt Caching 交互讲义 · 前缀稳，才省钱</title>
-<meta name="description" content="用可交互的 token 带、示波器式等效成本读数、成本模拟器和三家官方文档口径，讲清 LLM API 的 Prompt Caching：前缀逐字节匹配、命中/失效动画、最小可缓存长度与省钱决策。">
+<title>Prompt Caching 学习笔记 · 前缀复用与成本分析</title>
+<meta name="description" content="结合 token 序列可视化、等效成本读数与成本模拟，理解 LLM API 的 Prompt Caching：前缀匹配、缓存命中与失效、最小可缓存长度，以及不同提供商的计费方式。">
 <link rel="icon" type="image/svg+xml" href="../assets/logo.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -107,9 +107,7 @@ body{
 a{color:var(--ice)}
 a:hover{color:var(--ice-soft)}
 :focus-visible{outline:2px solid var(--ice);outline-offset:2px;border-radius:4px}
-.wrap{max-width:920px;margin:0 auto;padding:0 20px}
-.skip{position:absolute;left:-9999px;top:0;background:var(--amber);color:var(--on-amber);padding:8px 14px;z-index:100;font-family:var(--mono);font-size:13px}
-.skip:focus{left:8px;top:8px}
+.wrap{max-width:1060px;margin:0 auto;padding:0}
 
 /* 顶栏与页面内导航已移除：全站导航在左侧栏（../assets/site.css），
    旧的 .topbar / .nav / .brand 规则整块删除，避免和站点外壳抢样式。 */
@@ -378,11 +376,10 @@ footer .srcs{display:grid;gap:8px;font-family:var(--mono);font-size:12px;line-he
 </script>
 </head>
 <body>
-<a class="skip" href="#main">跳到主内容</a>
 
 <header class="site-top">
   <div class="site-top-in">
-    <a class="site-brand" href="../index.html" aria-label="NLP Learning 课程总览">
+    <a class="site-brand" href="../" aria-label="NLP Learning 课程总览">
       <img class="brand-logo" src="../assets/logo.svg" width="24" height="24" alt="">
       <span class="brand-text">NLP Learning</span>
     </a>
@@ -395,14 +392,14 @@ footer .srcs{display:grid;gap:8px;font-family:var(--mono);font-size:12px;line-he
 <div class="site-shell">
   <aside class="site-rail" aria-label="本页分节导航"><nav data-site-nav data-root="../"></nav></aside>
 
-  <main class="site-main" id="main" tabindex="-1">
+  <main class="site-main" id="main">
   <div class="wrap" data-nav-group="课程 02 · Prompt Caching">
 
   <!-- ================= hero ================= -->
   <section class="hero" id="top" data-nav-anchor data-nav-label="本节提要" aria-label="引言">
-    <p class="kicker">sec.0 / 5 · 一份 5 分钟的交互讲义 · v2</p>
-    <h1>前缀稳，才省钱。</h1>
-    <p class="lead">大模型 API 的 Prompt Caching 只认一条死规矩：<strong style="color:var(--ink);font-weight:600">前缀逐字节相同</strong>。懂了这条，你就懂了为什么命中只要一折钱，也懂了为什么改动一个字、它后面的整段缓存全部作废。这一页把它讲透，并且让你亲手改改看。</p>
+    <p class="kicker">sec.0 / 5 · 交互式学习笔记 · v2</p>
+    <h1>前缀复用与缓存成本</h1>
+    <p class="lead">大模型 API 的 Prompt Caching（提示词缓存）依赖一个核心条件：<strong style="color:var(--ink);font-weight:600">请求具有完全一致的前缀</strong>。前缀保持稳定，才有机会复用已有计算、降低输入成本；前缀发生变化，变化位置及其后续内容就需要重新处理。这份笔记从机制、交互示例和成本模拟三个角度展开，你可以边读边调整参数，观察结论如何变化。</p>
     <div class="chips">
       <span class="chip">命中读价 <b>0.1×</b> 基础输入价（Anthropic）<a class="ref" href="#src-1">[1]</a></span>
       <span class="chip">写价 <b>1.25×</b>（Anthropic 5 分钟档）<a class="ref" href="#src-1">[1]</a></span>
@@ -424,7 +421,7 @@ footer .srcs{display:grid;gap:8px;font-family:var(--mono);font-size:12px;line-he
       <div class="req">
         <div class="req-tag">请求 2 · 重放</div>
         <div class="tape" id="heroTape2"></div>
-        <div class="req-note hit">前缀逐字节相同 → 直接读旧账 · 读价 0.1×，TTL 顺带刷新</div>
+        <div class="req-note hit">前缀完全一致 → 复用已有缓存 · 读价 0.1×，同时刷新 TTL</div>
       </div>
 
       <!-- 签名时刻：示波器 + TTL -->
@@ -439,7 +436,7 @@ footer .srcs{display:grid;gap:8px;font-family:var(--mono);font-size:12px;line-he
             <div class="ttl">
               <div class="ttl-head"><span>TTL 倒计时 · 5 分钟档（命中即刷新）<a class="ref" href="#src-1">[1]</a></span><b id="heroTtlClock">--:--</b></div>
               <div class="ttl-track"><span class="ttl-fill" id="heroTtlFill"></span></div>
-              <p class="ttl-note" id="heroTtlNote">倒计时从「写入」起算；归零后同一前缀需重新全价写入（冷启动）。</p>
+              <p class="ttl-note" id="heroTtlNote">倒计时从「写入」起算；归零后同一前缀需按写入价格重新建立缓存（冷启动）。</p>
             </div>
           </div>
           <div class="oscope-side">
@@ -467,22 +464,22 @@ footer .srcs{display:grid;gap:8px;font-family:var(--mono);font-size:12px;line-he
   <!-- ================= sec 1 机制 ================= -->
   <section class="section" id="sec-mech" aria-labelledby="t-mech">
     <p class="kicker">sec.1 / 5 · 机制</p>
-    <h2 class="title" id="t-mech" data-nav-anchor>缓存的是什么？是前缀的 KV</h2>
-    <p class="bigtext">Transformer 解码时，第 <code>t</code> 个 token 的注意力要读取前 <code>t-1</code> 个 token 的 K 和 V。这些 K/V <strong style="font-weight:600">只取决于前缀本身</strong>，跟你这次问什么毫无关系。既然同一个前缀算多少次结果都一样，服务商就把它暂时存起来——再来一个前缀完全相同的请求，直接调旧账，不用重算。</p>
-    <p class="bigtext">如果你在本机推理里用过 KV cache：prompt caching 就是把它从「一次请求之内」搬到「多次请求之间」。省的是 prefill 的计算，落到你账上就是钱和延迟。</p>
+    <h2 class="title" id="t-mech" data-nav-anchor>缓存机制：复用前缀的 KV 状态</h2>
+    <p class="bigtext">在采用因果注意力的 Transformer 中，生成第 <code>t</code> 个 token 时会用到前 <code>t-1</code> 个 token 的键（Key）和值（Value）。在模型与计算配置一致的条件下，这些 K/V 状态<strong style="font-weight:600">由对应前缀决定</strong>，不依赖后续追加的问题。因此，服务商可以暂存前缀的计算状态，在后续请求满足匹配条件时直接复用，减少重复计算。</p>
+    <p class="bigtext">如果你用过本地推理中的 KV cache，可以把 prompt caching 理解为将复用范围从「一次请求内部」扩展到「多次请求之间」。它主要减少预填充（prefill）阶段的重复计算，进而降低输入成本和首 token 延迟。</p>
 
     <div class="rules">
       <div class="rule">
-        <h3><span class="glyph">[a]</span>只认前缀</h3>
-        <p>匹配从第一个 token 开始逐字节进行。尾部追加不影响命中；但前缀里动一个字节，从那一秒起后面全完。</p>
+        <h3><span class="glyph">[a]</span>从前缀开始匹配</h3>
+        <p>匹配从输入开头开始。尾部追加内容可以保留已有前缀；前缀内部发生变化时，变化位置及其后续状态无法直接复用。</p>
       </div>
       <div class="rule">
-        <h3><span class="glyph">[b]</span>认死理</h3>
-        <p>不相似、不近似，字节不同就是不同。「的」和「得」是两个世界；多一个空格也是一次失效。</p>
+        <h3><span class="glyph">[b]</span>要求精确一致</h3>
+        <p>前缀缓存依赖精确匹配，而非语义相似。换一个字或多一个空格，都可能改变实际输入；含义相近并不等于缓存可复用。</p>
       </div>
       <div class="rule">
-        <h3><span class="glyph">[c]</span>有保质期</h3>
-        <p>缓存有保质期：Anthropic 5 分钟档命中即刷新（另有 1 小时档）；OpenAI GPT-5.6+ 的 <code>ttl</code> 默认 30m；DeepSeek 可达数小时至数天。过期等于冷启动。</p>
+        <h3><span class="glyph">[c]</span>受有效期约束</h3>
+        <p>缓存具有有效期（TTL）：Anthropic 5 分钟档命中即刷新（另有 1 小时档）；OpenAI GPT-5.6+ 的 <code>ttl</code> 默认 30m；DeepSeek 可达数小时至数天。过期后需要重新建立缓存。</p>
       </div>
     </div>
 
@@ -495,7 +492,7 @@ footer .srcs{display:grid;gap:8px;font-family:var(--mono);font-size:12px;line-he
         <span class="sch-label"><b class="missc">MISS</b>第 5 个 token 起不同</span>
         <div class="tape sm" id="schMiss"></div>
       </div>
-      <p class="footnote" style="margin:0">Anthropic：需显式打下 <code>cache_control</code> 断点（最多 4 个），各模型另有最小可缓存长度<a class="ref" href="#src-1">[1]</a>；OpenAI GPT-5.6+：内容块级断点，可用 <code>prompt_cache_breakpoint</code> 显式打点（每请求最多 4 个）<a class="ref" href="#src-2">[2]</a>。</p>
+      <p class="footnote" style="margin:0">Anthropic：可显式设置 <code>cache_control</code> 断点（最多 4 个），各模型另有最小可缓存长度<a class="ref" href="#src-1">[1]</a>；OpenAI GPT-5.6+：内容块级断点，可用 <code>prompt_cache_breakpoint</code> 设置显式断点（每请求最多 4 个）<a class="ref" href="#src-2">[2]</a>。</p>
     </div>
 
   </section>
@@ -504,14 +501,14 @@ footer .srcs{display:grid;gap:8px;font-family:var(--mono);font-size:12px;line-he
 
   <!-- ================= sec 2 交互 demo ================= -->
   <section class="section" id="sec-demo" aria-labelledby="t-demo">
-    <p class="kicker">sec.2 / 5 · 亲手试</p>
-    <h2 class="title" id="t-demo" data-nav-anchor>改一个字，看缓存崩给你看</h2>
-    <p class="lede">下面是一条示例 prompt。点「重放相同请求」看命中；点「改一个字」，盯住分叉点——那之后的 token 会集体阵亡，并按写价重算。切换口径，看同一次失效在不同提供商怎么记账。</p>
+    <p class="kicker">sec.2 / 5 · 交互观察</p>
+    <h2 class="title" id="t-demo" data-nav-anchor>修改输入，观察命中与失效</h2>
+    <p class="lede">下面是一条示例 prompt。点击「重放相同请求」比较前缀，或点击「改一个字」观察分叉点：从这里开始，后续 token 需要重新处理。切换提供商后，还可以比较计费结果。示例是否产生命中，也取决于所选的长度门槛。</p>
 
     <!-- F5：示例长度说明 -->
     <div class="notice">
       <span class="n-glyph">[!]</span>
-      <span><b>为可读性压缩了长度。</b>这段示例 prompt 只有 <b id="demoTokCount">≈ N</b> 个 token，远低于真实缓存门槛（Anthropic 依模型 512–4,096 token、DeepSeek 无明示门槛）<a class="ref" href="#src-1">[1]</a><a class="ref" href="#src-3">[3]</a>。真实世界里，这么短的前缀<b>连缓存都不会建立</b>——本节的动画演示的是「匹配与失效的方向性」。长度本身如何改变结论，去 <a href="#sec-sim">成本模拟器</a> 把前缀拉到门槛以上再看（两边用的是同一套门槛参数）。示意分词启发式：CJK 单字逐字 / ASCII 单词整体 / 标点单独，仅用于可视化。</span>
+      <span><b>示例经过长度简化。</b>这段示例 prompt 只有 <b id="demoTokCount">≈ N</b> 个 token，远低于真实缓存门槛（Anthropic 依模型 512–4,096 token、DeepSeek 无明示门槛）<a class="ref" href="#src-1">[1]</a><a class="ref" href="#src-3">[3]</a>。对于设有长度门槛的模型，这样的短前缀可能<b>无法建立缓存</b>。本节主要展示前缀匹配与失效的过程。要观察长度对结果的影响，可以在 <a href="#sec-sim">成本模拟器</a> 中调整前缀长度，再比较不同门槛下的结果。示意分词启发式：CJK 单字逐字 / ASCII 单词整体 / 标点单独，仅用于可视化。</span>
     </div>
 
     <div class="demo">
@@ -522,8 +519,8 @@ footer .srcs{display:grid;gap:8px;font-family:var(--mono);font-size:12px;line-he
         <button class="btn ghost" id="btnReset" type="button">恢复初始 prompt</button>
         <span class="seg" role="group" aria-label="选择供应商口径">
           <button type="button" data-provider="openaiNew" aria-pressed="false">OpenAI GPT-5.6+</button>
-          <button type="button" data-provider="anthropic" aria-pressed="true">Anthropic</button>
-          <button type="button" data-provider="deepseek" aria-pressed="false">DeepSeek</button>
+          <button type="button" data-provider="anthropic" aria-pressed="false">Anthropic</button>
+          <button type="button" data-provider="deepseek" class="is-on" aria-pressed="true">DeepSeek</button>
         </span>
         <span class="pill is-idle" id="demoPill" role="status">待重放</span>
       </div>
@@ -534,9 +531,9 @@ footer .srcs{display:grid;gap:8px;font-family:var(--mono);font-size:12px;line-he
       <div class="tape-panel">
         <div class="tape" id="demoTape" aria-label="prompt token 带"></div>
         <div class="legend">
-          <span><span class="dot amber"></span>命中 · 固化</span>
-          <span><span class="dot ice"></span>失效 / 写入 · 碎裂</span>
-          <span>虚线标记 = 前缀分叉点，其后的缓存全部作废</span>
+          <span><span class="dot amber"></span>命中 · 复用</span>
+          <span><span class="dot ice"></span>失效 / 写入 · 重新处理</span>
+          <span>虚线标记 = 前缀分叉点，其后状态无法直接复用</span>
         </div>
       </div>
 
@@ -549,8 +546,8 @@ footer .srcs{display:grid;gap:8px;font-family:var(--mono);font-size:12px;line-he
       <div class="readout">
         <pre class="usage" id="demoUsage" aria-label="usage 记账字段">// 点上方按钮开始回放</pre>
         <div class="summary">
-          <div id="demoSummary">当前缓存快照 = 初始 prompt。先点「重放相同请求」看一次完整命中，再用「改一个字」制造失效。</div>
-          <div class="costnote" id="demoCostNote">Anthropic 显式断点：写 1.25×、读 0.1×（5 分钟档）。</div>
+          <div id="demoSummary">当前比较快照为初始 prompt。先点击「重放相同请求」，再用「改一个字」比较结果；低于长度门槛时不会产生命中。</div>
+          <div class="costnote" id="demoCostNote">DeepSeek 硬盘缓存：默认开启、无明示最小长度；命中约为未命中的 2%–3%（官网价目），尽力而为不保证 100%。[3]</div>
           <div class="hint">说明：这里的计费是教学简化口径——只算输入侧，忽略输出 token；但<b>最小可缓存长度门槛是真实存在的</b>，低于门槛不会命中、也不产生写溢价。倍率与字段名来自官方文档<a class="ref" href="#src-1">[1]</a><a class="ref" href="#src-2">[2]</a><a class="ref" href="#src-3">[3]</a><a class="ref" href="#src-2">[2]</a>。切到「OpenAI GPT-5.6+」可看显式断点 + 写 1.25× 的计费口径；Anthropic 的写溢价分 5 分钟档与 1 小时档。</div>
         </div>
       </div>
@@ -562,8 +559,8 @@ footer .srcs{display:grid;gap:8px;font-family:var(--mono);font-size:12px;line-he
   <!-- ================= sec 3 三家对比 ================= -->
   <section class="section" id="sec-cmp" aria-labelledby="t-cmp">
     <p class="kicker">sec.3 / 5 · 三家对比</p>
-    <h2 class="title" id="t-cmp" data-nav-anchor>同一件事，三种做法</h2>
-    <p class="lede">OpenAI、Anthropic、DeepSeek 都在做同一件事——前缀匹配 + 短 TTL + 命中记账，但开启方式与溢价结构分成两条路线：OpenAI GPT-5.6+ 与 Anthropic 走「显式断点 + 写溢价」，DeepSeek 则是默认开启、不单收写溢价。</p>
+    <h2 class="title" id="t-cmp" data-nav-anchor>三家提供商的实现与计费差异</h2>
+    <p class="lede">OpenAI、Anthropic、DeepSeek 都通过前缀复用减少重复计算，但缓存开启方式、有效期和计费结构有所不同。本页所列配置中，OpenAI GPT-5.6+ 与 Anthropic 采用断点机制并收取写入溢价，DeepSeek 则是默认开启、不单收写溢价。</p>
 
     <div class="tablewrap" tabindex="0" role="region" aria-label="三家缓存口径对比表（窄屏可横向滚动）">
       <table>
@@ -574,7 +571,7 @@ footer .srcs{display:grid;gap:8px;font-family:var(--mono);font-size:12px;line-he
         <tbody>
           <tr>
             <th scope="row">开启方式</th>
-            <td><code>prompt_cache_options</code>：默认打一个「最近合资格消息」处的隐式断点；<code>prompt_cache_breakpoint</code> 可在内容块上打显式断点（每请求最多写 4 个）；<code>mode:"explicit"</code> 关闭隐式断点<a class="ref" href="#src-2">[2]</a></td>
+            <td><code>prompt_cache_options</code>：默认设置一个「最近合资格消息」处的隐式断点；<code>prompt_cache_breakpoint</code> 可在内容块上设置显式断点（每请求最多写 4 个）；<code>mode:"explicit"</code> 关闭隐式断点<a class="ref" href="#src-2">[2]</a></td>
             <td>显式 <code>cache_control: {"type":"ephemeral"}</code> 断点（≤4 个），另有请求级自动断点<a class="ref" href="#src-1">[1]</a></td>
             <td>上下文硬盘缓存默认开启，无需改代码<a class="ref" href="#src-3">[3]</a></td>
           </tr>
@@ -615,8 +612,8 @@ footer .srcs{display:grid;gap:8px;font-family:var(--mono);font-size:12px;line-he
             <td><code>prompt_cache_hit_tokens</code> / <code>prompt_cache_miss_tokens</code></td>
           </tr>
           <tr>
-            <th scope="row">回本口径</th>
-            <td>写价 1.25× 意味着有前置成本；读价低于写价时，读得越多越回本</td>
+            <th scope="row">成本回收</th>
+            <td>写价 1.25× 带来额外写入成本；需通过后续读取相对标准输入价格的节省来抵消</td>
             <td>官方口径：5 分钟档 1 次读即回本；1 小时档需 ≥2 次读</td>
             <td>—</td>
           </tr>
@@ -629,7 +626,7 @@ footer .srcs{display:grid;gap:8px;font-family:var(--mono);font-size:12px;line-he
         </tbody>
       </table>
     </div>
-    <p class="commonline"><b>共同点：</b>三者都只认前缀、都有短保质期、都把命中量写进 usage 让你对账。<b>差异：</b>隐式全自动（DeepSeek）与显式打点 + 写溢价（Anthropic、OpenAI GPT-5.6+）——OpenAI 在 5.6 代际转向断点 + 写溢价，这本身就是「两种 API 形式不同」的活教材。所以 Anthropic 的命中折扣最深（0.1×），但也最容易「写亏」。</p>
+    <p class="commonline"><b>共同点：</b>三者都依赖前缀匹配，并通过 usage 字段提供命中量，便于核对实际效果。<b>差异：</b>各家的断点机制、保留策略与写入溢价不同。评估成本时，需要同时考虑首次写入和后续读取，不能只看命中折扣。</p>
   </section>
 
   <hr class="sprocket">
@@ -637,8 +634,8 @@ footer .srcs{display:grid;gap:8px;font-family:var(--mono);font-size:12px;line-he
   <!-- ================= sec 4 成本模拟器 ================= -->
   <section class="section" id="sec-sim" aria-labelledby="t-sim">
     <p class="kicker">sec.4 / 5 · 成本模拟</p>
-    <h2 class="title" id="t-sim" data-nav-anchor>算账：缓存到底省多少</h2>
-    <p class="lede">模型：每轮请求 = 稳定前缀 + 逐轮追加的新内容。无缓存时每轮全价重算；有缓存时命中部分按读价、新内容按原价；失效的那轮把整个前缀按写价重写。<b>前缀低于该提供商的最小可缓存长度时，缓存根本不建立——按无缓存计费，并在这里明确警告。</b>单位是「等效全价输入 token」，自己乘单价即得美元。</p>
+    <h2 class="title" id="t-sim" data-nav-anchor>成本模拟：缓存能节省多少</h2>
+    <p class="lede">本节采用简化模型：每轮请求由稳定前缀与逐轮追加的内容组成。无缓存时，全部输入按标准价格计费；命中时，复用部分按读取价格、新内容按标准价格计费；失效轮次则按写入价格重新计算。<b>前缀低于设定的最小可缓存长度时，模型按无缓存处理，并显示提示。</b>结果以「等效全价输入 token」表示，可结合每百万 token 的单价换算为美元。</p>
 
     <div class="sim-grid">
       <div class="ctrl">
@@ -685,7 +682,7 @@ footer .srcs{display:grid;gap:8px;font-family:var(--mono);font-size:12px;line-he
         </div>
 
         <label for="simPrice">折算单价（$/1M 全价输入）
-          <span class="price-row"><input type="number" id="simPrice" min="0" step="0.1" value="3"> <span class="val">仅用于换成美元，倍率才是重点</span></span>
+          <span class="price-row"><input type="number" id="simPrice" min="0" step="0.1" value="3"> <span class="val">用于美元换算；相对成本由倍率决定</span></span>
         </label>
       </div>
 
@@ -713,7 +710,7 @@ footer .srcs{display:grid;gap:8px;font-family:var(--mono);font-size:12px;line-he
         </div>
         <p class="detail" id="numDetail">写 0 · 读 0 · 新内容 0</p>
         <p class="detail" id="numDollar">$0.00</p>
-        <p class="advice" id="simAdvice" role="status">调参数，看结论变化。</p>
+        <p class="advice" id="simAdvice" role="status">调整参数，观察成本变化。</p>
         <p class="footnote" id="simCostNote">Anthropic：写 1.25×、读 0.1×（5 分钟档；1 小时档写 2×）。<a class="ref" href="#src-1">[1]</a></p>
       </div>
     </div>
@@ -723,67 +720,67 @@ footer .srcs{display:grid;gap:8px;font-family:var(--mono);font-size:12px;line-he
 
   <!-- ================= sec 5 陷阱与决策 ================= -->
   <section class="section" id="sec-decision" aria-labelledby="t-dec">
-    <p class="kicker">sec.5 / 5 · 陷阱与决策</p>
-    <h2 class="title" id="t-dec" data-nav-anchor>五个暗坑，一张决策单</h2>
-    <p class="lede">大多数缓存失效不是「改了一个字」，而是无意识地把每轮变化的内容塞进了前缀，或者压根没到门槛。五个最常见的暗坑：</p>
+    <p class="kicker">sec.5 / 5 · 常见问题与使用判断</p>
+    <h2 class="title" id="t-dec" data-nav-anchor>常见失效原因与使用建议</h2>
+    <p class="lede">实际使用时，动态内容的位置、序列化方式和前缀长度都会影响缓存效果。可以先检查下面五种情况，再判断缓存是否适合当前请求模式。</p>
 
     <div class="traps">
       <div class="trap">
-        <h3>暗坑 1 · 时间戳前插</h3>
+        <h3>问题 1 · 在前缀开头插入时间戳</h3>
         <p class="desc">把当前时间拼在 system 最前面，等于每轮换一个前缀。</p>
         <div class="bad">system = "现在 " + now + "\n" + BASE   // 每轮都不同 → 永远冷启动</div>
         <div class="good">BASE 保持字节稳定；now 放进最后一条 user 消息</div>
       </div>
       <div class="trap">
-        <h3>暗坑 2 · tools 增删或重排</h3>
-        <p class="desc">工具定义位于前缀。中途加一个工具、调一次顺序，前面全部作废。</p>
+        <h3>问题 2 · 增删或重排 tools</h3>
+        <p class="desc">工具定义位于前缀。新增工具或调整顺序，会影响变化位置及其后续前缀的复用。</p>
         <div class="bad">tools 数组每次重新排序 / 条件拼接   // 前缀字节变化</div>
         <div class="good">工具集固定序列化；必须变时，接受一次写价重写</div>
       </div>
       <div class="trap">
-        <h3>暗坑 3 · JSON 键序不稳</h3>
-        <p class="desc">同样内容、不同字节序，就是不同前缀。</p>
+        <h3>问题 3 · JSON 键顺序不固定</h3>
+        <p class="desc">将 JSON 文本放入 prompt 时，即使内容相同，键顺序不同也会改变输入序列。</p>
         <div class="bad">{"b":1,"a":2} 与 {"a":2,"b":1}   // 逐字节比较 → 不相等</div>
         <div class="good">固定键序（如 sort_keys）后再进 prompt</div>
       </div>
       <div class="trap">
-        <h3>暗坑 4 · 动态内容放在断点前</h3>
+        <h3>问题 4 · 动态内容位于断点之前</h3>
         <p class="desc">RAG 检索结果每次不同，却拼进 system 或断点之前。</p>
         <div class="bad">system = 检索结果 + 规则     // 检索一变，全失效</div>
         <div class="good">规则与静态文档走缓存；检索结果放到尾部再追加</div>
       </div>
       <div class="trap">
-        <h3>暗坑 5 · 门槛之下的静默失败</h3>
+        <h3>问题 5 · 未达到最小可缓存长度</h3>
         <p class="desc">前缀没到最小可缓存长度，或断点打在了太靠前的位置：接口不报错，只是永远不命中。</p>
-        <div class="bad">prefix = 400 token   // 低于该模型的最小可缓存长度 → 压根不进缓存，也无从「命中」</div>
-        <div class="good">先确认门槛，再决定要不要为写溢价买单</div>
+        <div class="bad">prefix = 400 token   // 低于该模型的最小可缓存长度 → 无法建立缓存，因此不会命中</div>
+        <div class="good">先确认长度门槛，再评估写入成本与复用收益</div>
       </div>
       <div class="trap">
         <h3>判断顺序 · 先门槛，再前缀，最后 TTL</h3>
-        <p class="desc">把这三个问题按顺序问一遍，比事后看账单便宜得多。</p>
+        <p class="desc">按以下顺序检查，有助于在发起请求前判断缓存是否具备复用条件。</p>
         <div class="good">1) 前缀够长吗？（Anthropic 512–4,096 / DeepSeek 无明示）
 2) 前缀字节真的稳定吗？（ tools / 键序 / 时间戳）
-3) 会在一两个 TTL 内复用吗？（间隔短于 TTL）</div>
+3) 会在缓存有效期内复用吗？（间隔短于 TTL）</div>
       </div>
     </div>
 
     <div class="decision">
       <div class="dec yes">
-        <h3><span class="glyph">[+]</span>缓存省钱，当……</h3>
+        <h3><span class="glyph">[+]</span>适合使用缓存的情况</h3>
         <ul>
           <li>前缀达到门槛（Anthropic 依模型 512–4,096 token）且重复使用 ≥2 次</li>
           <li>固定文档库 / RAG 语料放在最前，逐题只改尾部</li>
           <li>Agent 的 system + tools 固定，多轮对话用追加式</li>
-          <li>请求间隔短于 TTL，或持续有流量保温</li>
+          <li>请求间隔短于 TTL，或通过持续命中刷新有效期</li>
           <li>写溢价的一次性成本能被多次读摊薄（Anthropic 5 分钟档 1 次读即回本）</li>
         </ul>
       </div>
       <div class="dec no">
-        <h3><span class="glyph">[-]</span>反而更贵，当……</h3>
+        <h3><span class="glyph">[-]</span>收益有限或成本增加的情况</h3>
         <ul>
-          <li>只问一次：Anthropic 写价 1.25×（GPT-5.6+ 同样收 1.25×），一次读赚不回来</li>
-          <li>前缀短于门槛：不是「少省一点」，是根本不进缓存</li>
-          <li>每轮都污染前缀：失效一次，整个前缀按写价重算</li>
+          <li>只问一次：Anthropic 写价 1.25×（GPT-5.6+ 同样收 1.25×），没有后续读取来抵消写入溢价</li>
+          <li>前缀短于门槛：无法建立缓存，仍按标准输入价格计费</li>
+          <li>每轮都改动前缀：失效一次，整个前缀按写价重算</li>
           <li>超过 TTL 再来：冷启动 + 重新写一遍</li>
         </ul>
       </div>
@@ -1037,14 +1034,14 @@ footer .srcs{display:grid;gap:8px;font-family:var(--mono);font-size:12px;line-he
     fill.classList.toggle('is-warn', pct < 25);
     el('heroTtlNote').textContent = pct < 25 && remain > 0
       ? 'TTL 即将归零：再不命中就要冷启动、重新按写价写入整段。'
-      : '倒计时从「写入」起算；归零后同一前缀需重新全价写入（冷启动）。';
+      : '倒计时从「写入」起算；归零后同一前缀需按写入价格重新建立缓存（冷启动）。';
   }
 
   function ttlExpire() {
     ttl.expired = true;
     ttl.running = false;
     ttlRender(0);
-    el('heroTtlNote').textContent = 'TTL 已过期：同一前缀需重新全价写入（冷启动），刚才的命中读数作废。';
+    el('heroTtlNote').textContent = 'TTL 已过期：同一前缀需按写入价格重新建立缓存（冷启动），此前的命中读数不再适用于下一次请求。';
     scopeRun('expired', reduced ? 0 : 1600);
     if (!heroBusy) {
       var st = el('heroStatus');
@@ -1129,7 +1126,7 @@ footer .srcs{display:grid;gap:8px;font-family:var(--mono);font-size:12px;line-he
           '// 写入按 1.25× 标准未缓存输入价计费'
         ];
       },
-      costNote: 'OpenAI GPT-5.6+：默认一个隐式断点，可用 prompt_cache_breakpoint 显式打点（每请求最多 4 个）；写入按 1.25× 计费，ttl 默认 30m。[2]'
+      costNote: 'OpenAI GPT-5.6+：默认一个隐式断点，可用 prompt_cache_breakpoint 设置显式断点（每请求最多 4 个）；写入按 1.25× 计费，ttl 默认 30m。[2]'
     },
     anthropic: {
       label: 'Anthropic',
@@ -1159,7 +1156,7 @@ footer .srcs{display:grid;gap:8px;font-family:var(--mono);font-size:12px;line-he
     }
   };
 
-  var demo = { provider: 'anthropic', snapshot: [], busy: false, dirty: false };
+  var demo = { provider: 'deepseek', snapshot: [], busy: false, dirty: false };
 
   function demoGate(cur) {
     var p = DEMO_PROFILES[demo.provider];
@@ -1178,8 +1175,8 @@ footer .srcs{display:grid;gap:8px;font-family:var(--mono);font-size:12px;line-he
           : '；具体门槛与断点行为以官方实时页面为准。[2]');
     } else {
       text.textContent = '门槛检查：当前 ' + fmt(n) + ' token < ' + p.label + ' 最小可缓存长度 ' + fmt(p.floor) +
-        ' token —— 真实环境中这段前缀' + (demo.provider === 'anthropic' || demo.provider === 'openaiNew' ? '连缓存都不会建立，也' : '不会进缓存，也') +
-        '不会产生写溢价，整段按无缓存全价计费。为可读性这里的 prompt 被压缩了；把长度拉到门槛以上再判断省钱与否（见成本模拟器）。';
+        ' token —— 真实环境中这段前缀' + (demo.provider === 'anthropic' || demo.provider === 'openaiNew' ? '不会建立缓存，也' : '不会建立缓存，也') +
+        '不会产生写溢价，整段按无缓存全价计费。为可读性这里的 prompt 被压缩了；调整长度至门槛以上，再评估成本收益（见成本模拟器）。';
     }
     return ok;
   }
@@ -1195,15 +1192,15 @@ footer .srcs{display:grid;gap:8px;font-family:var(--mono);font-size:12px;line-he
       sum.textContent = '前缀 ' + fmt(total) + ' token 低于 ' + p.label + ' 的 ' + fmt(p.floor) +
         ' token 门槛：没有缓存可命中，' + fmt(total) + ' 个 token 全部按原价计费，写溢价也不会发生。';
     } else if (identical) {
-      sum.textContent = '与缓存快照逐字节相同：' + fmt(total) + ' 个 token 全部命中，一个都没重算。';
+      sum.textContent = '与缓存快照逐字节相同：' + fmt(total) + ' 个 token 在本示例中全部命中，无需重新计算前缀。';
     } else {
-      sum.textContent = '第 ' + fmt(d + 1) + ' 个 token 起不同：前 ' + fmt(hit) + ' 个命中，后 ' + fmt(miss) + ' 个作废并按写价重写。';
+      sum.textContent = '第 ' + fmt(d + 1) + ' 个 token 起不同：前 ' + fmt(hit) + ' 个命中，后 ' + fmt(miss) + ' 个无法复用，在本示例中按写入价格计算。';
     }
     var usage = p.usage(hit, miss, total);
     usage.push('');
     usage.push(cacheActive
       ? '等效全价 token ≈ ' + fmt(hit) + '×' + r + ' + ' + fmt(miss) + '×' + w + ' = ' + cost.toFixed(2)
-      : '等效全价 token = ' + fmt(total) + ' × 1.0 = ' + cost.toFixed(2) + '   // 低于门槛，无缓存可谈');
+      : '等效全价 token = ' + fmt(total) + ' × 1.0 = ' + cost.toFixed(2) + '   // 低于门槛，按无缓存计费');
     usage.push('（若无缓存：' + fmt(total) + '）');
     el('demoUsage').textContent = usage.join('\n');
     demo.snapshot = cur;
@@ -1223,7 +1220,7 @@ footer .srcs{display:grid;gap:8px;font-family:var(--mono);font-size:12px;line-he
       renderTape(tape, []);
       pill.textContent = '空 prompt';
       pill.className = 'pill is-idle';
-      el('demoSummary').textContent = '没有 token 可以匹配，先写点什么。';
+      el('demoSummary').textContent = '当前输入为空，请输入一段文本后再观察匹配结果。';
       el('demoUsage').textContent = '';
       demo.snapshot = [];
       demo.busy = false;
@@ -1372,18 +1369,26 @@ footer .srcs{display:grid;gap:8px;font-family:var(--mono);font-size:12px;line-he
       demoRefreshGate();
     });
 
+    /* 按钮高亮 / aria / 计费口径说明都按 demo.provider 走。抽成函数是为了让
+       初始态和点击后走同一条路：以前初始高亮只写在 HTML 里，改默认口径要改两处。 */
+    function syncProviderUI() {
+      all('[data-provider]').forEach(function (b) {
+        var on = b.getAttribute('data-provider') === demo.provider;
+        b.classList.toggle('is-on', on);
+        b.setAttribute('aria-pressed', on ? 'true' : 'false');
+      });
+      el('demoCostNote').textContent = DEMO_PROFILES[demo.provider].costNote;
+    }
+
     all('[data-provider]').forEach(function (btn) {
       btn.addEventListener('click', function () {
         demo.provider = btn.getAttribute('data-provider');
-        all('[data-provider]').forEach(function (b) {
-          var on = b === btn;
-          b.classList.toggle('is-on', on);
-          b.setAttribute('aria-pressed', on ? 'true' : 'false');
-        });
-        el('demoCostNote').textContent = DEMO_PROFILES[demo.provider].costNote;
+        syncProviderUI();
         demoRefreshGate();
       });
     });
+
+    syncProviderUI();
   }
 
   /* ================= 静态示意（sec.1） ================= */
@@ -1502,21 +1507,21 @@ footer .srcs{display:grid;gap:8px;font-family:var(--mono);font-size:12px;line-he
         ' token，缓存可以建立；命中仍受 TTL 与前缀字节稳定性影响。';
     } else {
       gt.textContent = '前缀 ' + fmt(sim.prefix) + ' token < ' + SIM_PROFILES[sim.provider].label + ' 最小可缓存长度 ' + fmt(r.floor) +
-        ' token：缓存根本不建立（Anthropic 低于门槛时 cache_control 被静默忽略），也没有写溢价可亏——整段按无缓存全价计费。把前缀拉到 ' + fmt(r.floor) + ' 以上再看。';
+        ' token：无法建立缓存（Anthropic 低于门槛时会静默忽略 cache_control），不产生写入溢价，全部输入按标准价格计费。可将前缀长度调整至 ' + fmt(r.floor) + ' 以上，再比较成本变化。';
     }
 
     var advice, warn = false;
     if (!r.cacheActive) {
-      advice = '当前参数下缓存完全不生效：前缀没够到最小可缓存长度。把「稳定前缀 token 数」拉到 ' + fmt(r.floor) +
-        ' 以上，再谈省多少——这是门槛问题，不是倍率问题。';
+      advice = '当前参数下未达到最小可缓存长度，模型按无缓存处理。可将「稳定前缀 token 数」调整至 ' + fmt(r.floor) +
+        ' 以上，再评估读取倍率和复用次数对成本的影响。';
       warn = true;
     } else if (r.total > r.noCache) {
-      advice = '当前参数下缓存反而更贵——多半是失效太频繁，或读价相对写价没优势。调低「前缀失效次数」、调高前缀长度试试。';
+      advice = '当前参数下，缓存成本高于无缓存成本，说明读取节省尚未抵消写入开销。可以调整失效次数、前缀长度或读取倍率，比较各因素的影响。';
       warn = true;
     } else if (savePct < 15) {
-      advice = '省得有限：前缀可能太短，或失效次数太多。把前缀拉长、失效调少，结论会明显变化。';
+      advice = '当前成本节省较为有限。可以分别调整前缀长度与失效次数，观察重复使用的内容规模和频率如何影响收益。';
     } else {
-      advice = '前缀长、轮次多、失效少——缓存正在替你省钱。注意这只是输入侧，输出 token 另算；真实命中率还取决于前缀是否真的字节稳定。';
+      advice = '当前参数下，前缀复用带来了较明显的输入成本节省。结果仅覆盖输入侧，输出 token 需另行计费；实际收益还取决于前缀稳定性、缓存有效期和服务端命中情况。';
     }
     var adv = el('simAdvice');
     adv.textContent = advice;

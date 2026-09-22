@@ -92,19 +92,6 @@
 
 /* ---------------------------------------------------------------- 壳层 */
 
-.skip-link {
-  position: absolute;
-  left: -9999px;
-  top: 0;
-  background: var(--hot);
-  color: var(--on-hot);
-  padding: 8px 14px;
-  z-index: 100;
-  font-family: var(--mono);
-  font-size: 13px;
-}
-.skip-link:focus { left: 8px; top: 8px; }
-
 /* 栅格：左列导航、右列正文；两列同高，侧栏才有"粘"的空间。
    max-width 必须等于「左栏 + 间距 + 正文列」——多了右侧就会空出一大块，
    整页看上去贴在左边（这是之前 1680px 时的问题）。 */
@@ -325,12 +312,13 @@
 
 .courses-h { font-size: 11px; margin: 34px 0 0; padding: 0; }
 
-/* 一行四个：容器是壳层满宽（约 1064px），240 × 4 + 3 × 16 塞得下，
-   留 268 只能塞三个。auto-fill 保留空轨道 —— 课少于四个时
+/* 一行四个：正文列加宽到 1060px 后容器约 1344px（壳层 1388 减去左右内边距），
+   268 × 4 + 3 × 16 = 1120 塞得下，也不会涨到第五列；
+   auto-fill 保留空轨道 —— 课少于四个时
    卡片保持原宽度，不拉伸。 */
 .course-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(268px, 1fr));
   gap: 16px;
   margin: 38px 0 0;
   padding: 0;
