@@ -15,13 +15,15 @@
 <link rel="stylesheet" href="../assets/tokens.css">
 <link rel="stylesheet" href="../assets/site.css">
 <link rel="stylesheet" href="hermes.css">
+<link rel="stylesheet" href="../assets/course.css">
 </head>
-<body>
+<body class="course-page hermes-course">
 
 <header class="site-top">
   <div class="site-top-in">
     <a class="site-brand" href="../" aria-label="NLP Learning 课程总览"><img class="brand-logo" src="../assets/logo.svg" width="24" height="24" alt=""><span class="brand-text">NLP Learning</span></a>
     <div class="site-top-right">
+      <a class="course-home-link" href="../">全部笔记 <span aria-hidden="true">↗</span></a>
       <button class="site-theme" type="button" data-theme-toggle aria-pressed="false"><span class="theme-ic" aria-hidden="true">☾</span><span class="theme-word">浅色</span></button>
     </div>
   </div>
@@ -31,18 +33,22 @@
   <aside class="site-rail" aria-label="本页章节导航"><nav data-site-nav data-root="../"></nav></aside>
 
   <main class="site-main" id="main">
+    <nav class="course-breadcrumb" aria-label="面包屑"><a href="../">学习笔记</a><span aria-hidden="true">/</span><span>01 · Agent 实践</span></nav>
     <article class="note note-intro" id="note-overview">
-      <header class="note-head">
-        <p class="note-path"><span>课程 01</span> / Agent · CLI</p>
-        <h1 id="note-overview-title">Hermes Agent 六步上手</h1>
-        <p class="note-desc">Hermes 是 Nous Research 开源的自主 agent（MIT、自托管、Python）。这份材料不做「它很厉害」的介绍，只把官方文档里最必要的内容压成一条六步路线：命令能在 Shell 里找到、模型和 Provider 配好、能跑通第一次对话并恢复会话、能看懂状态与 Context、分得清普通配置与 Secret、并且能让它用工具真的产出一个文件。</p>
-        <p class="note-desc">每一步都给四样东西：官方文档入口、要做什么、可直接照抄的命令、以及验收方式。<strong>没通过验收就不该往下走。</strong></p>
-        <p class="note-head-links"><a class="doc-link" href="https://hermes-agent.nousresearch.com/docs/zh-Hans/getting-started/learning-path" target="_blank" rel="noopener">官方学习路径</a></p>
+      <header class="course-intro">
+        <div class="course-intro-copy"><p class="course-eyebrow">NOTEBOOK 01 / AGENT · CLI</p>
+          <h1 id="note-overview-title">让 Agent，<br><span>完成一次真实任务。</span></h1>
+          <p class="course-intro-desc">Hermes Agent 六步上手。从环境搭建、模型配置到工具调用，建立一条可以亲手验证的实践路线。</p>
+          <div class="course-actions"><a class="course-primary" href="#note-install-title">开始第一步 <span aria-hidden="true">↗</span></a><a class="course-secondary" href="https://hermes-agent.nousresearch.com/docs/zh-Hans/getting-started/learning-path" target="_blank" rel="noopener">官方学习路径 ↗</a></div>
+        </div>
+        <div class="course-figure" aria-hidden="true"><span class="figure-index">01 / THE AGENT LOOP</span><div class="figure-orbit"></div><div class="figure-stack"><span>UNDERSTAND <b>理解任务</b></span><span>REASON <b>规划步骤</b></span><span>ACT <b>调用工具 ↗</b></span></div><span class="figure-caption">观察 → 推理 → 行动 → 验证</span></div>
       </header>
+      <div class="course-meta-strip"><span><b>06</b> 实践步骤</span><span>命令示例</span><span>逐步验收</span></div>
+      <details class="course-reading-note"><summary>关于这份讲义与学习方式</summary><p class="note-desc">Hermes 是 Nous Research 开源的自主 agent（MIT、自托管、Python）。这份材料不做「它很厉害」的介绍，只把官方文档里最必要的内容压成一条六步路线：命令能在 Shell 里找到、模型和 Provider 配好、能跑通第一次对话并恢复会话、能看懂状态与 Context、分得清普通配置与 Secret、并且能让它用工具真的产出一个文件。</p><p class="note-desc">每一步都给四样东西：官方文档入口、要做什么、可直接照抄的命令、以及验收方式。<strong>没通过验收就不该往下走。</strong></p></details>
     </article>
 
-      <article class="note" id="note-install" data-nav-group="课程 01 · Hermes Agent" data-nav-num="off">
-        <header class="note-head"><div class="note-head-main"><p class="note-path"><span>STEP 01</span> / 安装</p><h1 id="note-install-title" data-nav-anchor data-nav-label="01 安装">安装 Hermes Agent</h1><p class="note-desc">从环境检查到启动诊断，建立一条可重复验证的安装路径。</p>
+      <article class="note" id="note-install" data-nav-group="课程 01 · Hermes Agent" data-nav-num="off" data-step="01">
+        <header class="note-head"><div class="chapter-number" aria-hidden="true"><span>STEP</span><b>01</b><small>/ 06</small></div><div class="note-head-main"><p class="note-path"><span>STEP 01</span> / 安装</p><h1 id="note-install-title" data-nav-anchor data-nav-label="01 安装">安装 Hermes Agent</h1><p class="note-desc">从环境检查到启动诊断，建立一条可重复验证的安装路径。</p>
           <p class="note-head-links"><a class="doc-link" href="https://hermes-agent.nousresearch.com/docs/getting-started/installation" target="_blank" rel="noopener">官方文档</a></p>
         </div></header>
         <section class="note-sec"><h2>学习目标</h2><p>完成“检查环境 → 执行安装 → 重新载入 Shell → 启动验证 → 诊断问题”的完整流程，并知道安装方式、命令入口与用户数据目录各自在哪里。</p></section>
@@ -67,8 +73,8 @@
         
       </article>
 
-      <article class="note" id="note-quickstart" data-nav-group="课程 01 · Hermes Agent" data-nav-num="off">
-        <header class="note-head"><div class="note-head-main"><p class="note-path"><span>STEP 02</span> / 快速开始</p><h1 id="note-quickstart-title" data-nav-anchor data-nav-label="02 快速开始">完成第一次 Hermes 对话</h1><p class="note-desc">配置模型、进行两轮可验证对话，并恢复最近会话。</p>
+      <article class="note" id="note-quickstart" data-nav-group="课程 01 · Hermes Agent" data-nav-num="off" data-step="02">
+        <header class="note-head"><div class="chapter-number" aria-hidden="true"><span>STEP</span><b>02</b><small>/ 06</small></div><div class="note-head-main"><p class="note-path"><span>STEP 02</span> / 快速开始</p><h1 id="note-quickstart-title" data-nav-anchor data-nav-label="02 快速开始">完成第一次 Hermes 对话</h1><p class="note-desc">配置模型、进行两轮可验证对话，并恢复最近会话。</p>
           <p class="note-head-links"><a class="doc-link" href="https://hermes-agent.nousresearch.com/docs/zh-Hans/getting-started/quickstart" target="_blank" rel="noopener">官方文档</a></p>
         </div></header>
         <section class="note-sec"><h2>学习目标</h2><p>沿着“初始化 → 配置 Provider/Model → 第一次对话 → 恢复会话”的最短路径跑通模型调用，并能判断一次对话是否真正成功。</p></section>
@@ -95,8 +101,8 @@
         
       </article>
 
-      <article class="note" id="note-providers" data-nav-group="课程 01 · Hermes Agent" data-nav-num="off">
-        <header class="note-head"><div class="note-head-main"><p class="note-path"><span>STEP 03</span> / 模型配置</p><h1 id="note-providers-title" data-nav-anchor data-nav-label="03 模型配置">理解模型服务配置</h1><p class="note-desc">理解连接链路中的五个概念，并安全配置教师提供的 API。</p>
+      <article class="note" id="note-providers" data-nav-group="课程 01 · Hermes Agent" data-nav-num="off" data-step="03">
+        <header class="note-head"><div class="chapter-number" aria-hidden="true"><span>STEP</span><b>03</b><small>/ 06</small></div><div class="note-head-main"><p class="note-path"><span>STEP 03</span> / 模型配置</p><h1 id="note-providers-title" data-nav-anchor data-nav-label="03 模型配置">理解模型服务配置</h1><p class="note-desc">理解连接链路中的五个概念，并安全配置教师提供的 API。</p>
           <p class="note-head-links"><a class="doc-link" href="https://hermes-agent.nousresearch.com/docs/integrations/providers" target="_blank" rel="noopener">官方文档</a></p>
         </div></header>
         <section class="note-sec"><h2>学习目标</h2><p>能解释 Provider、Model、Base URL、API Key/OAuth、API mode 的职责，区分配置向导与会话内切换，并完成一次明确指定模型的验证。</p></section>
@@ -119,8 +125,8 @@
         
       </article>
 
-      <article class="note" id="note-cli" data-nav-group="课程 01 · Hermes Agent" data-nav-num="off">
-        <header class="note-head"><div class="note-head-main"><p class="note-path"><span>STEP 04</span> / CLI</p><h1 id="note-cli-title" data-nav-anchor data-nav-label="04 CLI">掌握 Hermes 常用命令</h1><p class="note-desc">从启动、交互到恢复，学会读懂状态和 Context。</p>
+      <article class="note" id="note-cli" data-nav-group="课程 01 · Hermes Agent" data-nav-num="off" data-step="04">
+        <header class="note-head"><div class="chapter-number" aria-hidden="true"><span>STEP</span><b>04</b><small>/ 06</small></div><div class="note-head-main"><p class="note-path"><span>STEP 04</span> / CLI</p><h1 id="note-cli-title" data-nav-anchor data-nav-label="04 CLI">掌握 Hermes 常用命令</h1><p class="note-desc">从启动、交互到恢复，学会读懂状态和 Context。</p>
           <p class="note-head-links"><a class="doc-link" href="https://hermes-agent.nousresearch.com/docs/zh-Hans/user-guide/cli" target="_blank" rel="noopener">官方文档</a></p>
         </div></header>
         <section class="note-sec"><h2>学习目标</h2><p>能选择合适的启动方式，使用五个核心斜杠命令，并完成多行输入、中断操作与会话恢复。</p></section>
@@ -147,8 +153,8 @@
         
       </article>
 
-      <article class="note" id="note-config" data-nav-group="课程 01 · Hermes Agent" data-nav-num="off">
-        <header class="note-head"><div class="note-head-main"><p class="note-path"><span>STEP 05</span> / 配置文件</p><h1 id="note-config-title" data-nav-anchor data-nav-label="05 配置文件">区分普通配置与 Secret</h1><p class="note-desc">理解目录职责、配置优先级，并通过 CLI 安全管理配置。</p>
+      <article class="note" id="note-config" data-nav-group="课程 01 · Hermes Agent" data-nav-num="off" data-step="05">
+        <header class="note-head"><div class="chapter-number" aria-hidden="true"><span>STEP</span><b>05</b><small>/ 06</small></div><div class="note-head-main"><p class="note-path"><span>STEP 05</span> / 配置文件</p><h1 id="note-config-title" data-nav-anchor data-nav-label="05 配置文件">区分普通配置与 Secret</h1><p class="note-desc">理解目录职责、配置优先级，并通过 CLI 安全管理配置。</p>
           <p class="note-head-links"><a class="doc-link" href="https://hermes-agent.nousresearch.com/docs/zh-Hans/user-guide/configuration" target="_blank" rel="noopener">官方文档</a></p>
         </div></header>
         <section class="note-sec"><h2>学习目标</h2><p>能找到四个核心文件，解释配置覆盖顺序，使用 CLI 查看、修改、检查配置，同时不展示或提交任何 Secret。</p></section>
@@ -183,8 +189,8 @@
         
       </article>
 
-      <article class="note" id="note-tools" data-nav-group="课程 01 · Hermes Agent" data-nav-num="off">
-        <header class="note-head"><div class="note-head-main"><p class="note-path"><span>STEP 06</span> / 工具调用</p><h1 id="note-tools-title" data-nav-anchor data-nav-label="06 工具调用">让 Hermes 完成真实任务</h1><p class="note-desc">理解 Tool Calling 循环，并交付一个可人工复核的文件结果。</p>
+      <article class="note" id="note-tools" data-nav-group="课程 01 · Hermes Agent" data-nav-num="off" data-step="06">
+        <header class="note-head"><div class="chapter-number" aria-hidden="true"><span>STEP</span><b>06</b><small>/ 06</small></div><div class="note-head-main"><p class="note-path"><span>STEP 06</span> / 工具调用</p><h1 id="note-tools-title" data-nav-anchor data-nav-label="06 工具调用">让 Hermes 完成真实任务</h1><p class="note-desc">理解 Tool Calling 循环，并交付一个可人工复核的文件结果。</p>
           <p class="note-head-links"><a class="doc-link" href="https://hermes-agent.nousresearch.com/docs/zh-Hans/user-guide/features/tools" target="_blank" rel="noopener">官方文档</a></p>
           <p class="note-head-links"><a class="doc-link" href="https://hermes-agent.nousresearch.com/docs/zh-Hans/getting-started/learning-path" target="_blank" rel="noopener">官方文档</a></p>
         </div></header>
@@ -228,6 +234,7 @@
         </section>
       </article>
 
+    <nav class="course-end" aria-label="继续学习"><a href="../"><small>THE NOTEBOOK</small><strong>返回全部笔记 ←</strong></a><a href="../llm-api/"><small>继续探索</small><strong>LLM API 与 Prompt Caching ↗</strong></a></nav>
   </main>
 </div>
 <script src="app.js?v=2"></script>

@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="dark light">
-<title>Natural Language Processing · NLP Learning</title>
-<meta name="description" content="从 Hermes Agent 到 NLP 的中文学习笔记：每份讲义都能自己跑一遍，讲清概念、给可照抄的命令与验收方式。">
+<title>NLP Learning · 从语言到智能行动</title>
+<meta name="description" content="从 NLP 到 LLM，再到 Agent：理解语言、探索模型、构建能行动的智能体。用学习笔记和交互实验，把概念变成实践。">
 <link rel="icon" type="image/svg+xml" href="assets/logo.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -14,6 +14,7 @@
 <script src="assets/theme-init.js?v=3"></script>
 <link rel="stylesheet" href="assets/tokens.css">
 <link rel="stylesheet" href="assets/site.css">
+<link rel="stylesheet" href="assets/home.css">
 </head>
 <body>
 
@@ -32,29 +33,45 @@
 <div class="site-shell is-plain">
   <main class="site-main" id="main">
     <section class="home-hero" aria-labelledby="home-title">
-      <h1 class="home-title" id="home-title">Natural Language Processing</h1>
-      <p class="home-lead">从 Hermes Agent 到 NLP Learning</p>
+      <div class="network-scene">
+        <div class="scene-label"><span class="status-dot"></span> A SPACE FOR CONNECTED IDEAS</div>
+        <canvas id="learning-network" role="img" aria-label="缓慢旋转的三维语义网络：语言节点相连，信号沿模型与行动轨道流动。">NLP → LLM → Agent：从语言理解到模型推理，再到工具与行动。</canvas>
+        <div class="scene-footer"><span>FIG. 01 / THE LEARNING NETWORK</span><button id="motion-toggle" type="button" aria-pressed="false" aria-label="暂停三维动画" hidden>暂停动画 <span aria-hidden="true">Ⅱ</span></button></div>
+      </div>
+      <div class="hero-copy">
+        <p class="hero-eyebrow">LANGUAGE → INTELLIGENCE → ACTION</p>
+        <h1 class="home-title" id="home-title">从语言，<br>到<span>智能行动。</span></h1>
+        <p class="home-lead">从 NLP 的语言理解，到 LLM 的生成与推理，<br class="desktop-break">再到 Agent 的工具与行动。<br class="desktop-break">沿着概念与实践之间的连接，一步步学懂。</p>
+        <div class="hero-actions"><a class="home-primary" href="#courses">探索学习笔记 <span aria-hidden="true">↗</span></a><span class="hero-side-note">读懂原理 · 动手验证</span></div>
+        <div class="learning-path" aria-label="学习路线"><span><b>01</b> NLP<small>理解语言</small></span><i aria-hidden="true">→</i><span><b>02</b> LLM<small>生成与推理</small></span><i aria-hidden="true">→</i><span><b>03</b> AGENT<small>工具与行动</small></span></div>
+      </div>
     </section>
-    <h2 class="rail-h courses-h" id="courses-title">课程</h2>
+    <section class="courses-section" id="courses" aria-labelledby="courses-title">
+      <div class="courses-heading"><div><p class="section-eyebrow">THE NOTEBOOK / 持续探索</p><h2 id="courses-title">从一篇笔记开始</h2></div><p>两份讲义，两个实践入口。<br>带着问题阅读，用一次实验理解。</p></div>
     <ul class="course-grid" aria-labelledby="courses-title">
       <li>
         <a class="course-card" href="hermes/" data-status="ready">
           <span class="course-meta"><span class="n">01</span>Agent / CLI</span>
           <span class="course-name">Hermes Agent 六步上手</span>
-          <span class="course-desc">从环境检查到工具调用：安装、快速开始、模型配置、CLI、配置文件、工具调用。每步给官方文档入口、可照抄的命令与验收方式。</span>
+          <span class="course-desc">搭建你的第一个 Agent。从安装和模型配置，到 CLI、配置文件与工具调用，走完六步可验证的实践。</span>
+          <span class="course-bottom"><span>6 个步骤 · 上手实践</span><b>阅读讲义 <span aria-hidden="true">↗</span></b></span>
         </a>
       </li>
       <li>
         <a class="course-card" href="llm-api/" data-status="ready">
           <span class="course-meta"><span class="n">02</span>Inference / Cost</span>
           <span class="course-name">LLM API 与 Prompt Caching</span>
-          <span class="course-desc">前缀缓存到底缓存了什么、为什么改一个字就全废、OpenAI 与 Anthropic 与 DeepSeek 的断点和倍率差在哪，以及一张能贴在工位上的省钱决策单。</span>
+          <span class="course-desc">缓存究竟复用了什么？通过前缀匹配动画与成本模拟器，理解缓存失效、计费差异与复用收益。</span>
+          <span class="course-bottom"><span>交互演示 · 成本模拟</span><b>开始探索 <span aria-hidden="true">↗</span></b></span>
         </a>
       </li>
     </ul>
+    </section>
+    <footer class="home-footer"><span>NLP Learning</span><span>让每个概念，都有一次实践。</span><a href="#main">回到顶部 ↑</a></footer>
   </main>
 </div>
 
 <script src="assets/site.js?v=2"></script>
+<script src="assets/home.js"></script>
 </body>
 </html>

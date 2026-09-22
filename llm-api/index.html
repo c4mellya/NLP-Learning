@@ -15,8 +15,9 @@
 <link rel="stylesheet" href="../assets/site.css">
 <link rel="stylesheet" href="llm-api.css">
 
+<link rel="stylesheet" href="../assets/course.css">
 </head>
-<body>
+<body class="course-page">
 
 <header class="site-top">
   <div class="site-top-in">
@@ -25,6 +26,7 @@
       <span class="brand-text">NLP Learning</span>
     </a>
     <div class="site-top-right">
+      <a class="course-home-link" href="../">全部笔记 <span aria-hidden="true">↗</span></a>
       <button class="site-theme" type="button" id="themeToggle" data-theme-toggle aria-pressed="false"><span class="theme-ic" aria-hidden="true">☾</span><span class="theme-word">浅色</span></button>
     </div>
   </div>
@@ -34,13 +36,21 @@
   <aside class="site-rail" aria-label="本页分节导航"><nav data-site-nav data-root="../"></nav></aside>
 
   <main class="site-main" id="main">
+    <nav class="course-breadcrumb" aria-label="面包屑"><a href="../">学习笔记</a><span aria-hidden="true">/</span><span>02 · LLM 推理</span></nav>
   <div class="wrap" data-nav-group="课程 02 · Prompt Caching">
 
   <!-- ================= hero ================= -->
   <section class="hero" id="top" data-nav-anchor data-nav-label="本节提要" aria-label="引言">
-    <p class="kicker">sec.0 / 5 · 交互式学习笔记 · v2</p>
-    <h1>前缀复用与缓存成本</h1>
-    <p class="lead">大模型 API 的 Prompt Caching（提示词缓存）依赖一个核心条件：<strong class="lead-emphasis">请求具有完全一致的前缀</strong>。前缀保持稳定，才有机会复用已有计算、降低输入成本；前缀发生变化，变化位置及其后续内容就需要重新处理。这份笔记从机制、交互示例和成本模拟三个角度展开，你可以边读边调整参数，观察结论如何变化。</p>
+    <header class="course-intro">
+      <div class="course-intro-copy"><p class="course-eyebrow">NOTEBOOK 02 / LLM · INFERENCE</p>
+        <h1>相同的前缀，<br><span>更少的重复计算。</span></h1>
+        <p class="course-intro-desc">LLM API 与 Prompt Caching。从一次缓存命中出发，看懂前缀复用、失效条件与实际成本。</p>
+        <div class="course-actions"><a class="course-primary" href="#t-demo">动手观察 <span aria-hidden="true">↗</span></a><a class="course-secondary" href="#t-sim">探索成本模拟器 →</a></div>
+      </div>
+      <div class="course-figure" aria-hidden="true"><span class="figure-index">02 / THE SHARED PREFIX</span><div class="figure-orbit"></div><div class="figure-stack"><span>PREFIX <b>相同输入</b></span><span>KV CACHE <b>复用状态</b></span><span>REUSE <b>减少计算 ↗</b></span></div><span class="figure-caption">匹配 → 复用 → 节省</span></div>
+    </header>
+    <div class="course-meta-strip"><span><b>05</b> 学习小节</span><span>交互演示</span><span>成本模拟</span></div>
+    <details class="course-reading-note"><summary>这份笔记讨论什么</summary><p>大模型 API 的 Prompt Caching（提示词缓存）依赖一个核心条件：<strong class="lead-emphasis">请求具有完全一致的前缀</strong>。前缀保持稳定，才有机会复用已有计算、降低输入成本；前缀发生变化，变化位置及其后续内容就需要重新处理。这份笔记从机制、交互示例和成本模拟三个角度展开，你可以边读边调整参数，观察结论如何变化。</p></details>
     <div class="chips">
       <span class="chip">命中读价 <b>0.1×</b> 基础输入价（Anthropic）<a class="ref" href="#src-1">[1]</a></span>
       <span class="chip">写价 <b>1.25×</b>（Anthropic 5 分钟档）<a class="ref" href="#src-1">[1]</a></span>
@@ -440,6 +450,7 @@
   </div>
 </footer>
   </div>
+    <nav class="course-end" aria-label="继续学习"><a href="../"><small>THE NOTEBOOK</small><strong>返回全部笔记 ←</strong></a><a href="../hermes/"><small>继续探索</small><strong>Hermes Agent 六步上手 ↗</strong></a></nav>
   </main>
 </div>
 

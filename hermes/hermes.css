@@ -1739,3 +1739,67 @@ summary.terminal-bar:hover { color: var(--ink); }
   .site-main .lesson-nav { width: 100%; justify-content: center; }
   .site-main .lesson-nav.lesson-next { margin-left: 0; }
 }
+
+/* 六步课程：章头、正文与章末形成清楚的阅读边界。 */
+.hermes-course.course-page .site-main .note[data-step] {
+  margin-top: 64px;
+  padding-top: 0;
+  border-top: 0;
+}
+.hermes-course.course-page .site-main .note[data-step] > .note-head {
+  display: grid;
+  grid-template-columns: 108px minmax(0, 1fr);
+  gap: 28px;
+  align-items: start;
+  padding: 28px 30px;
+  margin-bottom: 34px;
+  border: 1px solid var(--line2);
+  border-top: 3px solid var(--cold);
+  border-radius: 6px;
+  background: linear-gradient(115deg, var(--cold-bg), transparent 65%), var(--panel);
+}
+.hermes-course .chapter-number {
+  display: grid;
+  justify-items: start;
+  gap: 8px;
+  padding-right: 24px;
+  border-right: 1px solid var(--line2);
+  color: var(--cold);
+  font-family: var(--mono);
+}
+.hermes-course .chapter-number span { font-size: 10px; letter-spacing: .18em; }
+.hermes-course .chapter-number b { font-size: 64px; font-weight: 500; line-height: 1; letter-spacing: -.07em; }
+.hermes-course .chapter-number small { font-size: 11px; color: var(--dim); }
+.hermes-course.course-page .site-main .note[data-step] .note-path { margin: 0 0 12px; }
+.hermes-course.course-page .site-main .note[data-step] .note-head h1 { scroll-margin-top: 150px; }
+.hermes-course.course-page .site-main .note[data-step] .note-desc { margin-bottom: 0; }
+.hermes-course.course-page .site-main .note[data-step] .note-head-links { display: inline-block; margin: 16px 10px 0 0; }
+.hermes-course.course-page .site-main .note[data-step] .note-sec.summary {
+  margin-top: 32px;
+  padding: 20px 22px;
+  border: 1px solid var(--line2);
+  border-left: 3px solid var(--cold-line);
+  border-radius: 4px;
+  background: var(--panel);
+}
+.hermes-course.course-page .site-main .note[data-step] .summary h2 { font-size: 14px; margin-bottom: 8px; color: var(--mut); }
+.hermes-course.course-page .site-main .note[data-step] .summary p { font-size: 14px; margin: 0; color: var(--mut); }
+@media (max-width: 1080px) {
+  .hermes-course.course-page .site-main .note[data-step] .note-head h1 { scroll-margin-top: 205px; }
+}
+@media (max-width: 620px) {
+  .hermes-course.course-page .site-main .note[data-step] { margin-top: 48px; }
+  .hermes-course.course-page .site-main .note[data-step] > .note-head {
+    grid-template-columns: 54px minmax(0, 1fr);
+    gap: 16px;
+    padding: 22px 16px;
+    margin-bottom: 26px;
+  }
+  .hermes-course .chapter-number { padding-right: 12px; gap: 7px; }
+  .hermes-course .chapter-number b { font-size: 39px; }
+  .hermes-course .chapter-number span { font-size: 8px; }
+  .hermes-course .chapter-number small { font-size: 9px; }
+  .hermes-course.course-page .site-main .note[data-step] .note-head h1 { font-size: 23px; line-height: 1.4; }
+  .hermes-course.course-page .site-main .note[data-step] .note-head .note-desc { font-size: 13px; }
+  .hermes-course.course-page .site-main .note[data-step] .note-sec.summary { padding: 17px; }
+}
