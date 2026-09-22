@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark light">
+<title>Natural Language Processing · NLP Learning</title>
+<meta name="description" content="从 Hermes Agent 到 NLP 的中文学习笔记：每份讲义都能自己跑一遍，讲清概念、给可照抄的命令与验收方式。">
+<link rel="icon" type="image/svg+xml" href="assets/logo.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Noto+Sans+SC:wght@400;500;700&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+<script>
+/* 主题在首次绘制前定好：手动选过就用存的，没选过就跟随系统 */
+(function () {
+  var v = null;
+  try {
+    v = localStorage.getItem("lmapi-lab-theme")
+      || localStorage.getItem("hermes-theme")
+      || localStorage.getItem("lmapi-theme");
+  } catch (e) { v = null; }
+  if (v !== "light" && v !== "dark") {
+    v = (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) ? "dark" : "light";
+  }
+  document.documentElement.setAttribute("data-theme", v);
+}());
+</script>
+<link rel="stylesheet" href="assets/tokens.css">
+<link rel="stylesheet" href="assets/site.css">
+</head>
+<body>
+<a class="skip-link" href="#main">跳到主内容</a>
+
+<header class="site-top">
+  <div class="site-top-in">
+    <a class="site-brand" href="index.html" aria-label="NLP Learning 课程总览">
+      <img class="brand-logo" src="assets/logo.svg" width="24" height="24" alt="">
+      <span class="brand-text">NLP Learning</span>
+    </a>
+    <div class="site-top-right">
+      <button class="site-theme" type="button" data-theme-toggle aria-pressed="false"><span class="theme-ic" aria-hidden="true">☾</span><span class="theme-word">浅色</span></button>
+    </div>
+  </div>
+</header>
+
+<div class="site-shell is-plain">
+  <main class="site-main" id="main" tabindex="-1">
+    <section class="home-hero" aria-labelledby="home-title">
+      <h1 class="home-title" id="home-title">Natural Language Processing</h1>
+      <p class="home-lead">从 Hermes Agent 到 NLP Learning</p>
+    </section>
+    <h2 class="rail-h courses-h" id="courses-title">课程</h2>
+    <ul class="course-grid" aria-labelledby="courses-title">
+      <li>
+        <a class="course-card" href="hermes/index.html" data-status="ready">
+          <span class="course-meta"><span class="n">01</span>Agent / CLI</span>
+          <span class="course-name">Hermes Agent 六步上手</span>
+          <span class="course-desc">从环境检查到工具调用：安装、快速开始、模型配置、CLI、配置文件、工具调用。每步给官方文档入口、可照抄的命令与验收方式。</span>
+        </a>
+      </li>
+      <li>
+        <a class="course-card" href="llm-api/index.html" data-status="ready">
+          <span class="course-meta"><span class="n">02</span>Inference / Cost</span>
+          <span class="course-name">LLM API 与 Prompt Caching</span>
+          <span class="course-desc">前缀缓存到底缓存了什么、为什么改一个字就全废、OpenAI 与 Anthropic 与 DeepSeek 的断点和倍率差在哪，以及一张能贴在工位上的省钱决策单。</span>
+        </a>
+      </li>
+    </ul>
+  </main>
+</div>
+
+<script src="assets/site.js?v=2"></script>
+</body>
+</html>

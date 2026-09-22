@@ -1,0 +1,178 @@
+/* ============================================================================
+   NLP Learning — design tokens
+   ----------------------------------------------------------------------------
+   视觉取自 Prompt Caching 讲义：深蓝黑底 + 细网格 + 琥珀/冰蓝双信号色，
+   等宽字体负责数据与标签，Space Grotesk 负责标题与正文。
+
+   语义色（页面只引用语义名）：
+     --hot   命中 / 当前项 / 关键读数     琥珀
+     --cold  失效 / 链接 / 结构线          冰蓝
+     --ok    已完成                       绿松
+     --warn  门槛与警告                    暖橙
+
+   主题状态：
+     无 data-theme      → 跟随系统（浅色为默认，系统深色时套深色）
+     data-theme="dark"  → 强制深色
+     data-theme="light" → 强制浅色
+   ========================================================================= */
+
+:root {
+  color-scheme: dark;
+
+  /* 面 */
+  --bg: #0A0F14;
+  --bg2: #101A24;
+  --panel: #0E161F;
+  --inset: #070D13;
+  --line: #1D2E3E;
+  --line2: #27394C;
+
+  /* 字 */
+  --ink: #E9F1F8;
+  --mut: #9DB0C2;
+  --dim: #8298A9;
+
+  /* 语义 */
+  --hot: #FFB224;
+  --hot-soft: #FFD58A;
+  --hot-bg: rgba(255, 178, 36, .13);
+  --hot-line: rgba(255, 178, 36, .5);
+
+  --cold: #62C6F5;
+  --cold-deep: #2E9BD6;
+  --cold-soft: #BFE6FA;
+  --cold-bg: rgba(98, 198, 245, .08);
+  --cold-line: rgba(98, 198, 245, .3);
+
+  --ok: #34D399;
+  --ok-bg: rgba(52, 211, 153, .12);
+  --warn: #E0A458;
+  --warn-bg: rgba(224, 164, 88, .12);
+
+  /* 结构 */
+  --radius: 10px;
+  --radius-sm: 6px;
+  --rail-w: 240px;
+  --note-max: 780px;
+  --content-max: 880px;
+  --shell-gap: 44px;
+  --shell-pad: 22px;
+  /* 壳层总宽 = 左右内边距 + 导航列 + 间距 + 正文列。
+     顶栏与壳层必须用同一个值，否则宽屏下品牌会左右跳（两个页面的左右边界不同）。 */
+  --shell-w: calc(var(--shell-pad) * 2 + var(--rail-w) + var(--shell-gap) + var(--note-max));
+  --topbar-h: 58px;
+  --ring: var(--cold);
+
+  /* 字体：Google Fonts 优先，断网回落到本机等宽/无衬线 */
+  --mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, 'Cascadia Mono', Consolas, 'Courier New', monospace;
+  --display: 'Space Grotesk', 'Noto Sans SC', -apple-system, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+
+  /* 背景合成层：网格 + 顶部微光，全站共用这一套 */
+  --grid: rgba(98, 198, 245, .032);
+  --glow: rgba(98, 198, 245, .05);
+  --topbar-bg: rgba(10, 15, 20, .84);
+  --on-hot: #0A0F14;
+  --sel: rgba(255, 178, 36, .28);
+  --shadow: 0 1px 2px rgba(0, 0, 0, .35), 0 10px 30px rgba(0, 0, 0, .25);
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+
+  --bg: #F6F8FA;
+  --bg2: #FFFFFF;
+  --panel: #FBFCFE;
+  --inset: #EEF3F8;
+  --line: #E3E9EF;
+  --line2: #CBD6E0;
+
+  --ink: #16222E;
+  --mut: #4A5B6C;
+  --dim: #55677A;
+
+  --hot: #8F5500;
+  --hot-soft: #7A4900;
+  --hot-bg: rgba(255, 178, 36, .18);
+  --hot-line: rgba(143, 85, 0, .45);
+
+  --cold: #0F6EA8;
+  --cold-deep: #0B5A88;
+  --cold-soft: #0A5C8F;
+  --cold-bg: rgba(15, 110, 168, .08);
+  --cold-line: rgba(15, 110, 168, .3);
+
+  --ok: #0B6B4F;
+  --ok-bg: rgba(11, 107, 79, .1);
+  --warn: #8A5A12;
+  --warn-bg: rgba(224, 164, 88, .18);
+
+  --grid: rgba(30, 80, 130, .06);
+  --glow: rgba(30, 80, 130, .05);
+  --topbar-bg: rgba(250, 252, 254, .86);
+  --on-hot: #FFFFFF;
+  --sel: rgba(15, 110, 168, .18);
+  --shadow: 0 1px 2px rgba(10, 16, 28, .05), 0 10px 28px rgba(10, 16, 28, .07);
+}
+
+/* 无 data-theme = 跟随系统：只对「系统偏好浅色」做覆盖，深色用 :root 默认值。
+   这么写是为了让浅色主题真的能在系统浅色时生效——只靠在深色里加媒体查询
+   是做不到的，因为 :root 永远会给出深色。 */
+@media (prefers-color-scheme: light) {
+  :root:where(:not([data-theme])) {
+    color-scheme: light;
+    --bg: #F6F8FA; --bg2: #FFFFFF; --panel: #FBFCFE; --inset: #EEF3F8;
+    --line: #E3E9EF; --line2: #CBD6E0;
+    --ink: #16222E; --mut: #4A5B6C; --dim: #55677A;
+    --hot: #8F5500; --hot-soft: #7A4900; --hot-bg: rgba(255, 178, 36, .18); --hot-line: rgba(143, 85, 0, .45);
+    --cold: #0F6EA8; --cold-deep: #0B5A88; --cold-soft: #0A5C8F; --cold-bg: rgba(15, 110, 168, .08); --cold-line: rgba(15, 110, 168, .3);
+    --ok: #0B6B4F; --ok-bg: rgba(11, 107, 79, .1);
+    --warn: #8A5A12; --warn-bg: rgba(224, 164, 88, .18);
+    --grid: rgba(30, 80, 130, .06); --glow: rgba(30, 80, 130, .05);
+    --topbar-bg: rgba(250, 252, 254, .86); --on-hot: #FFFFFF; --sel: rgba(15, 110, 168, .18);
+    --shadow: 0 1px 2px rgba(10, 16, 28, .05), 0 10px 28px rgba(10, 16, 28, .07);
+  }
+}
+
+/* ---------------------------------------------------------------- 基础 */
+
+* { box-sizing: border-box; }
+
+html {
+  /* 锚点跳转要避开吸顶的顶栏，以及窄屏时正文上方那条吸顶目录 */
+  scroll-behavior: smooth;
+  scroll-padding-top: calc(var(--topbar-h) + 18px);
+  background: var(--bg);
+  /* 永远预留滚动条的位置：首页没有滚动条、课程页有，
+     不留位置的话两边的居中内容会差半个滚动条宽（点进课程时整页左右跳一下） */
+  scrollbar-gutter: stable;
+  overflow-y: scroll;
+}
+
+body {
+  margin: 0;
+  font-family: var(--display);
+  font-size: 16px;
+  line-height: 1.75;
+  color: var(--ink);
+  background:
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px),
+    radial-gradient(1200px 500px at 70% -100px, var(--glow), transparent),
+    var(--bg);
+  background-size: 44px 44px, 44px 44px, auto, auto;
+  background-attachment: fixed, fixed, scroll, scroll;
+  -webkit-font-smoothing: antialiased;
+  text-underline-offset: .18em;
+}
+
+::selection { background: var(--sel); }
+a { color: var(--cold); }
+a:hover { color: var(--cold-soft); }
+:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; border-radius: 4px; }
+code, kbd, samp, pre { font-family: var(--mono); }
+[hidden] { display: none !important; }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation-duration: .001ms !important; transition-duration: .001ms !important; }
+}

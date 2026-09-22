@@ -1,0 +1,1659 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark light">
+<title>Prompt Caching 交互讲义 · 前缀稳，才省钱</title>
+<meta name="description" content="用可交互的 token 带、示波器式等效成本读数、成本模拟器和三家官方文档口径，讲清 LLM API 的 Prompt Caching：前缀逐字节匹配、命中/失效动画、最小可缓存长度与省钱决策。">
+<link rel="icon" type="image/svg+xml" href="../assets/logo.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Noto+Sans+SC:wght@400;500;700;900&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/tokens.css">
+<link rel="stylesheet" href="../assets/site.css">
+<style>
+:root{
+  /* 全站通用底/字/语义色现在由 ../assets/tokens.css 提供：
+       --bg --bg2 --panel --inset --line --line2 --ink --mut --dim
+       --hot(琥珀=命中) --cold(冰蓝=失效) --ok --warn
+     本块只保留本页专属的示波器/纸带色值，以及给正文用的 --amber/--ice 别名，
+     这样正文里既有的 var(--amber) 写法不用大改，语义也不会和站点外壳打架。 */
+  --amber:var(--hot);
+  --amber-soft:var(--hot-soft);
+  --amber-bg:var(--hot-bg);
+  --ice:var(--cold);
+  --ice-deep:var(--cold-deep);
+  --ice-soft:var(--cold-soft);
+  --ice-bg:var(--cold-bg);
+  --mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Consolas,'Courier New',monospace;
+  --sans:'Space Grotesk','Noto Sans SC',-apple-system,'PingFang SC','Microsoft YaHei',sans-serif;
+  --radius:10px;
+
+  /* ---------- 主题化色值（默认深色） ---------- */
+  --screen-bg:#070D13;
+  --screen-grid:rgba(98,198,245,.055);
+  --track-bg:#0A1219;
+  --tok-bg:#111B26;
+  --tok-ink:#B9C8D6;
+  --neutral:#3B5068;
+  --on-amber:#0A0F14;
+  --dead-ink:#C9D8E4;
+  --dead-ink2:#8FA6B8;
+  --alert-ink:#E8F6FF;
+  --warn-from:#9A6207;
+  --scope-grid:rgba(98,198,245,.12);
+  --scope-ref-w:rgba(98,198,245,.30);
+  --scope-ref-r:rgba(255,178,36,.30);
+  --tok-dead-bg:rgba(98,198,245,.04);
+  --tok-dead-line:rgba(98,198,245,.18);
+}
+
+/* ---------- 浅色模式：只覆盖颜色，布局与尺寸完全共用 ---------- */
+:root[data-theme="light"]{
+  --bg:#F6F8FA;
+  --bg2:#FFFFFF;
+  --panel:#FFFFFF;
+  --inset:#EFF3F7;
+  --line:#E3E9EF;
+  --line2:#CBD6E0;
+  --ink:#16222E;
+  --mut:#4A5B6C;
+  --dim:#55677A;
+  --amber:#8F5500;
+  --amber-soft:#7A4900;
+  --amber-bg:rgba(255,178,36,.18);
+  --ice:#0F6EA8;
+  --ice-deep:#0B5A88;
+  --ice-soft:#0A5C8F;
+  --ice-bg:rgba(15,110,168,.08);
+  --grid:rgba(30,80,130,.06);
+  --glow:rgba(30,80,130,.05);
+  --topbar-bg:rgba(250,252,254,.86);
+  --screen-bg:#EEF3F8;
+  --screen-grid:rgba(15,110,168,.10);
+  --track-bg:#E4EAF0;
+  --tok-bg:#F2F6FA;
+  --tok-ink:#3B4C5C;
+  --neutral:#B7C5D2;
+  --on-amber:#FFFFFF;
+  --dead-ink:#42586C;
+  --dead-ink2:#5C7285;
+  --alert-ink:#0A3A55;
+  --warn-from:#C98A20;
+  --scope-grid:rgba(15,110,168,.16);
+  --scope-ref-w:rgba(15,110,168,.32);
+  --scope-ref-r:rgba(143,85,0,.35);
+  --tok-dead-bg:rgba(15,110,168,.06);
+  --tok-dead-line:rgba(15,110,168,.30);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:78px}
+body{
+  margin:0;
+  font-family:var(--sans);
+  font-size:16px;
+  line-height:1.75;
+  color:var(--ink);
+  background:
+    linear-gradient(var(--grid) 1px,transparent 1px),
+    linear-gradient(90deg,var(--grid) 1px,transparent 1px),
+    radial-gradient(1200px 500px at 70% -100px,var(--glow),transparent),
+    var(--bg);
+  background-size:44px 44px,44px 44px,auto,auto;
+  -webkit-font-smoothing:antialiased;
+}
+::selection{background:rgba(255,178,36,.28)}
+a{color:var(--ice)}
+a:hover{color:var(--ice-soft)}
+:focus-visible{outline:2px solid var(--ice);outline-offset:2px;border-radius:4px}
+.wrap{max-width:920px;margin:0 auto;padding:0 20px}
+.skip{position:absolute;left:-9999px;top:0;background:var(--amber);color:var(--on-amber);padding:8px 14px;z-index:100;font-family:var(--mono);font-size:13px}
+.skip:focus{left:8px;top:8px}
+
+/* 顶栏与页面内导航已移除：全站导航在左侧栏（../assets/site.css），
+   旧的 .topbar / .nav / .brand 规则整块删除，避免和站点外壳抢样式。 */
+
+/* ---------- hero ---------- */
+.hero{padding:0 0 8px}
+.kicker{font-family:var(--mono);font-size:12px;color:var(--dim)}
+.hero h1{font-size:clamp(34px,6vw,58px);line-height:1.14;letter-spacing:-.01em;margin:14px 0 18px;font-weight:900}
+.hero .lead{font-size:clamp(16px,2.4vw,19px);color:var(--mut);max-width:47em;margin:0}
+.chips{display:flex;flex-wrap:wrap;gap:10px;margin-top:26px}
+.chip{font-family:var(--mono);font-size:12.5px;color:var(--ink);border:1px solid var(--line2);background:var(--panel);border-radius:8px;padding:8px 12px}
+.chip b{color:var(--amber);font-weight:600}
+.chip a.ref{color:var(--dim);text-decoration:none;margin-left:7px;border-bottom:1px dotted var(--dim)}
+.chip a.ref:hover{color:var(--ice)}
+
+/* ---------- scope instrument ---------- */
+.scope{margin-top:34px;background:var(--bg2);border:1px solid var(--line2);border-radius:var(--radius);padding:18px}
+.scope-head{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px}
+.scope-title{font-family:var(--mono);font-size:12px;color:var(--dim)}
+.scope-status{font-family:var(--mono);font-size:12px;padding:4px 12px;border-radius:999px;border:1px solid var(--line2);color:var(--mut);white-space:nowrap}
+.scope-status.is-hit{color:var(--amber-soft);border-color:rgba(255,178,36,.5);background:var(--amber-bg)}
+.scope-status.is-idle{color:var(--ice-soft);border-color:rgba(98,198,245,.35)}
+.scope-status.is-dead{color:var(--dead-ink);border-color:rgba(98,198,245,.25);background:rgba(98,198,245,.06)}
+.req{display:grid;grid-template-columns:118px 1fr;gap:4px 14px;padding:12px 0}
+.req+.req{border-top:1px dashed var(--line)}
+.req-tag{font-family:var(--mono);font-size:12px;color:var(--mut);grid-column:1;grid-row:1/3;padding-top:4px}
+.req .tape{grid-column:2}
+.req-note{grid-column:2;font-family:var(--mono);font-size:12px;color:var(--ice-soft);margin-top:6px}
+.req-note.hit{color:var(--amber-soft)}
+.scope-foot{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-top:6px;padding-top:10px;border-top:1px dashed var(--line)}
+.scope-foot .srcs{font-family:var(--mono);font-size:11.5px;color:var(--dim);max-width:60em;line-height:1.7}
+.scope-foot .srcs a{color:var(--dim)}
+.scope-foot .srcs a:hover{color:var(--ice)}
+.scope-foot .btns{display:flex;gap:8px;flex-wrap:wrap}
+
+/* ---------- oscilloscope ---------- */
+.oscope{margin-top:14px;background:var(--inset);border:1px solid var(--line);border-radius:8px;padding:14px}
+.oscope-body{display:grid;grid-template-columns:1.5fr 1fr;gap:14px}
+.oscope-screen{position:relative;background:
+  linear-gradient(var(--screen-grid) 1px,transparent 1px) 0 0/100% 22px,
+  linear-gradient(90deg,var(--screen-grid) 1px,transparent 1px) 0 0/22px 100%,
+  var(--screen-bg);border:1px solid var(--line2);border-radius:6px;overflow:hidden}
+.oscope-screen canvas{display:block;width:100%;height:124px}
+.oscope-peak{position:absolute;left:10px;top:7px;font-family:var(--mono);font-size:11px;color:var(--ice-soft);pointer-events:none}
+.oscope-peak.is-amber{color:var(--amber-soft)}
+.oscope-peak.is-dead{color:var(--dead-ink2)}
+.oscope-scale{position:absolute;right:10px;top:7px;font-family:var(--mono);font-size:10.5px;color:var(--dim);pointer-events:none}
+.ttl{margin-top:10px}
+.ttl-head{display:flex;justify-content:space-between;gap:8px;font-family:var(--mono);font-size:11.5px;color:var(--mut)}
+.ttl-head b{color:var(--ice-soft);font-weight:500}
+.ttl-track{height:8px;background:var(--track-bg);border:1px solid var(--line);border-radius:999px;overflow:hidden;margin-top:6px}
+.ttl-fill{display:block;height:100%;width:100%;background:linear-gradient(90deg,var(--ice-deep),var(--ice));transition:width .25s linear}
+.ttl-fill.is-warn{background:linear-gradient(90deg,var(--warn-from),var(--amber))}
+.ttl-note{font-family:var(--mono);font-size:11.5px;color:var(--dim);margin-top:6px;line-height:1.6}
+.oscope-side{display:grid;gap:8px;align-content:start}
+.rd{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:8px 11px}
+.rd-k{display:block;font-family:var(--mono);font-size:10.5px;color:var(--dim);letter-spacing:.03em}
+.rd b{font-family:var(--mono);font-size:19px;color:var(--ink);font-weight:600;line-height:1.4}
+.rd.is-ice b{color:var(--ice-soft)}
+.rd.is-amber{border-color:rgba(255,178,36,.4);background:var(--amber-bg)}
+.rd.is-amber b{color:var(--amber-soft)}
+.rd.flash{animation:rd-flash .45s ease both}
+@keyframes rd-flash{0%{box-shadow:0 0 0 0 rgba(255,178,36,.55)}100%{box-shadow:0 0 0 8px rgba(255,178,36,0)}}
+.oscope-cap{font-family:var(--mono);font-size:11px;color:var(--dim);line-height:1.7;margin:10px 0 0}
+
+/* ---------- sections ---------- */
+.sprocket{border:0;border-top:1px dashed var(--line2);margin:56px auto 0;max-width:1060px}
+.section{padding:52px 0 8px}
+h2.title{font-size:clamp(24px,4vw,34px);margin:8px 0 12px;font-weight:900;letter-spacing:-.01em;line-height:1.25}
+.section .lede{color:var(--mut);max-width:47em;margin:0 0 28px}
+.bigtext{font-size:clamp(16.5px,2.5vw,19px);line-height:1.9;max-width:44em}
+.bigtext+.bigtext{margin-top:1em}
+code,.mono{font-family:var(--mono);font-size:.9em;background:var(--ice-bg);border:1px solid var(--line);padding:1px 5px;border-radius:4px;color:var(--ice-soft)}
+.ref{font-family:var(--mono);font-size:11px;color:var(--dim);text-decoration:none;vertical-align:super;margin-left:2px}
+.ref:hover{color:var(--ice)}
+
+/* ---------- notice / gate ---------- */
+.notice{display:flex;gap:10px;align-items:flex-start;background:rgba(255,178,36,.07);border:1px solid rgba(255,178,36,.35);border-radius:8px;padding:11px 13px;font-size:13.5px;line-height:1.75;color:var(--ink)}
+.notice .n-glyph{font-family:var(--mono);color:var(--amber);flex:0 0 auto;font-size:12px;padding-top:2px}
+.notice b{font-weight:600}
+.gate{display:flex;gap:10px;align-items:flex-start;background:rgba(255,178,36,.07);border:1px solid rgba(255,178,36,.35);border-radius:8px;padding:10px 12px;margin-top:12px}
+.gate.is-ok{background:rgba(98,198,245,.06);border-color:rgba(98,198,245,.3)}
+.gate-badge{font-family:var(--mono);font-size:11.5px;white-space:nowrap;padding:3px 10px;border-radius:999px;border:1px solid rgba(255,178,36,.5);color:var(--amber-soft);background:var(--amber-bg);flex:0 0 auto}
+.gate.is-ok .gate-badge{border-color:rgba(98,198,245,.45);color:var(--ice-soft);background:rgba(98,198,245,.1)}
+.gate-text{font-size:13px;line-height:1.75;color:var(--ink)}
+
+/* ---------- rules ---------- */
+.rules{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:28px}
+.rule{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px}
+.rule h3{font-size:15px;margin:0 0 8px;display:flex;align-items:center;gap:9px}
+.rule h3 .glyph{font-family:var(--mono);color:var(--amber);font-size:13px}
+.rule p{margin:0;font-size:14px;color:var(--mut);line-height:1.7}
+
+/* ---------- tape ---------- */
+.tape{display:flex;flex-wrap:wrap;gap:4px;align-items:stretch;min-height:10px}
+.tok{font-family:var(--mono);font-size:12px;line-height:1;padding:5px 6px;border-radius:4px;background:var(--tok-bg);border:1px solid var(--line2);color:var(--tok-ink);white-space:pre;transition:background .2s,border-color .2s,color .2s}
+.tape.sm .tok{font-size:11px;padding:3px 5px}
+.tok.cached{border-color:rgba(255,178,36,.4);color:var(--amber-soft)}
+.tok.hit{background:var(--amber-bg);border-color:rgba(255,178,36,.65);color:var(--amber-soft);animation:tok-pop .3s ease both}
+.tok.write{background:var(--ice-bg);border-color:rgba(98,198,245,.55);color:var(--ice-soft);animation:tok-write .5s ease both}
+.tok.dead{background:var(--tok-dead-bg);border-color:var(--tok-dead-line);color:var(--dim);animation:tok-dead .35s ease both}
+.tok.crack{border-color:var(--ice);color:var(--alert-ink);box-shadow:0 0 0 1px rgba(98,198,245,.35),0 0 14px rgba(98,198,245,.25)}
+@keyframes tok-pop{0%{transform:scale(.55)}60%{transform:scale(1.14)}100%{transform:scale(1)}}
+@keyframes tok-write{0%{transform:translateY(3px);opacity:.2}100%{transform:none;opacity:1}}
+@keyframes tok-dead{0%{transform:translateX(0)}25%{transform:translateX(-2px) rotate(-2deg)}55%{transform:translateX(2px) rotate(2deg)}100%{transform:none}}
+.fork{position:relative;flex:0 0 20px;align-self:stretch}
+.fork::before{content:"";position:absolute;left:50%;top:-2px;bottom:-2px;border-left:2px dashed rgba(98,198,245,.75);transform:translateX(-50%)}
+.fork .fork-tag{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:var(--bg2);border:1px solid rgba(98,198,245,.6);color:var(--ice-soft);font:600 10px/1 var(--mono);padding:3px 4px;border-radius:3px;white-space:nowrap}
+.schematic{display:grid;gap:12px;margin-top:28px;background:var(--bg2);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px}
+.sch-row{display:grid;grid-template-columns:150px 1fr;gap:12px;align-items:center}
+.sch-label{font-family:var(--mono);font-size:12px;color:var(--mut)}
+.sch-label b{display:block;font-weight:600}
+.sch-label .hitc{color:var(--amber-soft)}
+.sch-label .missc{color:var(--ice-soft)}
+
+/* ---------- demo ---------- */
+.demo{background:var(--bg2);border:1px solid var(--line2);border-radius:var(--radius);padding:18px}
+.demo-bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:14px}
+.btn{font-family:var(--mono);font-size:13px;color:var(--ink);background:var(--panel);border:1px solid var(--line2);border-radius:8px;padding:8px 14px;cursor:pointer;transition:border-color .15s,background .15s,transform .05s}
+.btn:hover{border-color:var(--ice);background:rgba(98,198,245,.08)}
+.btn:active{transform:translateY(1px)}
+.btn.primary{background:var(--amber-bg);border-color:rgba(255,178,36,.55);color:var(--amber-soft)}
+.btn.primary:hover{border-color:var(--amber)}
+.btn.ghost{color:var(--mut)}
+.seg{display:inline-flex;flex-wrap:wrap;background:var(--inset);border:1px solid var(--line2);border-radius:8px;padding:3px;gap:3px}
+.seg button{font-family:var(--mono);font-size:12.5px;color:var(--mut);background:transparent;border:0;border-radius:6px;padding:6px 12px;cursor:pointer}
+.seg button.is-on{background:var(--panel);color:var(--ink);box-shadow:inset 0 0 0 1px var(--line2)}
+.seg button:hover{color:var(--ink)}
+.pill{font-family:var(--mono);font-size:12px;padding:5px 12px;border-radius:999px;border:1px solid var(--line2);color:var(--mut);white-space:nowrap}
+.pill.is-hit{color:var(--amber-soft);border-color:rgba(255,178,36,.5);background:var(--amber-bg)}
+.pill.is-miss{color:var(--alert-ink);border-color:rgba(98,198,245,.55);background:rgba(98,198,245,.12)}
+.pill.is-idle{color:var(--ice-soft);border-color:rgba(98,198,245,.35)}
+textarea#demoInput{width:100%;min-height:104px;resize:vertical;background:var(--inset);color:var(--ink);border:1px solid var(--line2);border-radius:8px;padding:12px;font-family:var(--mono);font-size:12.5px;line-height:1.75}
+textarea#demoInput:focus-visible{outline:2px solid var(--ice);outline-offset:1px}
+.tape-panel{background:var(--inset);border:1px solid var(--line);border-radius:8px;padding:14px;margin-top:12px}
+.legend{display:flex;gap:18px;flex-wrap:wrap;font-family:var(--mono);font-size:11.5px;color:var(--dim);margin-top:12px;line-height:1.7}
+.dot{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:6px;vertical-align:-1px}
+.dot.amber{background:var(--amber)}
+.dot.ice{background:var(--ice)}
+.readout{display:grid;grid-template-columns:1.15fr 1fr;gap:14px;margin-top:14px}
+pre.usage{margin:0;background:var(--inset);border:1px solid var(--line);border-radius:8px;padding:14px;font-family:var(--mono);font-size:12.5px;line-height:1.8;color:var(--ice-soft);overflow-x:auto;white-space:pre-wrap}
+.summary{background:var(--inset);border:1px solid var(--line);border-radius:8px;padding:14px;font-size:14px;color:var(--ink);display:flex;flex-direction:column;gap:10px}
+.summary .costnote{font-family:var(--mono);font-size:12px;color:var(--dim);line-height:1.7}
+.summary .hint{font-size:12.5px;color:var(--dim)}
+
+/* ---------- table ---------- */
+.tablewrap{overflow-x:auto;border:1px solid var(--line2);border-radius:var(--radius);background:var(--bg2)}
+table{width:100%;border-collapse:collapse;min-width:820px;table-layout:fixed}
+/* 除行头外三列等宽：行头列固定宽度，其余三列平分剩余空间。
+   132px 取自最长行头标签「最小可缓存长度」（nowrap）所需宽度 + 少量余量 */
+thead th:first-child,tbody th{width:132px}
+/* 等宽后列宽收窄，长标识符（usage.prompt_tokens_details.cached_tokens 等）必须允许
+   在任意点折行，否则会溢出到相邻单元格 */
+tbody td{overflow-wrap:anywhere;word-break:break-word}
+caption{caption-side:top;text-align:left;font-family:var(--mono);font-size:12px;color:var(--dim);padding:12px 14px}
+th,td{text-align:left;padding:12px 14px;border-bottom:1px solid var(--line);vertical-align:top;font-size:13.5px;line-height:1.7}
+thead th{font-family:var(--mono);font-size:12.5px;color:var(--amber-soft);font-weight:600;border-bottom:1px solid var(--line2);white-space:nowrap}
+tbody th{font-family:var(--mono);font-size:12.5px;color:var(--mut);font-weight:500;white-space:nowrap}
+tbody tr:last-child th,tbody tr:last-child td{border-bottom:0}
+td .mono{font-size:12px}
+.commonline{margin-top:16px;font-size:14px;color:var(--mut)}
+.commonline b{color:var(--ink);font-weight:600}
+
+/* ---------- simulator ---------- */
+.sim-grid{display:grid;grid-template-columns:340px 1fr;gap:18px}
+.ctrl{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:18px;display:grid;gap:18px;align-content:start}
+.ctrl label{font-size:13.5px;color:var(--ink);display:grid;gap:7px}
+.ctrl .val{font-family:var(--mono);color:var(--amber-soft);font-size:12.5px}
+input[type=range]{width:100%;accent-color:var(--amber);cursor:pointer}
+.ctrl .price-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.ctrl input[type=number]{width:92px;background:var(--inset);border:1px solid var(--line2);border-radius:6px;color:var(--ink);font-family:var(--mono);font-size:13px;padding:6px 8px}
+.ctrl input[type=number]:disabled{opacity:.45;cursor:not-allowed}
+select{background:var(--inset);border:1px solid var(--line2);border-radius:6px;color:var(--ink);font-family:var(--mono);font-size:13px;padding:7px 8px;width:100%}
+.extra{border-top:1px dashed var(--line);padding-top:14px;display:grid;gap:14px}
+.extra-row{display:grid;gap:7px}
+.extra-row[hidden]{display:none}
+.x-k{font-family:var(--mono);font-size:11.5px;color:var(--dim)}
+.x-v{font-size:12.5px;color:var(--mut);line-height:1.7}
+.x-note{font-size:12px;color:var(--dim);line-height:1.7}
+.result{background:var(--bg2);border:1px solid var(--line2);border-radius:var(--radius);padding:18px;display:grid;gap:18px;align-content:start}
+.big-nums{display:flex;gap:30px;flex-wrap:wrap}
+.big-nums .n b{display:block;font-family:var(--mono);font-size:27px;color:var(--ink);font-weight:600;line-height:1.25}
+.big-nums .n span{font-size:11.5px;color:var(--dim);font-family:var(--mono)}
+.big-nums .n.save b{color:var(--amber)}
+.bars{display:grid;gap:10px}
+.bar-row{display:grid;grid-template-columns:128px 1fr 96px;gap:10px;align-items:center;font-family:var(--mono);font-size:12px;color:var(--mut)}
+.bar-row .num{text-align:right;color:var(--ink)}
+.bar-track{height:24px;background:var(--inset);border:1px solid var(--line);border-radius:6px;overflow:hidden;display:flex}
+.bar-fill{height:100%;width:0;transition:width .6s cubic-bezier(.2,.7,.2,1)}
+.bar-fill.plain{background:var(--neutral)}
+.seg-w{background:var(--ice-deep);height:100%}
+.seg-r{background:var(--amber);height:100%}
+.seg-b{background:var(--neutral);height:100%}
+.detail{font-family:var(--mono);font-size:12.5px;color:var(--mut)}
+.advice{font-size:13.5px;color:var(--ink);border-left:2px solid var(--amber);padding-left:12px;line-height:1.7}
+.advice.warn{border-left-color:var(--ice)}
+.footnote{font-family:var(--mono);font-size:11.5px;color:var(--dim);line-height:1.8}
+.footnote a{color:var(--dim)}
+.footnote a:hover{color:var(--ice)}
+
+/* ---------- traps & decision ---------- */
+.traps{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+.trap{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px}
+.trap h3{font-size:15px;margin:0 0 6px}
+.trap p.desc{font-size:13.5px;color:var(--mut);margin:0}
+.trap .bad,.trap .good{font-family:var(--mono);font-size:12px;line-height:1.7;padding:8px 10px;border-radius:6px;margin-top:8px;white-space:pre-wrap;word-break:break-all}
+.trap .bad{background:var(--ice-bg);border:1px solid rgba(98,198,245,.25);color:var(--ice-soft)}
+.trap .good{background:var(--amber-bg);border:1px solid rgba(255,178,36,.3);color:var(--amber-soft)}
+.decision{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:22px}
+.dec{border-radius:var(--radius);padding:18px 20px;border:1px solid var(--line2)}
+.dec.yes{background:linear-gradient(180deg,rgba(255,178,36,.07),transparent);border-color:rgba(255,178,36,.35)}
+.dec.no{background:linear-gradient(180deg,rgba(98,198,245,.06),transparent);border-color:rgba(98,198,245,.3)}
+.dec h3{font-size:15px;margin:0 0 4px;display:flex;align-items:center;gap:9px}
+.dec h3 .glyph{font-family:var(--mono);font-size:13px}
+.dec.yes h3 .glyph{color:var(--amber)}
+.dec.no h3 .glyph{color:var(--ice)}
+.dec ul{margin:8px 0 0;padding-left:18px;color:var(--mut);font-size:14px}
+.dec li{margin:7px 0;line-height:1.7}
+
+/* ---------- footer：只留三条信源 ---------- */
+footer{margin-top:72px;border-top:1px solid var(--line);padding:28px 0 60px;color:var(--dim);font-size:13px}
+/* 必须限定在 footer 内：hero 的 .scope-foot 里也有一个 <span class="srcs">，
+   若这条全局生效，它会变成 grid 容器——文本节点与 <a> 各成一个 grid item、
+   每个独占一行，于是「……见 / [1] / ；GPT-5.6+……见 / [2]」被拆成四行 */
+footer .srcs{display:grid;gap:8px;font-family:var(--mono);font-size:12px;line-height:1.8}
+.srcs a{color:var(--ice);text-decoration:none;border-bottom:1px dotted rgba(98,198,245,.4)}
+.srcs a:hover{color:var(--ice-soft)}
+
+/* ---------- responsive ---------- */
+@media (max-width:900px){
+  .sim-grid,.readout,.rules,.traps,.decision,.sch-row,.oscope-body{grid-template-columns:1fr}
+  .sch-row{gap:4px}
+  .req{grid-template-columns:1fr}
+  .req-tag{grid-row:auto;grid-column:1;padding-top:0}
+  .req .tape,.req-note{grid-column:1}
+  .nav a{padding:6px 7px}
+  .oscope-side{grid-template-columns:1fr 1fr;display:grid}
+  .big-nums{gap:18px}
+}
+@media (max-width:600px){
+  .oscope-side{grid-template-columns:1fr}
+  .scope-foot .btns{width:100%}
+}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation-duration:.01ms!important;animation-delay:0ms!important;transition-duration:.01ms!important}
+  .brand .dotpulse{animation:none}
+  .rd.flash{animation:none}
+}
+</style>
+<script>
+/* 主题判定必须早于首次绘制，否则会先闪一下另一种配色。
+   统一 key 为 lmapi-lab-theme（由 assets/site.js 写入），旧 key 仍然兼容。 */
+(function () {
+  var saved = null;
+  try {
+    saved = localStorage.getItem('lmapi-lab-theme')
+      || localStorage.getItem('lmapi-theme')
+      || localStorage.getItem('hermes-theme');
+  } catch (e) { saved = null; }
+  if (saved !== 'light' && saved !== 'dark') {
+    saved = (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
+  }
+  document.documentElement.setAttribute('data-theme', saved);
+})();
+</script>
+</head>
+<body>
+<a class="skip" href="#main">跳到主内容</a>
+
+<header class="site-top">
+  <div class="site-top-in">
+    <a class="site-brand" href="../index.html" aria-label="NLP Learning 课程总览">
+      <img class="brand-logo" src="../assets/logo.svg" width="24" height="24" alt="">
+      <span class="brand-text">NLP Learning</span>
+    </a>
+    <div class="site-top-right">
+      <button class="site-theme" type="button" id="themeToggle" data-theme-toggle aria-pressed="false"><span class="theme-ic" aria-hidden="true">☾</span><span class="theme-word">浅色</span></button>
+    </div>
+  </div>
+</header>
+
+<div class="site-shell">
+  <aside class="site-rail" aria-label="本页分节导航"><nav data-site-nav data-root="../"></nav></aside>
+
+  <main class="site-main" id="main" tabindex="-1">
+  <div class="wrap" data-nav-group="课程 02 · Prompt Caching">
+
+  <!-- ================= hero ================= -->
+  <section class="hero" id="top" data-nav-anchor data-nav-label="本节提要" aria-label="引言">
+    <p class="kicker">sec.0 / 5 · 一份 5 分钟的交互讲义 · v2</p>
+    <h1>前缀稳，才省钱。</h1>
+    <p class="lead">大模型 API 的 Prompt Caching 只认一条死规矩：<strong style="color:var(--ink);font-weight:600">前缀逐字节相同</strong>。懂了这条，你就懂了为什么命中只要一折钱，也懂了为什么改动一个字、它后面的整段缓存全部作废。这一页把它讲透，并且让你亲手改改看。</p>
+    <div class="chips">
+      <span class="chip">命中读价 <b>0.1×</b> 基础输入价（Anthropic）<a class="ref" href="#src-1">[1]</a></span>
+      <span class="chip">写价 <b>1.25×</b>（Anthropic 5 分钟档）<a class="ref" href="#src-1">[1]</a></span>
+      <span class="chip">最短前缀 <b>512–4,096</b> token（Anthropic 依模型）<a class="ref" href="#src-1">[1]</a></span>
+      <span class="chip">DeepSeek 命中约为未命中价的 <b>2%–3%</b><a class="ref" href="#src-3">[3]</a></span>
+      <span class="chip">GPT-5.6+ 写价 <b>1.25×</b><a class="ref" href="#src-2">[2]</a></span>
+    </div>
+
+    <div class="scope" aria-label="示波器：等效成本读数与 TTL 倒计时">
+      <div class="scope-head">
+        <span class="scope-title">osc · 示波器 — 同一个前缀，两次请求</span>
+        <span class="scope-status is-idle" id="heroStatus" role="status">COLD · 等待回放</span>
+      </div>
+      <div class="req">
+        <div class="req-tag">请求 1 · 冷启动</div>
+        <div class="tape" id="heroTape1"></div>
+        <div class="req-note">整段写入缓存 · 写价 1.25×（Anthropic 5 分钟档口径）<a class="ref" href="#src-1">[1]</a></div>
+      </div>
+      <div class="req">
+        <div class="req-tag">请求 2 · 重放</div>
+        <div class="tape" id="heroTape2"></div>
+        <div class="req-note hit">前缀逐字节相同 → 直接读旧账 · 读价 0.1×，TTL 顺带刷新</div>
+      </div>
+
+      <!-- 签名时刻：示波器 + TTL -->
+      <div class="oscope">
+        <div class="oscope-body">
+          <div>
+            <div class="oscope-screen">
+              <canvas id="heroWave" width="320" height="124" role="img" aria-label="示波器轨迹：写入时振幅为 1.25 倍，命中时振幅为 0.1 倍"></canvas>
+              <span class="oscope-peak" id="heroPeak">PEAK —</span>
+              <span class="oscope-scale">scale 1.25× / token</span>
+            </div>
+            <div class="ttl">
+              <div class="ttl-head"><span>TTL 倒计时 · 5 分钟档（命中即刷新）<a class="ref" href="#src-1">[1]</a></span><b id="heroTtlClock">--:--</b></div>
+              <div class="ttl-track"><span class="ttl-fill" id="heroTtlFill"></span></div>
+              <p class="ttl-note" id="heroTtlNote">倒计时从「写入」起算；归零后同一前缀需重新全价写入（冷启动）。</p>
+            </div>
+          </div>
+          <div class="oscope-side">
+            <div class="rd is-ice" id="heroRdW"><span class="rd-k">写入倍率 WRITE</span><b id="heroMultW">1.25×</b></div>
+            <div class="rd is-amber" id="heroRdR"><span class="rd-k">读取倍率 READ</span><b id="heroMultR">0.1×</b></div>
+            <div class="rd" id="heroRdE"><span class="rd-k">等效全价 token · 本次</span><b id="heroEquiv">0.0</b></div>
+            <div class="rd" id="heroRdG"><span class="rd-k">写 vs 读（同前缀）</span><b id="heroGap">12.5×</b></div>
+          </div>
+        </div>
+        <p class="oscope-cap">示波器为教学示意，不是真实延迟曲线；读数按这段 16 token 示意带计算，每千 token 即「写 1,250 / 读 100」个等效全价 token。真实前缀需达到该模型的最小可缓存长度才会建立缓存——Anthropic 依模型为 512–4,096 token<a class="ref" href="#src-1">[1]</a>。</p>
+      </div>
+
+      <div class="scope-foot">
+        <span class="srcs">写 1.25× / 读 0.1× / TTL 5 分钟（命中即刷新）见 <a href="#src-1">[1]</a>；GPT-5.6+ 写 1.25×、ttl 默认 30m 见 <a href="#src-2">[2]</a></span>
+        <span class="btns">
+          <button class="btn primary" id="heroReplay" type="button">重放这段动画</button>
+          <button class="btn ghost" id="heroTtlSkip" type="button">快进看 TTL 过期</button>
+        </span>
+      </div>
+    </div>
+  </section>
+
+  <hr class="sprocket">
+
+  <!-- ================= sec 1 机制 ================= -->
+  <section class="section" id="sec-mech" aria-labelledby="t-mech">
+    <p class="kicker">sec.1 / 5 · 机制</p>
+    <h2 class="title" id="t-mech" data-nav-anchor>缓存的是什么？是前缀的 KV</h2>
+    <p class="bigtext">Transformer 解码时，第 <code>t</code> 个 token 的注意力要读取前 <code>t-1</code> 个 token 的 K 和 V。这些 K/V <strong style="font-weight:600">只取决于前缀本身</strong>，跟你这次问什么毫无关系。既然同一个前缀算多少次结果都一样，服务商就把它暂时存起来——再来一个前缀完全相同的请求，直接调旧账，不用重算。</p>
+    <p class="bigtext">如果你在本机推理里用过 KV cache：prompt caching 就是把它从「一次请求之内」搬到「多次请求之间」。省的是 prefill 的计算，落到你账上就是钱和延迟。</p>
+
+    <div class="rules">
+      <div class="rule">
+        <h3><span class="glyph">[a]</span>只认前缀</h3>
+        <p>匹配从第一个 token 开始逐字节进行。尾部追加不影响命中；但前缀里动一个字节，从那一秒起后面全完。</p>
+      </div>
+      <div class="rule">
+        <h3><span class="glyph">[b]</span>认死理</h3>
+        <p>不相似、不近似，字节不同就是不同。「的」和「得」是两个世界；多一个空格也是一次失效。</p>
+      </div>
+      <div class="rule">
+        <h3><span class="glyph">[c]</span>有保质期</h3>
+        <p>缓存有保质期：Anthropic 5 分钟档命中即刷新（另有 1 小时档）；OpenAI GPT-5.6+ 的 <code>ttl</code> 默认 30m；DeepSeek 可达数小时至数天。过期等于冷启动。</p>
+      </div>
+    </div>
+
+    <div class="schematic" aria-label="命中与失效对比示意图">
+      <div class="sch-row">
+        <span class="sch-label"><b class="hitc">HIT</b>字节级相同</span>
+        <div class="tape sm" id="schHit"></div>
+      </div>
+      <div class="sch-row">
+        <span class="sch-label"><b class="missc">MISS</b>第 5 个 token 起不同</span>
+        <div class="tape sm" id="schMiss"></div>
+      </div>
+      <p class="footnote" style="margin:0">Anthropic：需显式打下 <code>cache_control</code> 断点（最多 4 个），各模型另有最小可缓存长度<a class="ref" href="#src-1">[1]</a>；OpenAI GPT-5.6+：内容块级断点，可用 <code>prompt_cache_breakpoint</code> 显式打点（每请求最多 4 个）<a class="ref" href="#src-2">[2]</a>。</p>
+    </div>
+
+  </section>
+
+  <hr class="sprocket">
+
+  <!-- ================= sec 2 交互 demo ================= -->
+  <section class="section" id="sec-demo" aria-labelledby="t-demo">
+    <p class="kicker">sec.2 / 5 · 亲手试</p>
+    <h2 class="title" id="t-demo" data-nav-anchor>改一个字，看缓存崩给你看</h2>
+    <p class="lede">下面是一条示例 prompt。点「重放相同请求」看命中；点「改一个字」，盯住分叉点——那之后的 token 会集体阵亡，并按写价重算。切换口径，看同一次失效在不同提供商怎么记账。</p>
+
+    <!-- F5：示例长度说明 -->
+    <div class="notice">
+      <span class="n-glyph">[!]</span>
+      <span><b>为可读性压缩了长度。</b>这段示例 prompt 只有 <b id="demoTokCount">≈ N</b> 个 token，远低于真实缓存门槛（Anthropic 依模型 512–4,096 token、DeepSeek 无明示门槛）<a class="ref" href="#src-1">[1]</a><a class="ref" href="#src-3">[3]</a>。真实世界里，这么短的前缀<b>连缓存都不会建立</b>——本节的动画演示的是「匹配与失效的方向性」。长度本身如何改变结论，去 <a href="#sec-sim">成本模拟器</a> 把前缀拉到门槛以上再看（两边用的是同一套门槛参数）。示意分词启发式：CJK 单字逐字 / ASCII 单词整体 / 标点单独，仅用于可视化。</span>
+    </div>
+
+    <div class="demo">
+      <div class="demo-bar">
+        <button class="btn primary" id="btnReplay" type="button">重放相同请求</button>
+        <button class="btn" id="btnChange" type="button">改一个字</button>
+        <button class="btn" id="btnAppend" type="button">在尾部追加问题</button>
+        <button class="btn ghost" id="btnReset" type="button">恢复初始 prompt</button>
+        <span class="seg" role="group" aria-label="选择供应商口径">
+          <button type="button" data-provider="openaiNew" aria-pressed="false">OpenAI GPT-5.6+</button>
+          <button type="button" data-provider="anthropic" aria-pressed="true">Anthropic</button>
+          <button type="button" data-provider="deepseek" aria-pressed="false">DeepSeek</button>
+        </span>
+        <span class="pill is-idle" id="demoPill" role="status">待重放</span>
+      </div>
+
+      <label for="demoInput" style="font-family:var(--mono);font-size:12px;color:var(--dim)">prompt 编辑器（可自由增删，重放后自动更新缓存快照）</label>
+      <textarea id="demoInput" spellcheck="false" style="margin-top:6px"></textarea>
+
+      <div class="tape-panel">
+        <div class="tape" id="demoTape" aria-label="prompt token 带"></div>
+        <div class="legend">
+          <span><span class="dot amber"></span>命中 · 固化</span>
+          <span><span class="dot ice"></span>失效 / 写入 · 碎裂</span>
+          <span>虚线标记 = 前缀分叉点，其后的缓存全部作废</span>
+        </div>
+      </div>
+
+      <!-- F2/F5：门槛联动提示 -->
+      <div class="gate" id="demoGate" role="status">
+        <span class="gate-badge" id="demoGateBadge">低于门槛</span>
+        <span class="gate-text" id="demoGateText">门槛检查：—</span>
+      </div>
+
+      <div class="readout">
+        <pre class="usage" id="demoUsage" aria-label="usage 记账字段">// 点上方按钮开始回放</pre>
+        <div class="summary">
+          <div id="demoSummary">当前缓存快照 = 初始 prompt。先点「重放相同请求」看一次完整命中，再用「改一个字」制造失效。</div>
+          <div class="costnote" id="demoCostNote">Anthropic 显式断点：写 1.25×、读 0.1×（5 分钟档）。</div>
+          <div class="hint">说明：这里的计费是教学简化口径——只算输入侧，忽略输出 token；但<b>最小可缓存长度门槛是真实存在的</b>，低于门槛不会命中、也不产生写溢价。倍率与字段名来自官方文档<a class="ref" href="#src-1">[1]</a><a class="ref" href="#src-2">[2]</a><a class="ref" href="#src-3">[3]</a><a class="ref" href="#src-2">[2]</a>。切到「OpenAI GPT-5.6+」可看显式断点 + 写 1.25× 的计费口径；Anthropic 的写溢价分 5 分钟档与 1 小时档。</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="sprocket">
+
+  <!-- ================= sec 3 三家对比 ================= -->
+  <section class="section" id="sec-cmp" aria-labelledby="t-cmp">
+    <p class="kicker">sec.3 / 5 · 三家对比</p>
+    <h2 class="title" id="t-cmp" data-nav-anchor>同一件事，三种做法</h2>
+    <p class="lede">OpenAI、Anthropic、DeepSeek 都在做同一件事——前缀匹配 + 短 TTL + 命中记账，但开启方式与溢价结构分成两条路线：OpenAI GPT-5.6+ 与 Anthropic 走「显式断点 + 写溢价」，DeepSeek 则是默认开启、不单收写溢价。</p>
+
+    <div class="tablewrap" tabindex="0" role="region" aria-label="三家缓存口径对比表（窄屏可横向滚动）">
+      <table>
+        <caption>口径与字段名查证于 2026-09，实时价格与倍率以各官方页面为准（窄屏可横向滑动）</caption>
+        <thead>
+          <tr><th scope="col"></th><th scope="col">OpenAI · GPT-5.6+</th><th scope="col">Anthropic</th><th scope="col">DeepSeek</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">开启方式</th>
+            <td><code>prompt_cache_options</code>：默认打一个「最近合资格消息」处的隐式断点；<code>prompt_cache_breakpoint</code> 可在内容块上打显式断点（每请求最多写 4 个）；<code>mode:"explicit"</code> 关闭隐式断点<a class="ref" href="#src-2">[2]</a></td>
+            <td>显式 <code>cache_control: {"type":"ephemeral"}</code> 断点（≤4 个），另有请求级自动断点<a class="ref" href="#src-1">[1]</a></td>
+            <td>上下文硬盘缓存默认开启，无需改代码<a class="ref" href="#src-3">[3]</a></td>
+          </tr>
+          <tr>
+            <th scope="row">匹配规则</th>
+            <td>内容块级断点匹配；<code>prompt_cache_key</code> 可分区路由<a class="ref" href="#src-2">[2]</a></td>
+            <td>精确前缀逐字节，直到断点为止<a class="ref" href="#src-1">[1]</a></td>
+            <td>须完整匹配一个 cache prefix unit；系统把公共前缀持久化为新 unit<a class="ref" href="#src-3">[3]</a></td>
+          </tr>
+          <tr>
+            <th scope="row">最小可缓存长度</th>
+            <td>未单列；以内容块断点为主，具体门槛以官方实时页面为准</td>
+            <td>依模型 <b>512–4,096 token</b>，低于门槛静默不缓存</td>
+            <td>无明示门槛；须完整匹配一个 unit，尽力而为不保证命中</td>
+          </tr>
+          <tr>
+            <th scope="row">命中计费</th>
+            <td>文档未给出确定的读价倍率（以官方实时页面为准）</td>
+            <td>读 <b>0.1×</b> 基础输入价<a class="ref" href="#src-1">[1]</a></td>
+            <td>约为未命中的 <b>2%–3%</b>（官网价目：flash 峰时 $0.006 vs $0.3 / 1M）<a class="ref" href="#src-3">[3]</a></td>
+          </tr>
+          <tr>
+            <th scope="row">写入计费</th>
+            <td><b>1.25×</b> 标准未缓存输入价<a class="ref" href="#src-2">[2]</a></td>
+            <td>写 <b>1.25×</b>（5 分钟档）／<b>2×</b>（1 小时档）<a class="ref" href="#src-1">[1]</a></td>
+            <td>无单独写溢价</td>
+          </tr>
+          <tr>
+            <th scope="row">TTL</th>
+            <td><code>ttl</code> 默认 <code>"30m"</code>，可按需延长保留<a class="ref" href="#src-2">[2]</a></td>
+            <td>5 分钟，命中即刷新；可选 1 小时档<a class="ref" href="#src-1">[1]</a></td>
+            <td>数小时至数天，不使用时自动清理</td>
+          </tr>
+          <tr>
+            <th scope="row">记账字段</th>
+            <td><code>usage.prompt_tokens_details.cached_tokens</code>；另有 <code>prompt_cache_options</code> / <code>prompt_cache_breakpoint</code> / <code>prompt_cache_key</code></td>
+            <td><code>cache_creation_input_tokens</code> / <code>cache_read_input_tokens</code></td>
+            <td><code>prompt_cache_hit_tokens</code> / <code>prompt_cache_miss_tokens</code></td>
+          </tr>
+          <tr>
+            <th scope="row">回本口径</th>
+            <td>写价 1.25× 意味着有前置成本；读价低于写价时，读得越多越回本</td>
+            <td>官方口径：5 分钟档 1 次读即回本；1 小时档需 ≥2 次读</td>
+            <td>—</td>
+          </tr>
+          <tr>
+            <th scope="row">官方文档</th>
+            <td><a href="#src-2">developers.openai.com · prompt-caching</a></td>
+            <td><a href="#src-1">docs.anthropic.com · prompt-caching</a></td>
+            <td><a href="#src-3">api-docs.deepseek.com · kv_cache</a></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="commonline"><b>共同点：</b>三者都只认前缀、都有短保质期、都把命中量写进 usage 让你对账。<b>差异：</b>隐式全自动（DeepSeek）与显式打点 + 写溢价（Anthropic、OpenAI GPT-5.6+）——OpenAI 在 5.6 代际转向断点 + 写溢价，这本身就是「两种 API 形式不同」的活教材。所以 Anthropic 的命中折扣最深（0.1×），但也最容易「写亏」。</p>
+  </section>
+
+  <hr class="sprocket">
+
+  <!-- ================= sec 4 成本模拟器 ================= -->
+  <section class="section" id="sec-sim" aria-labelledby="t-sim">
+    <p class="kicker">sec.4 / 5 · 成本模拟</p>
+    <h2 class="title" id="t-sim" data-nav-anchor>算账：缓存到底省多少</h2>
+    <p class="lede">模型：每轮请求 = 稳定前缀 + 逐轮追加的新内容。无缓存时每轮全价重算；有缓存时命中部分按读价、新内容按原价；失效的那轮把整个前缀按写价重写。<b>前缀低于该提供商的最小可缓存长度时，缓存根本不建立——按无缓存计费，并在这里明确警告。</b>单位是「等效全价输入 token」，自己乘单价即得美元。</p>
+
+    <div class="sim-grid">
+      <div class="ctrl">
+        <span class="seg" role="group" aria-label="选择供应商口径">
+          <button type="button" data-simprovider="openaiNew" aria-pressed="false">OpenAI GPT-5.6+</button>
+          <button type="button" data-simprovider="anthropic" aria-pressed="true">Anthropic</button>
+          <button type="button" data-simprovider="deepseek" aria-pressed="false">DeepSeek</button>
+        </span>
+        <label for="simPrefix">稳定前缀 token 数 <span class="val" id="simPrefixOut">6,000 token</span>
+          <input type="range" id="simPrefix" min="200" max="50000" step="100" value="6000">
+        </label>
+        <label for="simPer">每轮新增 token <span class="val" id="simPerOut">400</span>
+          <input type="range" id="simPer" min="50" max="2000" step="50" value="400">
+        </label>
+        <label for="simRounds">对话轮数 <span class="val" id="simRoundsOut">8</span>
+          <input type="range" id="simRounds" min="2" max="30" step="1" value="8">
+        </label>
+        <label for="simInvalid">前缀失效次数 <span class="val" id="simInvalidOut">2</span>
+          <input type="range" id="simInvalid" min="0" max="7" step="1" value="2">
+        </label>
+
+        <div class="extra" id="simExtra">
+          <div class="extra-row" data-for="openaiNew" hidden>
+            <label for="simReadMult">读价倍率（资料未确认项） <span class="val" id="simReadMultOut">0.5</span>
+              <input type="number" id="simReadMult" min="0.05" max="1" step="0.05" value="0.5">
+            </label>
+            <span class="x-note">GPT-5.6+ 的读价倍率在官方文档里没有给出确定值，这里按 0.5× 代入，可自行调整；写价 1.25× 是明确的<a class="ref" href="#src-2">[2]</a>。所有取值以官方实时页面为准。</span>
+          </div>
+          <div class="extra-row" data-for="anthropic" hidden>
+            <label for="simMinLen">最小可缓存长度（依模型）
+              <select id="simMinLen">
+                <option value="512">512 token（较小/较早模型）</option>
+                <option value="1024" selected>1,024 token</option>
+                <option value="2048">2,048 token</option>
+                <option value="4096">4,096 token</option>
+              </select>
+            </label>
+            <span class="x-note">官方口径为「依模型 512–4,096」，低于门槛静默不缓存；你所用模型的确切值以对应模型页为准<a class="ref" href="#src-1">[1]</a>。</span>
+          </div>
+          <div class="extra-row" data-for="deepseek" hidden>
+            <span class="x-k">代际参数</span>
+            <span class="x-v">无明示最小可缓存长度：须完整匹配一个 cache prefix unit，且尽力而为、不保证 100% 命中<a class="ref" href="#src-3">[3]</a>。</span>
+          </div>
+        </div>
+
+        <label for="simPrice">折算单价（$/1M 全价输入）
+          <span class="price-row"><input type="number" id="simPrice" min="0" step="0.1" value="3"> <span class="val">仅用于换成美元，倍率才是重点</span></span>
+        </label>
+      </div>
+
+      <div class="result">
+        <div class="gate" id="simGate" role="status">
+          <span class="gate-badge" id="simGateBadge">缓存生效</span>
+          <span class="gate-text" id="simGateText">—</span>
+        </div>
+        <div class="big-nums">
+          <span class="n"><b id="numNoCache">0</b><span>无缓存 · 等效全价 token</span></span>
+          <span class="n save"><b id="numCache">0</b><span>有缓存 · 等效全价 token</span></span>
+          <span class="n save"><b id="numSave">省 0%</b><span>相对无缓存</span></span>
+        </div>
+        <div class="bars">
+          <div class="bar-row">
+            <span>无缓存</span>
+            <span class="bar-track"><span class="bar-fill plain" id="barNoCache"></span></span>
+            <span class="num" id="numNoCacheBar">0</span>
+          </div>
+          <div class="bar-row">
+            <span>有缓存</span>
+            <span class="bar-track"><span class="bar-fill" id="barCache"><span class="seg-w" id="segWrite"></span><span class="seg-r" id="segRead"></span><span class="seg-b" id="segBase"></span></span></span>
+            <span class="num" id="numCacheBar">0</span>
+          </div>
+        </div>
+        <p class="detail" id="numDetail">写 0 · 读 0 · 新内容 0</p>
+        <p class="detail" id="numDollar">$0.00</p>
+        <p class="advice" id="simAdvice" role="status">调参数，看结论变化。</p>
+        <p class="footnote" id="simCostNote">Anthropic：写 1.25×、读 0.1×（5 分钟档；1 小时档写 2×）。<a class="ref" href="#src-1">[1]</a></p>
+      </div>
+    </div>
+  </section>
+
+  <hr class="sprocket">
+
+  <!-- ================= sec 5 陷阱与决策 ================= -->
+  <section class="section" id="sec-decision" aria-labelledby="t-dec">
+    <p class="kicker">sec.5 / 5 · 陷阱与决策</p>
+    <h2 class="title" id="t-dec" data-nav-anchor>五个暗坑，一张决策单</h2>
+    <p class="lede">大多数缓存失效不是「改了一个字」，而是无意识地把每轮变化的内容塞进了前缀，或者压根没到门槛。五个最常见的暗坑：</p>
+
+    <div class="traps">
+      <div class="trap">
+        <h3>暗坑 1 · 时间戳前插</h3>
+        <p class="desc">把当前时间拼在 system 最前面，等于每轮换一个前缀。</p>
+        <div class="bad">system = "现在 " + now + "\n" + BASE   // 每轮都不同 → 永远冷启动</div>
+        <div class="good">BASE 保持字节稳定；now 放进最后一条 user 消息</div>
+      </div>
+      <div class="trap">
+        <h3>暗坑 2 · tools 增删或重排</h3>
+        <p class="desc">工具定义位于前缀。中途加一个工具、调一次顺序，前面全部作废。</p>
+        <div class="bad">tools 数组每次重新排序 / 条件拼接   // 前缀字节变化</div>
+        <div class="good">工具集固定序列化；必须变时，接受一次写价重写</div>
+      </div>
+      <div class="trap">
+        <h3>暗坑 3 · JSON 键序不稳</h3>
+        <p class="desc">同样内容、不同字节序，就是不同前缀。</p>
+        <div class="bad">{"b":1,"a":2} 与 {"a":2,"b":1}   // 逐字节比较 → 不相等</div>
+        <div class="good">固定键序（如 sort_keys）后再进 prompt</div>
+      </div>
+      <div class="trap">
+        <h3>暗坑 4 · 动态内容放在断点前</h3>
+        <p class="desc">RAG 检索结果每次不同，却拼进 system 或断点之前。</p>
+        <div class="bad">system = 检索结果 + 规则     // 检索一变，全失效</div>
+        <div class="good">规则与静态文档走缓存；检索结果放到尾部再追加</div>
+      </div>
+      <div class="trap">
+        <h3>暗坑 5 · 门槛之下的静默失败</h3>
+        <p class="desc">前缀没到最小可缓存长度，或断点打在了太靠前的位置：接口不报错，只是永远不命中。</p>
+        <div class="bad">prefix = 400 token   // 低于该模型的最小可缓存长度 → 压根不进缓存，也无从「命中」</div>
+        <div class="good">先确认门槛，再决定要不要为写溢价买单</div>
+      </div>
+      <div class="trap">
+        <h3>判断顺序 · 先门槛，再前缀，最后 TTL</h3>
+        <p class="desc">把这三个问题按顺序问一遍，比事后看账单便宜得多。</p>
+        <div class="good">1) 前缀够长吗？（Anthropic 512–4,096 / DeepSeek 无明示）
+2) 前缀字节真的稳定吗？（ tools / 键序 / 时间戳）
+3) 会在一两个 TTL 内复用吗？（间隔短于 TTL）</div>
+      </div>
+    </div>
+
+    <div class="decision">
+      <div class="dec yes">
+        <h3><span class="glyph">[+]</span>缓存省钱，当……</h3>
+        <ul>
+          <li>前缀达到门槛（Anthropic 依模型 512–4,096 token）且重复使用 ≥2 次</li>
+          <li>固定文档库 / RAG 语料放在最前，逐题只改尾部</li>
+          <li>Agent 的 system + tools 固定，多轮对话用追加式</li>
+          <li>请求间隔短于 TTL，或持续有流量保温</li>
+          <li>写溢价的一次性成本能被多次读摊薄（Anthropic 5 分钟档 1 次读即回本）</li>
+        </ul>
+      </div>
+      <div class="dec no">
+        <h3><span class="glyph">[-]</span>反而更贵，当……</h3>
+        <ul>
+          <li>只问一次：Anthropic 写价 1.25×（GPT-5.6+ 同样收 1.25×），一次读赚不回来</li>
+          <li>前缀短于门槛：不是「少省一点」，是根本不进缓存</li>
+          <li>每轮都污染前缀：失效一次，整个前缀按写价重算</li>
+          <li>超过 TTL 再来：冷启动 + 重新写一遍</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<footer>
+  <div class="wrap">
+    <div class="srcs" id="srcs">
+      <span id="src-1">[1] Anthropic · Prompt caching — <a href="https://docs.anthropic.com/en/docs/build-with-claude/prompt-caching" target="_blank" rel="noopener">docs.anthropic.com/en/docs/build-with-claude/prompt-caching</a></span>
+      <span id="src-2">[2] OpenAI · Prompt Caching（GPT-5.6 及以后代际）— <a href="https://developers.openai.com/api/docs/guides/prompt-caching" target="_blank" rel="noopener">developers.openai.com/api/docs/guides/prompt-caching</a> ／ 平台指南 <a href="https://platform.openai.com/docs/guides/prompt-caching" target="_blank" rel="noopener">platform.openai.com/docs/guides/prompt-caching</a></span>
+      <span id="src-3">[3] DeepSeek · Context Caching（上下文硬盘缓存）— <a href="https://api-docs.deepseek.com/guides/kv_cache/" target="_blank" rel="noopener">api-docs.deepseek.com/guides/kv_cache</a> ／ 价格页 <a href="https://api-docs.deepseek.com/quick_start/pricing" target="_blank" rel="noopener">api-docs.deepseek.com/quick_start/pricing</a></span>
+    </div>
+  </div>
+</footer>
+  </div>
+  </main>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ================= 基础设施 ================= */
+  var reduceMQ = window.matchMedia('(prefers-reduced-motion: reduce)');
+  var reduced = reduceMQ.matches;
+  if (reduceMQ.addEventListener) {
+    reduceMQ.addEventListener('change', function (e) { reduced = e.matches; });
+  }
+
+  function el(id) { return document.getElementById(id); }
+  function all(sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); }
+  function sleep(ms) { return new Promise(function (res) { setTimeout(res, reduced ? 0 : ms); }); }
+  function clamp(v, a, b) { return Math.min(b, Math.max(a, v)); }
+  /* 任何不可计算的输入都退化成「—」，页面上不出现 NaN */
+  function fmt(n) { return (typeof n === 'number' && isFinite(n)) ? Math.round(n).toLocaleString('en-US') : '—'; }
+  function money(n) { return (typeof n === 'number' && isFinite(n)) ? n : 0; }
+  function flash(node) {
+    if (!node || reduced) return;
+    node.classList.remove('flash');
+    void node.offsetWidth;
+    node.classList.add('flash');
+  }
+
+  /* ================= 示意分词（F7） =================
+     CJK 连续单字逐字成 token；ASCII 单词整体成 token；标点/符号单独成 token。
+     仅用于可视化，不代表任何真实 tokenizer。 */
+  var TOK_RE = /[\u3400-\u4dbf\u4e00-\u9fff]|[A-Za-z0-9_]+|[^\s]/g;
+  function tokenize(text) {
+    var s = String(text == null ? '' : text).replace(/\r/g, '').replace(/[ \t]+/g, ' ').replace(/\n/g, ' \u23ce ');
+    var out = [];
+    var m;
+    TOK_RE.lastIndex = 0;
+    while ((m = TOK_RE.exec(s)) !== null) {
+      out.push(m[0]);
+      if (m.index === TOK_RE.lastIndex) TOK_RE.lastIndex++;
+    }
+    return out;
+  }
+
+  function renderTape(node, tokens) {
+    node.textContent = '';
+    var frag = document.createDocumentFragment();
+    var cells = [];
+    tokens.forEach(function (tk) {
+      var c = document.createElement('span');
+      c.className = 'tok';
+      c.textContent = tk;
+      frag.appendChild(c);
+      cells.push(c);
+    });
+    node.appendChild(frag);
+    return cells;
+  }
+
+  /* ================= hero：示波器 + TTL（F6） ================= */
+  var DEMO_PROMPT = '你是一名企业合规助手。请只依据用户提供的合同原文回答问题，不要引用外部法条；金额保留两位小数并注明币种；拿不准时回答「无法确定」并说明缺少什么信息。\n合同原文：《云服务采购协议》甲方购买乙方云服务，合同总额 120 万元；违约金为合同总额的 5%；争议提交甲方所在地法院管辖。\n问题：违约金条款是否有效？';
+
+  var HERO_TOKENS = 16;            /* 示意带长度：为可读性只画 16 格 */
+  var HERO_W = 1.25;               /* Anthropic 5 分钟档写价 [1] */
+  var HERO_R = 0.1;                /* Anthropic 5 分钟档读价 [1] */
+  var TTL_SECONDS = 300;           /* 5 分钟档 */
+
+  var heroCells1 = null, heroCells2 = null, heroPlayed = false, heroGen = 0, heroBusy = false;
+  var heroEquivNow = 0;
+
+  var scope = { samples: [], raf: 0, last: 0, state: 'idle', until: 0 };
+
+  function heroRender() {
+    var toks = tokenize(DEMO_PROMPT).slice(0, HERO_TOKENS);
+    heroCells1 = renderTape(el('heroTape1'), toks);
+    heroCells2 = renderTape(el('heroTape2'), toks);
+  }
+
+  function heroClear() {
+    [heroCells1, heroCells2].forEach(function (cs) {
+      (cs || []).forEach(function (c) { c.className = 'tok'; c.style.animationDelay = ''; });
+    });
+  }
+
+  /* 示波器是 canvas 绘制，取不到 CSS 变量，主题切换时把色值读进来缓存 */
+  var themeColors = {
+    amber: '#FFB224', ice: '#62C6F5', dead: '#8298A9',
+    grid: 'rgba(98,198,245,.12)', refW: 'rgba(98,198,245,.30)', refR: 'rgba(255,178,36,.30)'
+  };
+  function readThemeColors() {
+    var cs = getComputedStyle(document.documentElement);
+    function v(name, fallback) {
+      var x = cs.getPropertyValue(name);
+      x = x ? x.trim() : '';
+      return x || fallback;
+    }
+    themeColors.amber = v('--amber', themeColors.amber);
+    themeColors.ice = v('--ice', themeColors.ice);
+    themeColors.dead = v('--dim', themeColors.dead);
+    themeColors.grid = v('--scope-grid', themeColors.grid);
+    themeColors.refW = v('--scope-ref-w', themeColors.refW);
+    themeColors.refR = v('--scope-ref-r', themeColors.refR);
+  }
+
+  function scopeColor(state) {
+    if (state === 'hit') return themeColors.amber;
+    if (state === 'expired') return themeColors.dead;
+    return themeColors.ice;
+  }
+
+  function drawScope() {
+    var c = el('heroWave');
+    if (!c || !c.getContext) return;
+    var ctx = c.getContext('2d');
+    if (!ctx) return;
+    var dpr = Math.min(2, window.devicePixelRatio || 1);
+    var w = c.clientWidth || 320, h = c.clientHeight || 124;
+    var pw = Math.round(w * dpr), ph = Math.round(h * dpr);
+    if (c.width !== pw || c.height !== ph) { c.width = pw; c.height = ph; }
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, w, h);
+
+    var top = 6, bottom = h - 6, span = bottom - top;
+    ctx.strokeStyle = themeColors.grid;
+    ctx.lineWidth = 1;
+    for (var g = 0; g <= 4; g++) {
+      var y = Math.round(top + span * g / 4) + 0.5;
+      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
+    }
+    /* 参考线：1.25× 与 0.1× 的高度 */
+    [1.25, 0.1].forEach(function (amp) {
+      var ry = Math.round(bottom - (amp / 1.25) * span) + 0.5;
+      ctx.save();
+      ctx.setLineDash([3, 4]);
+      ctx.strokeStyle = amp === 1.25 ? themeColors.refW : themeColors.refR;
+      ctx.beginPath(); ctx.moveTo(0, ry); ctx.lineTo(w, ry); ctx.stroke();
+      ctx.restore();
+    });
+
+    var s = scope, n = s.samples.length;
+    if (n > 1) {
+      var col = scopeColor(s.state);
+      ctx.strokeStyle = col;
+      ctx.lineWidth = 2;
+      ctx.lineJoin = 'round';
+      ctx.shadowColor = col;
+      ctx.shadowBlur = 7;
+      ctx.beginPath();
+      for (var i = 0; i < n; i++) {
+        var x = (i / (s.samples.length - 1)) * w;
+        var amp = s.samples[i];
+        var yy = bottom - (amp / 1.25) * span;
+        if (i === 0) ctx.moveTo(x, yy); else ctx.lineTo(x, yy);
+      }
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+      var lastX = w, lastY = bottom - (s.samples[n - 1] / 1.25) * span;
+      ctx.fillStyle = col;
+      ctx.beginPath(); ctx.arc(lastX - 2, lastY, 2.6, 0, Math.PI * 2); ctx.fill();
+    }
+  }
+
+  function pushSample(amp) {
+    scope.samples.push(clamp(amp, 0, 1.25));
+    if (scope.samples.length > 104) scope.samples.shift();
+  }
+
+  function scopeFrame(t) {
+    if (!scope.last) scope.last = t;
+    var dt = t - scope.last;
+    if (dt >= 26) {
+      scope.last = t;
+      var amp = (scope.state === 'hit') ? HERO_R : (scope.state === 'expired' ? 0.02 : HERO_W);
+      pushSample(amp + (Math.random() - 0.5) * 0.05);
+      drawScope();
+    }
+    if (t < scope.until) { scope.raf = requestAnimationFrame(scopeFrame); }
+    else { scope.raf = 0; }
+  }
+
+  function scopeRun(state, ms) {
+    scope.state = state;
+    scope.until = performance.now() + (reduced ? 0 : (ms || 1400));
+    if (reduced) {
+      scope.samples = [];
+      for (var i = 0; i < 104; i++) {
+        var amp = (state === 'hit') ? HERO_R : (state === 'expired' ? 0.02 : HERO_W);
+        pushSample(amp + (Math.random() - 0.5) * 0.05);
+      }
+      drawScope();
+      return;
+    }
+    if (!scope.raf) { scope.last = 0; scope.raf = requestAnimationFrame(scopeFrame); }
+  }
+
+  function setHeroReadouts(state, equivTarget) {
+    var peak = el('heroPeak');
+    peak.className = 'oscope-peak' + (state === 'hit' ? ' is-amber' : (state === 'expired' ? ' is-dead' : ''));
+    peak.textContent = state === 'hit' ? 'PEAK 0.10× · READ' : (state === 'expired' ? 'PEAK — · EXPIRED' : 'PEAK 1.25× · WRITE');
+    el('heroMultW').textContent = HERO_W + '×';
+    el('heroMultR').textContent = HERO_R + '×';
+    el('heroGap').textContent = (HERO_W / HERO_R) + '×';
+    animateNum(el('heroEquiv'), heroEquivNow, equivTarget, 620);
+    heroEquivNow = equivTarget;
+    flash(el('heroRdE'));
+    if (state === 'hit') flash(el('heroRdR')); else flash(el('heroRdW'));
+  }
+
+  function animateNum(node, from, to, dur) {
+    if (!node) return;
+    if (reduced || !isFinite(to)) { node.textContent = to.toFixed(1); return; }
+    var t0 = performance.now();
+    function step(t) {
+      var k = clamp((t - t0) / dur, 0, 1);
+      var e = 1 - Math.pow(1 - k, 3);
+      var v = from + (to - from) * e;
+      node.textContent = isFinite(v) ? v.toFixed(1) : '0.0';
+      if (k < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+
+  /* ---- TTL 倒计时 ---- */
+  var ttl = { deadline: 0, running: false, expired: true };
+
+  function ttlRender(remain) {
+    var sec = Math.max(0, Math.ceil(remain / 1000));
+    var mm = Math.floor(sec / 60), ss = sec % 60;
+    el('heroTtlClock').textContent = mm + ':' + (ss < 10 ? '0' : '') + ss;
+    var pct = clamp(remain / (TTL_SECONDS * 1000), 0, 1) * 100;
+    var fill = el('heroTtlFill');
+    fill.style.width = pct + '%';
+    fill.classList.toggle('is-warn', pct < 25);
+    el('heroTtlNote').textContent = pct < 25 && remain > 0
+      ? 'TTL 即将归零：再不命中就要冷启动、重新按写价写入整段。'
+      : '倒计时从「写入」起算；归零后同一前缀需重新全价写入（冷启动）。';
+  }
+
+  function ttlExpire() {
+    ttl.expired = true;
+    ttl.running = false;
+    ttlRender(0);
+    el('heroTtlNote').textContent = 'TTL 已过期：同一前缀需重新全价写入（冷启动），刚才的命中读数作废。';
+    scopeRun('expired', reduced ? 0 : 1600);
+    if (!heroBusy) {
+      var st = el('heroStatus');
+      st.textContent = 'EXPIRED · TTL 归零，需重新写入';
+      st.className = 'scope-status is-dead';
+    }
+    if (heroCells2) heroCells2.forEach(function (c) { c.classList.remove('hit'); c.classList.add('dead'); });
+  }
+
+  function ttlTick() {
+    if (!ttl.running) return;
+    var remain = ttl.deadline - Date.now();
+    if (remain <= 0) { ttlExpire(); return; }
+    ttlRender(remain);
+    setTimeout(ttlTick, 200);
+  }
+
+  function ttlStart(seconds) {
+    ttl.deadline = Date.now() + seconds * 1000;
+    ttl.expired = false;
+    if (!ttl.running) { ttl.running = true; ttlTick(); }
+  }
+
+  async function heroPlay(force) {
+    if (!heroCells1) return;
+    if (heroPlayed && !force) return;
+    heroPlayed = true;
+    heroBusy = true;
+    var gen = ++heroGen;
+    heroClear();
+
+    /* 阶段 1：冷启动，写入 */
+    var st = el('heroStatus');
+    st.textContent = 'COLD · 请求 1 写入缓存';
+    st.className = 'scope-status is-idle';
+    scopeRun('write', 1400);
+    setHeroReadouts('write', HERO_TOKENS * HERO_W);
+    for (var i = 0; i < heroCells1.length; i++) {
+      if (gen !== heroGen) { heroBusy = false; return; }
+      heroCells1[i].style.animationDelay = (i * 45) + 'ms';
+      heroCells1[i].classList.add('write');
+    }
+    ttlStart(TTL_SECONDS);
+    await sleep(heroCells1.length * 45 + 380);
+    if (gen !== heroGen) { heroBusy = false; return; }
+
+    /* 阶段 2：重放，命中 */
+    st.textContent = 'REPLAY · 请求 2 重放同一前缀';
+    st.className = 'scope-status is-idle';
+    scopeRun('hit', 1400);
+    for (var j = 0; j < heroCells2.length; j++) {
+      if (gen !== heroGen) { heroBusy = false; return; }
+      heroCells2[j].style.animationDelay = (j * 35) + 'ms';
+      heroCells2[j].classList.add('hit');
+    }
+    setHeroReadouts('hit', HERO_TOKENS * HERO_R);
+    await sleep(heroCells2.length * 35 + 260);
+    if (gen !== heroGen) { heroBusy = false; return; }
+
+    ttlStart(TTL_SECONDS);   /* 命中即刷新 TTL [1] */
+    st.textContent = 'HIT · 命中读 0.1×（TTL 已刷新）';
+    st.className = 'scope-status is-hit';
+    heroBusy = false;
+  }
+
+  /* ================= demo ================= */
+  var DEMO_PROFILES = {
+    openaiNew: {
+      label: 'OpenAI · GPT-5.6+',
+      floor: 0,
+      w: 1.25, r: 0.5,
+      usage: function (hit, miss, total) {
+        return [
+          'prompt_tokens: ' + fmt(total),
+          'prompt_tokens_details: {',
+          '  cached_tokens: ' + fmt(hit) + ',   // 命中读价（文档未给确定值，暂按 0.5×）',
+          '  uncached: ' + fmt(miss) + '        // 未命中 / 写入侧',
+          '}',
+          '',
+          '// 断点侧参数：prompt_cache_options / prompt_cache_breakpoint /',
+          '//             mode:"explicit" / ttl:"30m"|"24h" / prompt_cache_key',
+          '// 写入按 1.25× 标准未缓存输入价计费'
+        ];
+      },
+      costNote: 'OpenAI GPT-5.6+：默认一个隐式断点，可用 prompt_cache_breakpoint 显式打点（每请求最多 4 个）；写入按 1.25× 计费，ttl 默认 30m。[2]'
+    },
+    anthropic: {
+      label: 'Anthropic',
+      floor: 1024,
+      w: 1.25, r: 0.1,
+      usage: function (hit, miss, total) {
+        return [
+          'input_tokens: ' + fmt(total),
+          'cache_read_input_tokens: ' + fmt(hit) + ',       // 命中读 0.1×',
+          'cache_creation_input_tokens: ' + fmt(miss) + '   // 失效重写 1.25×'
+        ];
+      },
+      costNote: 'Anthropic 显式断点：写 1.25×、读 0.1×（5 分钟档；1 小时档写 2×）。最小可缓存长度依模型 512–4,096 token。[1]'
+    },
+    deepseek: {
+      label: 'DeepSeek',
+      floor: 0,
+      w: 1.0, r: 0.03,
+      usage: function (hit, miss, total) {
+        return [
+          'prompt_tokens: ' + fmt(total),
+          'prompt_cache_hit_tokens: ' + fmt(hit) + ',    // 硬盘缓存命中',
+          'prompt_cache_miss_tokens: ' + fmt(miss) + '   // 未命中，按原价'
+        ];
+      },
+      costNote: 'DeepSeek 硬盘缓存：默认开启、无明示最小长度；命中约为未命中的 2%–3%（官网价目），尽力而为不保证 100%。[3]'
+    }
+  };
+
+  var demo = { provider: 'anthropic', snapshot: [], busy: false, dirty: false };
+
+  function demoGate(cur) {
+    var p = DEMO_PROFILES[demo.provider];
+    var n = cur.length;
+    var gate = el('demoGate'), badge = el('demoGateBadge'), text = el('demoGateText');
+    var ok = n >= p.floor;
+    gate.classList.toggle('is-ok', ok);
+    badge.textContent = ok ? '达到门槛' : '低于门槛';
+    if (ok) {
+      text.textContent = '门槛检查：当前 ' + fmt(n) + ' token ≥ ' + p.label + ' 门槛 ' + fmt(p.floor) +
+        ' token，缓存可以生效（真实命中率仍取决于前缀字节是否稳定、是否在 TTL 内复用）。';
+    } else if (p.floor === 0) {
+      text.textContent = '门槛检查：' + p.label + ' 无明示最小可缓存长度' +
+        (demo.provider === 'deepseek'
+          ? '；但仍须完整匹配一个 cache prefix unit，且尽力而为、不保证 100% 命中。[3]'
+          : '；具体门槛与断点行为以官方实时页面为准。[2]');
+    } else {
+      text.textContent = '门槛检查：当前 ' + fmt(n) + ' token < ' + p.label + ' 最小可缓存长度 ' + fmt(p.floor) +
+        ' token —— 真实环境中这段前缀' + (demo.provider === 'anthropic' || demo.provider === 'openaiNew' ? '连缓存都不会建立，也' : '不会进缓存，也') +
+        '不会产生写溢价，整段按无缓存全价计费。为可读性这里的 prompt 被压缩了；把长度拉到门槛以上再判断省钱与否（见成本模拟器）。';
+    }
+    return ok;
+  }
+
+  function demoFinish(cur, hit, miss, identical, cacheActive, d) {
+    var p = DEMO_PROFILES[demo.provider];
+    var total = cur.length;
+    var w = cacheActive ? p.w : 1.0;
+    var r = cacheActive ? p.r : 0;
+    var cost = miss * w + hit * r;
+    var sum = el('demoSummary');
+    if (!cacheActive) {
+      sum.textContent = '前缀 ' + fmt(total) + ' token 低于 ' + p.label + ' 的 ' + fmt(p.floor) +
+        ' token 门槛：没有缓存可命中，' + fmt(total) + ' 个 token 全部按原价计费，写溢价也不会发生。';
+    } else if (identical) {
+      sum.textContent = '与缓存快照逐字节相同：' + fmt(total) + ' 个 token 全部命中，一个都没重算。';
+    } else {
+      sum.textContent = '第 ' + fmt(d + 1) + ' 个 token 起不同：前 ' + fmt(hit) + ' 个命中，后 ' + fmt(miss) + ' 个作废并按写价重写。';
+    }
+    var usage = p.usage(hit, miss, total);
+    usage.push('');
+    usage.push(cacheActive
+      ? '等效全价 token ≈ ' + fmt(hit) + '×' + r + ' + ' + fmt(miss) + '×' + w + ' = ' + cost.toFixed(2)
+      : '等效全价 token = ' + fmt(total) + ' × 1.0 = ' + cost.toFixed(2) + '   // 低于门槛，无缓存可谈');
+    usage.push('（若无缓存：' + fmt(total) + '）');
+    el('demoUsage').textContent = usage.join('\n');
+    demo.snapshot = cur;
+    demo.dirty = false;
+  }
+
+  async function demoReplay() {
+    if (demo.busy) return;
+    demo.busy = true;
+    var inputEl = el('demoInput');
+    var tape = el('demoTape');
+    var pill = el('demoPill');
+    var cur = tokenize(inputEl.value);
+    var cacheActive = demoGate(cur);
+
+    if (cur.length === 0) {
+      renderTape(tape, []);
+      pill.textContent = '空 prompt';
+      pill.className = 'pill is-idle';
+      el('demoSummary').textContent = '没有 token 可以匹配，先写点什么。';
+      el('demoUsage').textContent = '';
+      demo.snapshot = [];
+      demo.busy = false;
+      return;
+    }
+
+    var snap = demo.snapshot;
+    var max = Math.min(cur.length, snap.length);
+    var d = 0;
+    while (d < max && cur[d] === snap[d]) d++;
+    var identical = (d === cur.length && d === snap.length);
+    /* 第 3 轮回归修复：完全一致时整段都算命中，不能落进「全价重写」分支。
+       （第 2 轮引入 cacheActive 时把此处写反，导致「重放相同请求」不产生命中动画、
+         usage 反而报 cache_creation_input_tokens = 全文。） */
+    var hit = !cacheActive ? 0 : (identical ? cur.length : d);
+    var miss = !cacheActive ? cur.length : (identical ? 0 : cur.length - d);
+
+    var cells = renderTape(tape, cur);
+
+    if (!identical && d < cur.length) {
+      var fork = document.createElement('span');
+      fork.className = 'fork';
+      fork.setAttribute('aria-hidden', 'true');
+      var tag = document.createElement('span');
+      tag.className = 'fork-tag';
+      tag.textContent = '分叉';
+      fork.appendChild(tag);
+      tape.insertBefore(fork, cells[d]);
+    }
+
+    if (reduced) {
+      cells.forEach(function (c, i) { c.classList.add(i < hit ? 'hit' : 'dead'); });
+      if (hit < cells.length) cells[hit].classList.add('crack');
+      pill.textContent = !cacheActive ? 'NO-CACHE · 低于门槛' : (identical ? 'HIT · 前缀完整命中' : 'MISS · 前缀失效');
+      pill.className = (!cacheActive || !identical) ? 'pill is-miss' : 'pill is-hit';
+      demoFinish(cur, hit, miss, identical, cacheActive, d);
+      demo.busy = false;
+      return;
+    }
+
+    pill.textContent = 'REPLAY · 回放中';
+    pill.className = 'pill is-idle';
+
+    for (var i = 0; i < hit; i++) {
+      cells[i].style.animationDelay = (i * 22) + 'ms';
+      cells[i].classList.add('hit');
+    }
+    if (hit > 0) await sleep(hit * 22 + 120);
+
+    if (!cacheActive) {
+      for (var z = 0; z < cells.length; z++) {
+        cells[z].style.animationDelay = (z * 14) + 'ms';
+        cells[z].classList.add('dead');
+      }
+      pill.textContent = 'NO-CACHE · 低于门槛';
+      pill.className = 'pill is-miss';
+      demoFinish(cur, hit, miss, identical, cacheActive, d);
+      demo.busy = false;
+      return;
+    }
+
+    if (!identical) {
+      for (var k = hit; k < cells.length; k++) {
+        cells[k].style.animationDelay = ((k - hit) * 16) + 'ms';
+        cells[k].classList.add('dead');
+      }
+      if (hit < cells.length) {
+        cells[hit].classList.add('crack');
+        cells[hit].style.animationDelay = '0ms';
+      }
+      pill.textContent = 'MISS · 前缀失效';
+      pill.className = 'pill is-miss';
+      await sleep(340);
+    } else {
+      pill.textContent = 'HIT · 前缀完整命中';
+      pill.className = 'pill is-hit';
+    }
+    demoFinish(cur, hit, miss, identical, cacheActive, d);
+    demo.busy = false;
+  }
+
+  /* 只改一个字节：把示例里的数字轮换，保证字节真的变了 */
+  function toggleOneChar(text) {
+    var cycle = ['120', '128', '126'];
+    for (var k = 0; k < cycle.length; k++) {
+      if (text.indexOf(cycle[k]) !== -1) {
+        return text.replace(cycle[k], cycle[(k + 1) % cycle.length]);
+      }
+    }
+    return text.replace(/\d/, '9');
+  }
+
+  function demoRefreshGate() {
+    demoGate(tokenize(el('demoInput').value));
+  }
+
+  function demoInit() {
+    var inputEl = el('demoInput');
+    inputEl.value = DEMO_PROMPT;
+    demo.snapshot = tokenize(DEMO_PROMPT);
+    var cells = renderTape(el('demoTape'), demo.snapshot);
+    cells.forEach(function (c) { c.classList.add('cached'); });
+    el('demoTokCount').textContent = '≈ ' + fmt(demo.snapshot.length);
+    demoRefreshGate();
+
+    el('btnReplay').addEventListener('click', demoReplay);
+
+    el('btnChange').addEventListener('click', function () {
+      if (demo.busy) return;
+      inputEl.value = toggleOneChar(inputEl.value);
+      demo.dirty = true;
+      demoReplay();
+    });
+
+    el('btnAppend').addEventListener('click', function () {
+      if (demo.busy) return;
+      /* F1：这里必须是 inputEl.value.replace(...)，不是 inputEl.replace(...) */
+      inputEl.value = inputEl.value.replace(/\s*$/, '') + '\n追问：违约金上限可以调整吗？';
+      demo.dirty = true;
+      demoRefreshGate();
+      demoReplay();
+    });
+
+    el('btnReset').addEventListener('click', function () {
+      if (demo.busy) return;
+      inputEl.value = DEMO_PROMPT;
+      demo.snapshot = tokenize(DEMO_PROMPT);
+      var cs = renderTape(el('demoTape'), demo.snapshot);
+      cs.forEach(function (c) { c.classList.add('cached'); });
+      el('demoPill').textContent = '已恢复初始快照';
+      el('demoPill').className = 'pill is-idle';
+      el('demoSummary').textContent = '缓存快照已重置为初始 prompt，点「重放相同请求」可再次看到命中。';
+      el('demoUsage').textContent = '';
+      demo.dirty = false;
+      el('demoTokCount').textContent = '≈ ' + fmt(demo.snapshot.length);
+      demoRefreshGate();
+    });
+
+    inputEl.addEventListener('input', function () {
+      if (!demo.dirty) {
+        demo.dirty = true;
+        el('demoPill').textContent = '已编辑 · 待重放';
+        el('demoPill').className = 'pill is-idle';
+      }
+      el('demoTokCount').textContent = '≈ ' + fmt(tokenize(inputEl.value).length);
+      demoRefreshGate();
+    });
+
+    all('[data-provider]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        demo.provider = btn.getAttribute('data-provider');
+        all('[data-provider]').forEach(function (b) {
+          var on = b === btn;
+          b.classList.toggle('is-on', on);
+          b.setAttribute('aria-pressed', on ? 'true' : 'false');
+        });
+        el('demoCostNote').textContent = DEMO_PROFILES[demo.provider].costNote;
+        demoRefreshGate();
+      });
+    });
+  }
+
+  /* ================= 静态示意（sec.1） ================= */
+  function schematicInit() {
+    var base = tokenize(DEMO_PROMPT).slice(0, 9);
+    var CHANGED = base.slice();
+    /* 第 6 轮修复两件事：
+       (1) 这两处下标曾被第 5 轮的「[4] → [2] 全页重编号」误伤，改动点从第 5 个 token
+           错位到第 3 个，与本行标签「第 5 个 token 起不同」自相矛盾。
+       (2) 替换值原为两字的「合规」，与后文已有的「合规」重复，会渲染成
+           「你是一名合规业合规助手」；改为单字后得到「你是一名行业合规助手」。 */
+    CHANGED[4] = '行';
+    var hitCells = renderTape(el('schHit'), base);
+    var missCells = renderTape(el('schMiss'), CHANGED);
+    hitCells.forEach(function (c) { c.classList.add('hit'); });
+    missCells.forEach(function (c, i) {
+      if (i < 4) c.classList.add('hit');
+      else c.classList.add('dead');
+    });
+    missCells[4].classList.add('crack');
+  }
+
+  /* ================= 成本模拟器（F2） ================= */
+  var SIM_PROFILES = {
+    openaiNew: {
+      w: 1.25, r: null, floor: 0, label: 'OpenAI GPT-5.6+',
+      note: 'OpenAI GPT-5.6+：写入按 1.25× 计费；读价倍率为资料未确认项（默认 0.5×，可改），以官方实时页面为准。<a class="ref" href="#src-2">[2]</a>'
+    },
+    anthropic: {
+      w: 1.25, r: 0.1, floor: null, label: 'Anthropic',
+      note: 'Anthropic：写 1.25×、读 0.1×（5 分钟档；1 小时档写 2×）；最小可缓存长度依模型 512–4,096，低于门槛静默不缓存。<a class="ref" href="#src-1">[1]</a>'
+    },
+    deepseek: {
+      w: 1.0, r: 0.03, floor: 0, label: 'DeepSeek',
+      note: 'DeepSeek：默认开启、无明示最小长度；须完整匹配一个 cache prefix unit，命中约为未命中的 2%–3%，尽力而为不保证 100%。<a class="ref" href="#src-3">[3]</a>'
+    }
+  };
+
+  var sim = { provider: 'anthropic', prefix: 6000, per: 400, rounds: 8, invalid: 2, price: 3, readMult: 0.5, minLen: 1024 };
+
+  function simFloor() {
+    var p = SIM_PROFILES[sim.provider];
+    if (p.floor === null) return sim.minLen;
+    return p.floor;
+  }
+
+  function simInvalidRounds() {
+    var N = sim.rounds, K = Math.min(sim.invalid, Math.max(0, N - 1));
+    var slots = [];
+    for (var i = 2; i <= N; i++) slots.push(i);
+    if (K <= 0 || slots.length === 0) return {};
+    var step = slots.length / K;
+    var picked = {};
+    for (var j = 0; j < K; j++) {
+      var idx = Math.min(slots.length - 1, Math.floor(j * step));
+      picked[slots[idx]] = true;
+    }
+    return picked;
+  }
+
+  function simCompute() {
+    var p = SIM_PROFILES[sim.provider];
+    var readRate = (p.r === null) ? sim.readMult : p.r;
+    if (!isFinite(readRate) || readRate < 0) readRate = 0;
+    var P = sim.prefix, S = sim.per, N = sim.rounds;
+    var floor = simFloor();
+    var cacheActive = P >= floor;
+    var invalid = simInvalidRounds();
+    var write = 0, read = 0, base = 0, noCache = 0;
+    for (var i = 1; i <= N; i++) {
+      var T = P + i * S;
+      var prev = P + (i - 1) * S;
+      noCache += T;
+      if (!cacheActive) { base += T; continue; }
+      if (i === 1 || invalid[i]) {
+        write += T * p.w;
+      } else {
+        read += prev * readRate;
+        base += S;
+      }
+    }
+    var total = write + read + base;
+    return {
+      write: write, read: read, base: base, total: total, noCache: noCache,
+      cacheActive: cacheActive, floor: floor, readRate: readRate
+    };
+  }
+
+  function simRender() {
+    var r = simCompute();
+    var max = Math.max(r.total, r.noCache, 1);
+    var savePct = r.noCache > 0 ? (1 - r.total / r.noCache) * 100 : 0;
+
+    el('barNoCache').style.width = (r.noCache / max * 100) + '%';
+    el('barCache').style.width = (r.total / max * 100) + '%';
+    var inner = function (v) { return (v / Math.max(r.total, 1) * 100) + '%'; };
+    el('segWrite').style.width = inner(r.write);
+    el('segRead').style.width = inner(r.read);
+    el('segBase').style.width = inner(r.base);
+
+    el('numNoCache').textContent = fmt(r.noCache);
+    el('numCache').textContent = fmt(r.total);
+    el('numNoCacheBar').textContent = fmt(r.noCache);
+    el('numCacheBar').textContent = fmt(r.total);
+    el('numSave').textContent = (savePct >= 0 ? '省 ' : '多花 ') + Math.abs(savePct).toFixed(1) + '%';
+    el('numDetail').textContent = '构成：写 ' + fmt(r.write) + ' · 读 ' + fmt(r.read) + ' · 新内容与原价 ' + fmt(r.base);
+    el('numDollar').textContent = '折合约 $' + (r.total * money(sim.price) / 1e6).toFixed(2) +
+      '；无缓存 $' + (r.noCache * money(sim.price) / 1e6).toFixed(2) + '（按 $' + sim.price + ' / 1M 全价输入）';
+
+    /* F2：门槛警告，不静默 */
+    var gate = el('simGate'), gb = el('simGateBadge'), gt = el('simGateText');
+    gate.classList.toggle('is-ok', r.cacheActive);
+    gb.textContent = r.cacheActive ? '缓存生效' : '低于门槛';
+    if (r.cacheActive) {
+      gt.textContent = '前缀 ' + fmt(sim.prefix) + ' token ≥ ' + SIM_PROFILES[sim.provider].label + ' 最小可缓存长度 ' + fmt(r.floor) +
+        ' token，缓存可以建立；命中仍受 TTL 与前缀字节稳定性影响。';
+    } else {
+      gt.textContent = '前缀 ' + fmt(sim.prefix) + ' token < ' + SIM_PROFILES[sim.provider].label + ' 最小可缓存长度 ' + fmt(r.floor) +
+        ' token：缓存根本不建立（Anthropic 低于门槛时 cache_control 被静默忽略），也没有写溢价可亏——整段按无缓存全价计费。把前缀拉到 ' + fmt(r.floor) + ' 以上再看。';
+    }
+
+    var advice, warn = false;
+    if (!r.cacheActive) {
+      advice = '当前参数下缓存完全不生效：前缀没够到最小可缓存长度。把「稳定前缀 token 数」拉到 ' + fmt(r.floor) +
+        ' 以上，再谈省多少——这是门槛问题，不是倍率问题。';
+      warn = true;
+    } else if (r.total > r.noCache) {
+      advice = '当前参数下缓存反而更贵——多半是失效太频繁，或读价相对写价没优势。调低「前缀失效次数」、调高前缀长度试试。';
+      warn = true;
+    } else if (savePct < 15) {
+      advice = '省得有限：前缀可能太短，或失效次数太多。把前缀拉长、失效调少，结论会明显变化。';
+    } else {
+      advice = '前缀长、轮次多、失效少——缓存正在替你省钱。注意这只是输入侧，输出 token 另算；真实命中率还取决于前缀是否真的字节稳定。';
+    }
+    var adv = el('simAdvice');
+    adv.textContent = advice;
+    adv.classList.toggle('warn', warn);
+    el('simCostNote').innerHTML = SIM_PROFILES[sim.provider].note;
+  }
+
+  function simSyncExtra() {
+    all('#simExtra .extra-row').forEach(function (row) {
+      row.hidden = row.getAttribute('data-for') !== sim.provider;
+    });
+    var rm = el('simReadMult');
+    rm.disabled = sim.provider !== 'openaiNew';
+    el('simMinLen').disabled = sim.provider !== 'anthropic';
+  }
+
+  function simInit() {
+    function bind(id, key, fmtFn) {
+      var node = el(id);
+      node.addEventListener('input', function () {
+        var v = Number(node.value);
+        if (!isFinite(v)) v = 0;
+        sim[key] = v;
+        if (key === 'rounds') {
+          var inv = el('simInvalid');
+          inv.max = String(Math.max(0, sim.rounds - 1));
+          if (sim.invalid > sim.rounds - 1) {
+            sim.invalid = sim.rounds - 1;
+            inv.value = String(sim.invalid);
+            el('simInvalidOut').textContent = String(sim.invalid);
+          }
+        }
+        el(id + 'Out').textContent = fmtFn(v);
+        simRender();
+      });
+    }
+    /* 第 4 轮修复：el() 走的是 getElementById，不吃 CSS 选择器语法。
+       这四处原先写成 '#simPrefix'，导致 el() 返回 null、addEventListener 抛 TypeError，
+       整个 DOMContentLoaded 初始化链在此中断（sec.0 自动播放 / 导航高亮 / 模拟器初值全部失效）。 */
+    bind('simPrefix', 'prefix', function (v) { return fmt(v) + ' token'; });
+    bind('simPer', 'per', function (v) { return fmt(v); });
+    bind('simRounds', 'rounds', function (v) { return String(v); });
+    bind('simInvalid', 'invalid', function (v) { return String(v); });
+
+    el('simReadMult').addEventListener('input', function () {
+      var v = Number(el('simReadMult').value);
+      if (!isFinite(v) || v < 0) v = 0.5;
+      sim.readMult = v;
+      el('simReadMultOut').textContent = v.toFixed(2).replace(/0$/, '');
+      simRender();
+    });
+    el('simMinLen').addEventListener('change', function () {
+      var v = Number(el('simMinLen').value);
+      if (!isFinite(v)) v = 1024;
+      sim.minLen = v;
+      simRender();
+    });
+
+    var priceEl = el('simPrice');
+    priceEl.addEventListener('input', function () {
+      var v = Number(priceEl.value);
+      sim.price = (isFinite(v) && v >= 0) ? v : 0;
+      simRender();
+    });
+
+    all('[data-simprovider]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        sim.provider = btn.getAttribute('data-simprovider');
+        all('[data-simprovider]').forEach(function (b) {
+          var on = b === btn;
+          b.classList.toggle('is-on', on);
+          b.setAttribute('aria-pressed', on ? 'true' : 'false');
+        });
+        simSyncExtra();
+        simRender();
+      });
+    });
+    simSyncExtra();
+  }
+
+  /* ================= 主题切换 ================= */
+  /* 按钮本身（点击、文案、aria、localStorage）由 ../assets/site.js 统一接管；
+     这里只负责让 Canvas 重新按当前 CSS 变量取色，否则切主题后示波器会留旧色。 */
+  function currentTheme() {
+    return document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
+  }
+
+  var lastPaintedTheme = null;
+  function syncThemePaint() {
+    var theme = currentTheme();
+    if (theme === lastPaintedTheme) return;
+    lastPaintedTheme = theme;
+    readThemeColors();
+    drawScope();
+  }
+
+  function themeInit() {
+    syncThemePaint();
+    /* site.js 会在切换时改写 data-theme；用 MutationObserver 跟上，不抢它的职责 */
+    if (window.MutationObserver) {
+      new MutationObserver(function () { syncThemePaint(); })
+        .observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+    }
+    /* 没手动选过时跟随系统变化 */
+    if (window.matchMedia) {
+      var mq = window.matchMedia('(prefers-color-scheme: dark)');
+      var onSys = function () { syncThemePaint(); };
+      if (mq.addEventListener) mq.addEventListener('change', onSys);
+      else if (mq.addListener) mq.addListener(onSys);
+    }
+  }
+
+  /* ================= init ================= */
+  document.addEventListener('DOMContentLoaded', function () {
+    heroRender();
+    schematicInit();
+    demoInit();
+    simInit();
+    readThemeColors();
+    themeInit();
+    simRender();
+    el('heroReplay').addEventListener('click', function () { heroPlay(true); });
+    el('heroTtlSkip').addEventListener('click', function () {
+      ttl.deadline = Date.now() + 2600;   /* 示教快进：几秒后看过期 */
+      ttl.expired = false;
+      if (!ttl.running) { ttl.running = true; ttlTick(); }
+      el('heroTtlNote').textContent = '已快进：倒计时按示教加速走完，观察归零后的状态。';
+    });
+    var resizeTimer = null;
+    window.addEventListener('resize', function () {
+      if (resizeTimer) clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(drawScope, 120);
+    });
+    setTimeout(heroPlay, 500);
+  });
+})();
+</script>
+<script src="../assets/site.js?v=2"></script>
+</body>
+</html>

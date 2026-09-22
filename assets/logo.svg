@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48" fill="none" role="img" aria-labelledby="logo-title logo-desc">
+  <title id="logo-title">Hermes Study Flow</title>
+  <desc id="logo-desc">由六个节点组成的字母 H，代表六步学习路径</desc>
+  <rect x="3.5" y="3.5" width="41" height="41" rx="12.5" stroke="#0A6C74" stroke-width="2.5" opacity="0.3"/>
+  <path d="M16 14V34M32 14V34M16 24H32" stroke="#0A6C74" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <g fill="#0A6C74">
+    <circle cx="16" cy="14" r="3"/>
+    <circle cx="16" cy="24" r="3"/>
+    <circle cx="16" cy="34" r="3"/>
+    <circle cx="32" cy="14" r="3"/>
+    <circle cx="32" cy="24" r="3"/>
+    <circle cx="32" cy="34" r="3"/>
+  </g>
+</svg>

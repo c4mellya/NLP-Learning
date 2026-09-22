@@ -1,0 +1,392 @@
+/* ============================================================================
+   Hermes 课程：页面层样式
+   ----------------------------------------------------------------------------
+   配色、字体、壳层、左侧栏全部来自 ../assets/tokens.css + site.css。
+   这里只写讲义正文的排版与课程入口页的六步清单。
+
+   色语义与全站一致：琥珀 = 当前/强调，冰蓝 = 链接与结构，绿松 = 已完成，
+   暖橙 = 验收门槛。
+   ========================================================================= */
+
+/* ------------------------------------------------------------- 页头 */
+
+.site-main .note-head {
+  padding: 6px 0 26px;
+  border-bottom: 1px dashed var(--line2);
+}
+.site-main .note-path {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--dim);
+  margin: 0 0 12px;
+}
+.site-main .note-path span { color: var(--hot); font-weight: 600; }
+.site-main .note-head h1 {
+  font-size: clamp(26px, 3.4vw, 33px);
+  line-height: 1.22;
+  letter-spacing: -.018em;
+  margin: 0 0 12px;
+  color: var(--ink);
+}
+.site-main .note-desc {
+  color: var(--mut);
+  margin: 0 0 10px;
+  max-width: 40em;
+}
+.site-main .note-desc strong { color: var(--ink); font-weight: 600; }
+.site-main .note-head-links { margin: 14px 0 0; }
+
+.site-main .doc-link {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: var(--dim);
+  text-decoration: none;
+  border-bottom: 1px dotted var(--dim);
+}
+.site-main .doc-link:hover { color: var(--cold); border-bottom-color: var(--cold); }
+
+/* ------------------------------------------------------------- 小节 */
+
+.site-main .note-sec {
+  padding: 46px 0 0;
+  border: 0;
+  scroll-margin-top: calc(var(--topbar-h) + 22px);
+}
+.site-main .note-sec > h2 {
+  font-size: 21px;
+  line-height: 1.4;
+  margin: 0 0 18px;
+  padding: 0;
+  border: 0;
+  color: var(--ink);
+  letter-spacing: -.012em;
+}
+.site-main .note-sec h3 {
+  font-size: 15px;
+  margin: 0 0 7px;
+  color: var(--ink);
+}
+.site-main .note-sec p,
+.site-main .note-sec li { color: var(--mut); }
+.site-main .note-sec p:last-child { margin-bottom: 0; }
+.site-main .note-sec > p { margin-bottom: 14px; }
+
+.site-main .note-sec code.inline-code,
+.site-main .inline-code {
+  font-size: .88em;
+  color: var(--cold-soft);
+  background: var(--cold-bg);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 1px 5px;
+}
+
+.site-main .hint-text {
+  font-size: 13.5px;
+  color: var(--dim);
+}
+
+/* 终端块：页面里的「仪器」，用最深的面 + 细致的条 */
+.site-main .terminal {
+  margin: 16px 0;
+  background: var(--inset);
+  border: 1px solid var(--line2);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.site-main .terminal-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 13px;
+  background: rgba(98, 198, 245, .05);
+  border-bottom: 1px solid var(--line);
+}
+.site-main .terminal-label {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--dim);
+  letter-spacing: .04em;
+}
+.site-main .terminal-body {
+  margin: 0;
+  padding: 15px 16px;
+  font-family: var(--mono);
+  font-size: 12.5px;
+  line-height: 1.85;
+  color: var(--cold-soft);
+  overflow-x: auto;
+  white-space: pre;
+}
+.site-main .terminal-body .comment { color: var(--dim); }
+.site-main .terminal-body .prompt { color: var(--hot); }
+.site-main .codeblock {
+  margin: 14px 0;
+  padding: 14px 16px;
+  background: var(--inset);
+  border: 1px solid var(--line2);
+  border-radius: var(--radius-sm);
+  font-family: var(--mono);
+  font-size: 12.5px;
+  line-height: 1.8;
+  color: var(--cold-soft);
+  overflow-x: auto;
+}
+
+/* 表格 */
+.site-main .table-wrap {
+  margin: 16px 0;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.site-main .reading-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+.site-main .reading-table th {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: .04em;
+  color: var(--hot-soft);
+  text-align: left;
+  padding: 10px 14px;
+  background: rgba(98, 198, 245, .04);
+  border-bottom: 1px solid var(--line2);
+  white-space: nowrap;
+}
+.site-main .reading-table td {
+  padding: 11px 14px;
+  color: var(--mut);
+  border-bottom: 1px solid var(--line);
+  vertical-align: top;
+}
+.site-main .reading-table tbody tr:last-child td { border-bottom: 0; }
+.site-main .reading-table tbody tr:hover td { background: rgba(98, 198, 245, .03); }
+
+/* 要点块 */
+.site-main .note-aside {
+  background: var(--cold-bg);
+  border-left: 2px solid var(--cold);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  padding: 14px 16px;
+}
+.site-main .note-aside p { margin: 0; }
+.site-main .note-aside strong { color: var(--ink); }
+
+.site-main .tip-block {
+  margin-top: 16px;
+  background: var(--panel);
+  border: 1px solid var(--line2);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+}
+.site-main .tip-block strong { color: var(--hot); }
+.site-main .tip-block p { margin: 4px 0 0; font-size: 14px; }
+
+/* 验收段：暖橙只留给门槛 */
+.site-main .note-sec.acceptance {
+  margin-top: 34px;
+  padding: 18px 20px;
+  border: 1px solid var(--warn);
+  border-radius: var(--radius);
+  background: var(--warn-bg);
+}
+.site-main .note-sec.acceptance > h2 { color: var(--warn); }
+.site-main .gate-foot { margin-top: 14px; }
+
+.site-main .check-list { display: grid; gap: 7px; }
+.site-main .check-list li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  column-gap: 10px;
+  font-size: 14.5px;
+}
+.site-main .check-list li::before {
+  content: "▸";
+  font-family: var(--mono);
+  color: var(--dim);
+}
+.site-main .acceptance .check-list li::before { color: var(--warn); }
+
+.site-main .lesson-complete {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--mono);
+  font-size: 12.5px;
+  color: var(--mut);
+  background: var(--panel);
+  border: 1px solid var(--line2);
+  border-radius: var(--radius-sm);
+  padding: 8px 14px;
+  cursor: pointer;
+  transition: border-color .15s, background .15s, color .15s;
+}
+.site-main .lesson-complete:hover { border-color: var(--cold); color: var(--ink); }
+.site-main .lesson-complete[data-state="completed"] {
+  color: var(--ok);
+  border-color: var(--ok);
+  background: var(--ok-bg);
+}
+.site-main .lesson-complete-icon { width: 15px; height: 15px; flex: none; }
+
+/* 本步总结：安静收尾 */
+.site-main .note-sec.summary {
+  margin-top: 26px;
+  padding-top: 22px;
+  border-top: 1px dashed var(--line2);
+}
+
+/* ------------------------------------------------- 上一节 / 下一节 */
+
+.site-main .lesson-footer {
+  margin-top: 34px;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+}
+.site-main .lesson-nav {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--mono);
+  font-size: 12.5px;
+  color: var(--ink);
+  text-decoration: none;
+  background: var(--panel);
+  border: 1px solid var(--line2);
+  border-radius: var(--radius-sm);
+  padding: 9px 15px;
+  transition: border-color .15s, background .15s, color .15s;
+}
+.site-main .lesson-nav:hover { border-color: var(--cold); background: var(--cold-bg); color: var(--ink); }
+.site-main .lesson-nav.lesson-next {
+  margin-left: auto;
+  border-color: var(--hot-line);
+  background: var(--hot-bg);
+  color: var(--hot-soft);
+}
+.site-main .lesson-nav.lesson-next:hover { background: var(--hot); color: var(--on-hot); }
+.site-main .lesson-nav-icon { width: 17px; height: 17px; flex: none; }
+.site-main .lesson-nav-spacer { display: none; }
+
+/* ------------------------------------------- 单页全文：各章的连接与层次 */
+
+/* 一页里有六个 <article>，章与章之间用一条打孔虚线分开 */
+.site-main .note + .note {
+  margin-top: 56px;
+  padding-top: 48px;
+  border-top: 1px dashed var(--line2);
+}
+.site-main .note-intro .note-head { border-bottom: 0; padding-bottom: 18px; }
+.site-main .note .note-head { padding-top: 0; }
+
+/* 正文标题：章节 h1 与各章内小节 h2 全局统一 */
+.site-main h1 {
+  font-family: var(--display);
+  font-weight: 700;
+  letter-spacing: -.02em;
+  line-height: 1.2;
+  color: var(--ink);
+  margin: 0 0 12px;
+  scroll-margin-top: calc(var(--topbar-h) + 22px);
+}
+.site-main h2 {
+  font-family: var(--display);
+  font-weight: 700;
+  color: var(--ink);
+  letter-spacing: -.012em;
+  line-height: 1.35;
+  margin: 0 0 18px;
+  scroll-margin-top: calc(var(--topbar-h) + 22px);
+}
+
+@media (max-width: 900px) {
+  .site-main h1,
+  .site-main h2,
+  .site-main .note-sec { scroll-margin-top: calc(var(--topbar-h) + 62px); }
+  .site-main .note + .note { margin-top: 44px; padding-top: 36px; }
+}
+
+/* ------------------------------------------------- 课程入口页（index） */
+
+/* 入口页的页头不走章节页那套（右侧徽标 + 文档链接），标题一律左对齐铺满 */
+.site-main #note-overview .note-head {
+  display: block;
+  padding-bottom: 30px;
+}
+.site-main #note-overview .note-head-main { flex: 0 1 auto; }
+.site-main #note-overview .note-head h1 {
+  font-size: clamp(28px, 4vw, 40px);
+  margin-bottom: 14px;
+}
+.site-main #note-overview .note-desc { max-width: 44em; }
+.site-main #note-overview .note-head-links { margin-top: 16px; }
+
+.step-list {
+  display: grid;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.step-card {
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr);
+  column-gap: 14px;
+  align-items: start;
+  padding: 15px 17px;
+  background: var(--bg2);
+  border: 1px solid var(--line2);
+  border-left: 2px solid var(--line2);
+  border-radius: var(--radius);
+  text-decoration: none;
+  color: inherit;
+  transition: border-color .15s ease, transform .15s ease, background-color .15s ease;
+}
+.step-card:hover {
+  border-color: var(--cold);
+  border-left-color: var(--cold);
+  transform: translateY(-1px);
+}
+
+.sc-num {
+  font-family: var(--mono);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--dim);
+}
+.step-card:hover .sc-num { color: var(--hot); }
+
+.sc-body { min-width: 0; display: grid; gap: 2px; }
+.sc-name {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--ink);
+}
+.sc-sub {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--dim);
+}
+.sc-desc {
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--mut);
+}
+
+@media (max-width: 620px) {
+  .step-card { grid-template-columns: 34px minmax(0, 1fr); padding: 13px; column-gap: 10px; }
+  .sc-sub { display: none; }
+  .site-main .lesson-nav { width: 100%; justify-content: center; }
+  .site-main .lesson-nav.lesson-next { margin-left: 0; }
+}
