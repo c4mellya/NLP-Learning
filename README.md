@@ -11,7 +11,7 @@
 
 ## 怎么看
 
-打开 [`index.html`](index.html)，或者直接双击本地的这个文件。
+打开 [`https://www.camellya-learning.site/`](index.html)，或者直接在主目录下python -m http.server [指定port]。
 
 - 左边一列是目录：点一下跳到对应小节，往下滚时当前小节会自动高亮。
 - 右上角的按钮切换深色 / 浅色。
