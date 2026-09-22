@@ -10,21 +10,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Noto+Sans+SC:wght@400;500;700&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
-<script>
-/* 主题在首次绘制前定好：手动选过就用存的，没选过就跟随系统 */
-(function () {
-  var v = null;
-  try {
-    v = localStorage.getItem("lmapi-lab-theme")
-      || localStorage.getItem("hermes-theme")
-      || localStorage.getItem("lmapi-theme");
-  } catch (e) { v = null; }
-  if (v !== "light" && v !== "dark") {
-    v = (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) ? "dark" : "light";
-  }
-  document.documentElement.setAttribute("data-theme", v);
-}());
-</script>
+
+<script src="../assets/theme-init.js?v=3"></script>
 <link rel="stylesheet" href="../assets/tokens.css">
 <link rel="stylesheet" href="../assets/site.css">
 <link rel="stylesheet" href="hermes.css">
