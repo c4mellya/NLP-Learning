@@ -19,6 +19,7 @@
     return [radius * Math.cos(phi), y, radius * Math.sin(phi)];
   });
   const edges = [];
+  const ringTilts = [.25, 1.1, -1.05];
   nodes.forEach((a, i) => nodes.forEach((b, j) => {
     if (j > i && Math.hypot(...a.map((v, k) => v - b[k])) < .48) edges.push([i, j]);
   }));
@@ -41,17 +42,19 @@
     ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
   }
 
+  function ringPoint(ring, phase) {
+    const theta = phase * Math.PI * 2;
+    const radius = 1.43;
+    const offset = Math.sin(theta) * radius;
+    const tilt = ringTilts[ring];
+    return project([Math.cos(theta) * radius, offset * Math.sin(tilt), offset * Math.cos(tilt)]);
+  }
+
   function draw() {
     ctx.clearRect(0, 0, width, height);
     const points = nodes.map(project);
     // 三条倾角不同的轨道对应语言、模型与行动。
-    const rings = [0, 1, 2].map(ring => Array.from({ length: 121 }, (_, i) => {
-      const theta = i / 120 * Math.PI * 2;
-      const tilt = [.25, 1.1, -1.05][ring];
-      const x = Math.cos(theta) * 1.43;
-      const z = Math.sin(theta) * 1.43;
-      return project([x, z * Math.sin(tilt), z * Math.cos(tilt)]);
-    }));
+    const rings = ringTilts.map((_, ring) => Array.from({ length: 121 }, (_, i) => ringPoint(ring, i / 120)));
     // 先画背面，前景轨道在节点之后绘制，保留空间遮挡关系。
     const drawRings = front => rings.forEach((ring, r) => ring.slice(1).forEach((p, i) => {
       if ((p.z >= 0) === front) line(ring[i], p, r === 1 ? colors.hot : colors.cold, front ? .5 : .13, .8);
@@ -72,8 +75,8 @@
       ctx.beginPath(); ctx.arc(p.x, p.y, 2.4 * p.scale, 0, Math.PI * 2); ctx.fill();
     }
     drawRings(true);
-    rings.forEach((ring, r) => {
-      const p = ring[Math.floor((time * .045 + r / 3) % 1 * 120)];
+    rings.forEach((_, r) => {
+      const p = ringPoint(r, time * .045 + r / 3);
       ctx.globalAlpha = 1; ctx.fillStyle = r === 1 ? colors.hot : colors.cold;
       ctx.shadowColor = ctx.fillStyle; ctx.shadowBlur = 12;
       ctx.beginPath(); ctx.arc(p.x, p.y, 4, 0, Math.PI * 2); ctx.fill();
@@ -85,15 +88,14 @@
     labels.forEach(([label, x, y], i) => {
       const p = { x: width * x, y: height * y };
       line(p, points[[22, 51, 65][i]], colors.dim, .32);
-      ctx.globalAlpha = 1; ctx.fillStyle = colors.bg; ctx.fillRect(p.x - 7, p.y - 13, label.length * 7 + 14, 21);
-      ctx.fillStyle = colors.ink; ctx.fillText(label, p.x, p.y);
+      ctx.globalAlpha = 1; ctx.fillStyle = colors.ink; ctx.fillText(label, p.x, p.y);
     });
     ctx.globalAlpha = 1;
   }
 
   function syncColors() {
     const style = getComputedStyle(document.documentElement);
-    colors = Object.fromEntries(['cold', 'hot', 'dim', 'ink', 'bg'].map(key => [key, style.getPropertyValue('--' + key).trim()]));
+    colors = Object.fromEntries(['cold', 'hot', 'dim', 'ink'].map(key => [key, style.getPropertyValue('--' + key).trim()]));
     draw();
   }
   function resize() {
