@@ -1,0 +1,66 @@
+/* IconPark official outline icons, @icon-park/svg 1.4.2 (Apache-2.0).
+   Source: https://iconpark.oceanengine.com/official and https://github.com/bytedance/IconPark
+   Masks are embedded so the static site also works from file://. */
+:root {
+  --ip-arrow-up-right: url("data:image/svg+xml,%3Csvg%20viewBox%3D%220%200%2048%2048%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20d%3D%22M19%2011H37V29%22%20stroke%3D%22%23000%22%20stroke-width%3D%224%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M11.5439%2036.4559L36.9997%2011%22%20stroke%3D%22%23000%22%20stroke-width%3D%224%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E");
+  --ip-arrow-right: url("data:image/svg+xml,%3Csvg%20viewBox%3D%220%200%2048%2048%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20d%3D%22M41.9999%2024H5.99994%22%20stroke%3D%22%23000%22%20stroke-width%3D%224%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M30%2012L42%2024L30%2036%22%20stroke%3D%22%23000%22%20stroke-width%3D%224%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E");
+  --ip-arrow-left: url("data:image/svg+xml,%3Csvg%20viewBox%3D%220%200%2048%2048%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20d%3D%22M5.79889%2024H41.7989%22%20stroke%3D%22%23000%22%20stroke-width%3D%224%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M17.7988%2036L5.79883%2024L17.7988%2012%22%20stroke%3D%22%23000%22%20stroke-width%3D%224%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E");
+  --ip-arrow-up: url("data:image/svg+xml,%3Csvg%20viewBox%3D%220%200%2048%2048%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20d%3D%22M24%206V42%22%20stroke%3D%22%23000%22%20stroke-width%3D%224%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M12%2018L24%206L36%2018%22%20stroke%3D%22%23000%22%20stroke-width%3D%224%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E");
+  --ip-moon: url("data:image/svg+xml,%3Csvg%20viewBox%3D%220%200%2048%2048%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20d%3D%22M28.0527%204.41085C22.5828%205.83695%2018.5455%2010.8106%2018.5455%2016.7273C18.5455%2023.7564%2024.2436%2029.4545%2031.2727%2029.4545C37.1894%2029.4545%2042.1631%2025.4172%2043.5891%2019.9473C43.8585%2021.256%2044%2022.6115%2044%2024C44%2035.0457%2035.0457%2044%2024%2044C12.9543%2044%204%2035.0457%204%2024C4%2012.9543%2012.9543%204%2024%204C25.3885%204%2026.744%204.14149%2028.0527%204.41085Z%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%224%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E");
+  --ip-sun: url("data:image/svg+xml,%3Csvg%20viewBox%3D%220%200%2048%2048%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20d%3D%22M9.15039%209.15088L11.3778%2011.3783%22%20stroke%3D%22%23000%22%20stroke-width%3D%224%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M3%2024H6.15%22%20stroke%3D%22%23000%22%20stroke-width%3D%224%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M9.15039%2038.8495L11.3778%2036.6221%22%20stroke%3D%22%23000%22%20stroke-width%3D%224%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M38.8495%2038.8495L36.6221%2036.6221%22%20stroke%3D%22%23000%22%20stroke-width%3D%224%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M44.9996%2024H41.8496%22%20stroke%3D%22%23000%22%20stroke-width%3D%224%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M38.8495%209.15088L36.6221%2011.3783%22%20stroke%3D%22%23000%22%20stroke-width%3D%224%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M24%203V6.15%22%20stroke%3D%22%23000%22%20stroke-width%3D%224%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M24%2036C30.6274%2036%2036%2030.6274%2036%2024C36%2017.3726%2030.6274%2012%2024%2012C17.3726%2012%2012%2017.3726%2012%2024C12%2030.6274%2017.3726%2036%2024%2036Z%22%20fill%3D%22%23000%22%20stroke%3D%22%23000%22%20stroke-width%3D%224%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M24%2045.0001V41.8501%22%20stroke%3D%22%23000%22%20stroke-width%3D%224%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E");
+  --ip-check: url("data:image/svg+xml,%3Csvg%20viewBox%3D%220%200%2048%2048%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20d%3D%22M10%2024L20%2034L40%2014%22%20stroke%3D%22%23000%22%20stroke-width%3D%224%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E");
+  --ip-chevron-right: url("data:image/svg+xml,%3Csvg%20viewBox%3D%220%200%2048%2048%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20d%3D%22M19%2012L31%2024L19%2036%22%20stroke%3D%22%23000%22%20stroke-width%3D%224%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E");
+  --ip-plus: url("data:image/svg+xml,%3Csvg%20viewBox%3D%220%200%2048%2048%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20d%3D%22M24.0605%2010L24.0239%2038%22%20stroke%3D%22%23000%22%20stroke-width%3D%224%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M10%2024L38%2024%22%20stroke%3D%22%23000%22%20stroke-width%3D%224%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E");
+  --ip-minus: url("data:image/svg+xml,%3Csvg%20viewBox%3D%220%200%2048%2048%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20d%3D%22M10.5%2024L38.5%2024%22%20stroke%3D%22%23000%22%20stroke-width%3D%224%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E");
+}
+.ip-icon {
+  display: inline-block;
+  flex: none;
+  width: 1em;
+  height: 1em;
+  vertical-align: -.12em;
+  background-color: currentColor;
+  -webkit-mask: var(--ip-mask) center / contain no-repeat;
+  mask: var(--ip-mask) center / contain no-repeat;
+}
+.ip-arrow-up-right { --ip-mask: var(--ip-arrow-up-right); }
+.ip-arrow-right { --ip-mask: var(--ip-arrow-right); }
+.ip-arrow-left { --ip-mask: var(--ip-arrow-left); }
+.ip-arrow-up { --ip-mask: var(--ip-arrow-up); }
+.ip-moon { --ip-mask: var(--ip-moon); }
+.ip-sun { --ip-mask: var(--ip-sun); }
+.ip-check { --ip-mask: var(--ip-check); }
+.ip-chevron-right { --ip-mask: var(--ip-chevron-right); }
+.ip-plus { --ip-mask: var(--ip-plus); }
+.ip-minus { --ip-mask: var(--ip-minus); }
+
+/* Hermes article glyphs share the same IconPark shapes as the controls. */
+.hermes-course .site-main .check-list li::before,
+.hermes-course .site-main .gate-row::before {
+  content: "";
+  display: block;
+  width: 16px;
+  height: 16px;
+  top: 4px;
+  background-color: currentColor;
+  -webkit-mask: var(--ip-check) center / contain no-repeat;
+  mask: var(--ip-check) center / contain no-repeat;
+}
+.hermes-course .site-main .note-sec:not(.acceptance) .check-list li::before {
+  -webkit-mask: var(--ip-chevron-right) center / contain no-repeat;
+  mask: var(--ip-chevron-right) center / contain no-repeat;
+}
+.hermes-course .site-main summary.terminal-bar::after {
+  content: "";
+  display: block;
+  width: 16px;
+  height: 16px;
+  padding-left: 0;
+  background-color: currentColor;
+  -webkit-mask: var(--ip-plus) center / contain no-repeat;
+  mask: var(--ip-plus) center / contain no-repeat;
+}
+.hermes-course .site-main details[open] > summary.terminal-bar::after {
+  -webkit-mask: var(--ip-minus) center / contain no-repeat;
+  mask: var(--ip-minus) center / contain no-repeat;
+}

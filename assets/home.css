@@ -8,9 +8,6 @@
 .status-dot { width: 5px; height: 5px; background: var(--cold); border-radius: 50%; box-shadow: 0 0 12px var(--cold); }
 #learning-network { display: block; width: 100%; height: 440px; position: relative; }
 .scene-footer { padding: 12px 0; font-size: 9px; }
-#motion-toggle { color: var(--mut); background: none; border: 0; padding: 8px; cursor: pointer; font: 11px var(--display); }
-#motion-toggle[hidden] { display: none; }
-#motion-toggle span { margin-left: 6px; color: var(--cold); }
 .hero-copy { min-width: 0; }
 .hero-eyebrow, .section-eyebrow { font: 10px var(--mono); letter-spacing: .13em; color: var(--dim); margin: 0 0 25px; }
 .home-title { font-size: clamp(42px, 4.9vw, 68px); line-height: 1.23; letter-spacing: -.055em; margin: 0 0 25px; font-weight: 700; }
@@ -43,7 +40,7 @@
 .course-bottom b span { display: inline-block; margin-left: 12px; color: var(--cold-deep); }
 .home-footer { display: flex; justify-content: space-between; gap: 18px; margin-top: 40px; color: var(--dim); font: 10px var(--mono); }
 .home-footer a { color: inherit; text-decoration: none; }
-.home-primary:focus-visible, #motion-toggle:focus-visible, .course-card:focus-visible, .home-footer a:focus-visible { outline: 2px solid var(--cold); outline-offset: 5px; }
+.home-primary:focus-visible, .course-card:focus-visible, .home-footer a:focus-visible { outline: 2px solid var(--cold); outline-offset: 5px; }
 @media (max-width: 1050px) {
   .home-hero { gap: 24px; padding-top: 24px; }
   #learning-network { height: 385px; }

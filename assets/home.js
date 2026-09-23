@@ -5,9 +5,6 @@
   if (!canvas) return;
   const ctx = canvas.getContext('2d');
   if (!ctx) return;
-  const toggle = document.getElementById('motion-toggle');
-  const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
-  let paused = motion.matches;
   let visible = true;
   let frame = 0;
   let time = 0;
@@ -111,23 +108,15 @@
     frame = 0;
     if (last) time += Math.min((now - last) / 1000, .05);
     last = now; draw();
-    if (!paused && visible && !document.hidden) frame = requestAnimationFrame(tick);
+    if (visible && !document.hidden) frame = requestAnimationFrame(tick);
   }
   function schedule() {
     cancelAnimationFrame(frame); frame = 0; last = 0;
-    if (!paused && visible && !document.hidden) frame = requestAnimationFrame(tick);
+    if (visible && !document.hidden) frame = requestAnimationFrame(tick);
   }
-  function paintToggle() {
-    toggle.setAttribute('aria-pressed', String(paused));
-    toggle.setAttribute('aria-label', paused ? '播放三维动画' : '暂停三维动画');
-    toggle.textContent = paused ? '播放动画 ▷' : '暂停动画 Ⅱ';
-  }
-  toggle.hidden = false;
-  toggle.addEventListener('click', () => { paused = !paused; paintToggle(); schedule(); });
-  motion.addEventListener('change', e => { paused = e.matches; paintToggle(); schedule(); });
   new ResizeObserver(resize).observe(canvas);
   new MutationObserver(syncColors).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
   new IntersectionObserver(entries => { visible = entries[0].isIntersecting; schedule(); }).observe(canvas);
   document.addEventListener('visibilitychange', schedule);
-  resize(); paintToggle(); schedule();
+  resize(); schedule();
 })();

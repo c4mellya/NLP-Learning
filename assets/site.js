@@ -51,7 +51,10 @@
     document.querySelectorAll("[data-theme-toggle]").forEach((btn) => {
       const ic = btn.querySelector(".theme-ic");
       const word = btn.querySelector(".theme-word");
-      if (ic) ic.textContent = dark ? "☾" : "☀";
+      if (ic) {
+        ic.classList.toggle("ip-moon", dark);
+        ic.classList.toggle("ip-sun", !dark);
+      }
       if (word) word.textContent = dark ? "浅色" : "深色";
       btn.setAttribute("aria-label", `切换到${dark ? "浅色" : "深色"}模式`);
       btn.setAttribute("aria-pressed", String(dark));

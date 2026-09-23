@@ -1285,35 +1285,7 @@ summary.terminal-bar:hover { color: var(--ink); }
     white-space: normal;
     overflow-wrap: anywhere;
   }
-  .reading-table thead { display: none; }
-  .reading-table, .reading-table tbody, .reading-table tr, .reading-table td { display: block; width: 100%; }
-  .reading-table tbody tr { border-bottom: 1px solid var(--line); padding: 10px 0; }
-  .reading-table tbody td { border: 0; padding: 3px 0 3px 4.6em; position: relative; font-size: 14px; }
-  .reading-table tbody td::before {
-    content: "\\";
-    position: absolute;
-    left: 0;
-    top: 3px;
-    min-width: 4.6em;
-    color: var(--dim);
-    font-family: var(--mono);
-    font-size: 12.5px;
-  }
-  #note-install .note-sec:nth-of-type(4) .reading-table tbody td:nth-child(1)::before { content: "现象"; }
-  #note-install .note-sec:nth-of-type(4) .reading-table tbody td:nth-child(2)::before { content: "先检查"; }
-  #note-install .note-sec:nth-of-type(4) .reading-table tbody td:nth-child(3)::before { content: "处理方向"; }
-  #note-providers .note-sec:nth-of-type(3) .reading-table tbody td:nth-child(1)::before { content: "入口"; }
-  #note-providers .note-sec:nth-of-type(3) .reading-table tbody td:nth-child(2)::before { content: "用途"; }
-  #note-providers .note-sec:nth-of-type(3) .reading-table tbody td:nth-child(3)::before { content: "边界"; }
-  #note-providers .note-sec:nth-of-type(5) .reading-table tbody td:nth-child(1)::before { content: "错误"; }
-  #note-providers .note-sec:nth-of-type(5) .reading-table tbody td:nth-child(2)::before { content: "检查方向"; }
-  #note-cli .note-sec:nth-of-type(5) .reading-table tbody td:nth-child(1)::before { content: "操作"; }
-  #note-cli .note-sec:nth-of-type(5) .reading-table tbody td:nth-child(2)::before { content: "用途"; }
-  #note-tools .note-sec:nth-of-type(3) .reading-table tbody td:nth-child(1)::before { content: "类型"; }
-  #note-tools .note-sec:nth-of-type(3) .reading-table tbody td:nth-child(2)::before { content: "教学职责"; }
-  #note-tools .note-sec:nth-of-type(11) .reading-table tbody td:nth-child(1)::before { content: "资料"; }
-  #note-tools .note-sec:nth-of-type(11) .reading-table tbody td:nth-child(2)::before { content: "用途"; }
-  #note-tools .note-sec:nth-of-type(11) .reading-table tbody td:nth-child(3)::before { content: "入口"; }
+
 }
 
 /* ============================================================================
@@ -1379,7 +1351,7 @@ summary.terminal-bar:hover { color: var(--ink); }
    给（var(--dim) / hover 时 var(--cold)），深色浅色两套主题都自动跟得上。
    写成伪元素，9 个按钮一次生效，不用在 HTML 里重复 9 遍。 */
 .site-main .doc-link::after {
-  --doc-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48' fill='none'%3E%3Cpath d='M19 11H37V29' stroke='%23000' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M11.5439 36.4559L36.9997 11' stroke='%23000' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  --doc-arrow: var(--ip-arrow-up-right);
   content: "";
   flex: 0 0 auto;
   /* 图形本身只占 viewBox 的 11→37，四周留白；contain 缩放后实际笔画更小，
@@ -1771,7 +1743,7 @@ summary.terminal-bar:hover { color: var(--ink); }
 .hermes-course .chapter-number b { font-size: 64px; font-weight: 500; line-height: 1; letter-spacing: -.07em; }
 .hermes-course .chapter-number small { font-size: 11px; color: var(--dim); }
 .hermes-course.course-page .site-main .note[data-step] .note-path { margin: 0 0 12px; }
-.hermes-course.course-page .site-main .note[data-step] .note-head h1 { scroll-margin-top: 150px; }
+.hermes-course.course-page .site-main .note[data-step] .note-head h1 { scroll-margin-top: 90px; }
 .hermes-course.course-page .site-main .note[data-step] .note-desc { margin-bottom: 0; }
 .hermes-course.course-page .site-main .note[data-step] .note-head-links { display: inline-block; margin: 16px 10px 0 0; }
 .hermes-course.course-page .site-main .note[data-step] .note-sec.summary {
@@ -1785,7 +1757,7 @@ summary.terminal-bar:hover { color: var(--ink); }
 .hermes-course.course-page .site-main .note[data-step] .summary h2 { font-size: 14px; margin-bottom: 8px; color: var(--mut); }
 .hermes-course.course-page .site-main .note[data-step] .summary p { font-size: 14px; margin: 0; color: var(--mut); }
 @media (max-width: 1080px) {
-  .hermes-course.course-page .site-main .note[data-step] .note-head h1 { scroll-margin-top: 205px; }
+  .hermes-course.course-page .site-main .note[data-step] .note-head h1 { scroll-margin-top: 110px; }
 }
 @media (max-width: 620px) {
   .hermes-course.course-page .site-main .note[data-step] { margin-top: 48px; }
@@ -1802,4 +1774,70 @@ summary.terminal-bar:hover { color: var(--ink); }
   .hermes-course.course-page .site-main .note[data-step] .note-head h1 { font-size: 23px; line-height: 1.4; }
   .hermes-course.course-page .site-main .note[data-step] .note-head .note-desc { font-size: 13px; }
   .hermes-course.course-page .site-main .note[data-step] .note-sec.summary { padding: 17px; }
+}
+
+/* 手机表格使用各单元格自己的字段名，避免旧的定位标签压住正文。 */
+@media (max-width: 720px) {
+  .hermes-course .site-main .table-wrap {
+    overflow: hidden;
+  }
+  .hermes-course .site-main .reading-table,
+  .hermes-course .site-main .reading-table tbody,
+  .hermes-course .site-main .reading-table tr,
+  .hermes-course .site-main .reading-table td {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+  }
+  .hermes-course .site-main .reading-table {
+    table-layout: auto;
+  }
+  .hermes-course .site-main .reading-table thead {
+    display: none;
+  }
+  .hermes-course .site-main .reading-table tbody tr {
+    padding: 13px 15px;
+    border-bottom: 1px solid var(--line2);
+  }
+  .hermes-course .site-main .reading-table tbody tr:last-child {
+    border-bottom: 0;
+  }
+  .hermes-course .site-main .reading-table tbody td,
+  .hermes-course .site-main .reading-table tbody td:first-child,
+  .hermes-course .site-main .reading-table tbody td:last-child {
+    display: grid;
+    grid-template-columns: minmax(0, 5.3em) minmax(0, 1fr);
+    gap: 12px;
+    align-items: start;
+    position: static;
+    min-width: 0;
+    width: 100%;
+    padding: 7px 0;
+    border: 0;
+    font-family: var(--display);
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 1.7;
+    overflow-wrap: anywhere;
+  }
+  .hermes-course .site-main .reading-table tbody td::before {
+    content: attr(data-label);
+    position: static;
+    min-width: 0;
+    color: var(--dim);
+    font: 11px/1.7 var(--mono);
+  }
+  .hermes-course .site-main .reading-table tbody td:first-child {
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .hermes-course .site-main .reading-table .cell-value {
+    min-width: 0;
+  }
+  .hermes-course .site-main .reading-table tbody td code,
+  .hermes-course .site-main .reading-table tbody td a {
+    min-width: 0;
+    max-width: 100%;
+  }
 }
