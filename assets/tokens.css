@@ -49,6 +49,26 @@
   --warn: #E0A458;
   --warn-bg: rgba(224, 164, 88, .12);
 
+  /* 排版与节奏：页面组件只消费这些变量，不重复定义全站基础。 */
+  --text-xs: 12px;
+  --text-sm: 14px;
+  --text-base: 16px;
+  --line-base: 1.75;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-7: 28px;
+  --space-8: 32px;
+  --space-9: 36px;
+  --space-10: 40px;
+  --space-11: 44px;
+  --space-12: 48px;
+  --control-h: 44px;
+  --anchor-offset: calc(var(--topbar-h) + 24px);
+
   /* 结构 */
   --radius: 10px;
   --radius-sm: 6px;
@@ -140,7 +160,7 @@
 html {
   /* 锚点跳转要避开吸顶的顶栏，以及窄屏时正文上方那条吸顶目录 */
   scroll-behavior: smooth;
-  scroll-padding-top: calc(var(--topbar-h) + 18px);
+  scroll-padding-top: var(--anchor-offset);
   background: var(--bg);
   /* 永远预留滚动条的位置：首页没有滚动条、课程页有，
      不留位置的话两边的居中内容会差半个滚动条宽（点进课程时整页左右跳一下） */
@@ -169,7 +189,15 @@ body {
 a { color: var(--cold); }
 a:hover { color: var(--cold-soft); }
 :focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; border-radius: 4px; }
+button, input, select, textarea { font: inherit; }
+button, input, select, textarea { accent-color: var(--cold); }
+button { color: inherit; }
+button:disabled { cursor: not-allowed; opacity: .6; }
+img, canvas, svg { max-width: 100%; }
 code, kbd, samp, pre { font-family: var(--mono); }
+@media (max-width: 1080px) {
+  :root { --anchor-offset: calc(var(--topbar-h) + 86px); }
+}
 [hidden] { display: none !important; }
 
 @media (prefers-reduced-motion: reduce) {
