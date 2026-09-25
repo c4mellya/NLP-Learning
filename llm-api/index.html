@@ -9,16 +9,15 @@
 <link rel="icon" type="image/svg+xml" href="../assets/logo.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Noto+Sans+SC:wght@400;500;700;900&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Noto+Sans+SC:wght@400;500;700&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
 <script src="../assets/theme-init.js?v=3"></script>
 <link rel="stylesheet" href="../assets/tokens.css">
 <link rel="stylesheet" href="../assets/site.css">
-<link rel="stylesheet" href="llm-api.css">
-
 <link rel="stylesheet" href="../assets/course.css">
+<link rel="stylesheet" href="llm-api.css?v=5">
 <link rel="stylesheet" href="../assets/iconpark.css">
 </head>
-<body class="course-page">
+<body class="course-page llm-api-page">
 
 <header class="site-top">
   <div class="site-top-in">
@@ -56,9 +55,8 @@
       <span class="chip">命中读价 <b>0.1×</b> 基础输入价（Anthropic）<a class="ref" href="#src-1">[1]</a></span>
       <span class="chip">写价 <b>1.25×</b>（Anthropic 5 分钟档）<a class="ref" href="#src-1">[1]</a></span>
       <span class="chip">最短前缀 <b>512–4,096</b> token（Anthropic 依模型）<a class="ref" href="#src-1">[1]</a></span>
-      <span class="chip">DeepSeek 命中约为未命中价的 <b>2%–3%</b><a class="ref" href="#src-3">[3]</a></span>
-      <span class="chip">GPT-5.6+ 写价 <b>1.25×</b><a class="ref" href="#src-2">[2]</a></span>
     </div>
+    <a class="provider-more" href="#t-cmp">查看 OpenAI、Anthropic 与 DeepSeek 的完整对比 <span class="ip-icon ip-arrow-right" aria-hidden="true"></span></a>
 
     <div class="scope" aria-label="示波器：等效成本读数与 TTL 倒计时">
       <div class="scope-head">
@@ -380,39 +378,49 @@
       <div class="trap">
         <h3>问题 1 · 在前缀开头插入时间戳</h3>
         <p class="desc">把当前时间拼在 system 最前面，等于每轮换一个前缀。</p>
-        <div class="bad">system = "现在 " + now + "\n" + BASE   // 每轮都不同 → 永远冷启动</div>
-        <div class="good">BASE 保持字节稳定；now 放进最后一条 user 消息</div>
+        <div class="trap-examples">
+          <div class="bad">system = "现在 " + now + "\n" + BASE   // 每轮都不同 → 永远冷启动</div>
+          <div class="good">BASE 保持字节稳定；now 放进最后一条 user 消息</div>
+        </div>
       </div>
       <div class="trap">
         <h3>问题 2 · 增删或重排 tools</h3>
         <p class="desc">工具定义位于前缀。新增工具或调整顺序，会影响变化位置及其后续前缀的复用。</p>
-        <div class="bad">tools 数组每次重新排序 / 条件拼接   // 前缀字节变化</div>
-        <div class="good">工具集固定序列化；必须变时，接受一次写价重写</div>
+        <div class="trap-examples">
+          <div class="bad">tools 数组每次重新排序 / 条件拼接   // 前缀字节变化</div>
+          <div class="good">工具集固定序列化；必须变时，接受一次写价重写</div>
+        </div>
       </div>
       <div class="trap">
         <h3>问题 3 · JSON 键顺序不固定</h3>
         <p class="desc">将 JSON 文本放入 prompt 时，即使内容相同，键顺序不同也会改变输入序列。</p>
-        <div class="bad">{"b":1,"a":2} 与 {"a":2,"b":1}   // 逐字节比较 → 不相等</div>
-        <div class="good">固定键序（如 sort_keys）后再进 prompt</div>
+        <div class="trap-examples">
+          <div class="bad">{"b":1,"a":2} 与 {"a":2,"b":1}   // 逐字节比较 → 不相等</div>
+          <div class="good">固定键序（如 sort_keys）后再进 prompt</div>
+        </div>
       </div>
       <div class="trap">
         <h3>问题 4 · 动态内容位于断点之前</h3>
         <p class="desc">RAG 检索结果每次不同，却拼进 system 或断点之前。</p>
-        <div class="bad">system = 检索结果 + 规则     // 检索一变，全失效</div>
-        <div class="good">规则与静态文档走缓存；检索结果放到尾部再追加</div>
+        <div class="trap-examples">
+          <div class="bad">system = 检索结果 + 规则     // 检索一变，全失效</div>
+          <div class="good">规则与静态文档走缓存；检索结果放到尾部再追加</div>
+        </div>
       </div>
       <div class="trap">
         <h3>问题 5 · 未达到最小可缓存长度</h3>
         <p class="desc">前缀没到最小可缓存长度，或断点打在了太靠前的位置：接口不报错，只是永远不命中。</p>
-        <div class="bad">prefix = 400 token   // 低于该模型的最小可缓存长度 → 无法建立缓存，因此不会命中</div>
-        <div class="good">先确认长度门槛，再评估写入成本与复用收益</div>
+        <div class="trap-examples">
+          <div class="bad">prefix = 400 token   // 低于该模型的最小可缓存长度 → 无法建立缓存，因此不会命中</div>
+          <div class="good">先确认长度门槛，再评估写入成本与复用收益</div>
+        </div>
       </div>
       <div class="trap">
         <h3>判断顺序 · 先门槛，再前缀，最后 TTL</h3>
         <p class="desc">按以下顺序检查，有助于在发起请求前判断缓存是否具备复用条件。</p>
-        <div class="good">1) 前缀够长吗？（Anthropic 512–4,096 / DeepSeek 无明示）
+        <div class="trap-examples"><div class="good">1) 前缀够长吗？（Anthropic 512–4,096 / DeepSeek 无明示）
 2) 前缀字节真的稳定吗？（ tools / 键序 / 时间戳）
-3) 会在缓存有效期内复用吗？（间隔短于 TTL）</div>
+3) 会在缓存有效期内复用吗？（间隔短于 TTL）</div></div>
       </div>
     </div>
 
@@ -441,7 +449,7 @@
 
 </div>
 
-<footer>
+<footer class="llm-api-sources">
   <div class="wrap">
     <div class="srcs" id="srcs">
       <span id="src-1">[1] Anthropic · Prompt caching — <a href="https://docs.anthropic.com/en/docs/build-with-claude/prompt-caching" target="_blank" rel="noopener">docs.anthropic.com/en/docs/build-with-claude/prompt-caching</a></span>
@@ -450,7 +458,6 @@
     </div>
   </div>
 </footer>
-  </div>
     <nav class="course-end" aria-label="继续学习"><a href="../"><small>THE NOTEBOOK</small><strong>返回全部笔记 <span class="ip-icon ip-arrow-left" aria-hidden="true"></span></strong></a><a href="../hermes/"><small>继续探索</small><strong>Hermes Agent 六步上手 <span class="ip-icon ip-arrow-up-right" aria-hidden="true"></span></strong></a></nav>
   </main>
 </div>
