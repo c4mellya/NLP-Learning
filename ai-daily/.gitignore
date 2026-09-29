@@ -1,0 +1,3 @@
+# AI 日报运行时数据 —— 由 Hermes 每天写入，不入版本控制
+index.json
+data/*.json
