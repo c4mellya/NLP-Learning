@@ -55,16 +55,59 @@
     content.hidden = true;
   };
 
+  // 使用当前页面的完整地址，避免 <base> 让章节链接丢失日期。
+  const sectionUrl = (id) => {
+    const url = new URL(location.href);
+    url.searchParams.set("date", dateNode.dateTime);
+    url.hash = id;
+    return url.href;
+  };
+
+  const brandIcon = (className, key, fallback) => {
+    const assets = { openai: "openai.svg", claude: "claude-color.svg", deepseek: "deepseek-color.svg" };
+    const node = el("span", className);
+    node.setAttribute("aria-hidden", "true");
+    if (assets[key]) {
+      node.classList.add("daily-brand-logo");
+      const img = el("img");
+      img.src = `brands/${assets[key]}`;
+      img.alt = "";
+      img.width = 40;
+      img.height = 40;
+      node.appendChild(img);
+    } else node.textContent = fallback;
+    return node;
+  };
+
   const addSection = (id, heading, detail = "") => {
     const section = el("section", "daily-section");
     section.id = id;
     const head = el("div", "daily-section-head");
-    head.appendChild(el("h2", "", heading));
+    const titleGroup = el("div", "daily-section-title");
+    titleGroup.appendChild(el("span", "daily-section-number", String(content.children.length + 1).padStart(2, "0")));
+    titleGroup.appendChild(el("h2", "", heading));
+    head.appendChild(titleGroup);
     if (detail) head.appendChild(el("small", "", detail));
     section.appendChild(head);
+    const chapters = {
+      "daily-top": ["重点阅读", "从本期重点开始，了解事件与背景。", "◎"],
+      "daily-openai": ["厂商动态 / 01", "转向各家进展 · OpenAI / GPT", "O"],
+      "daily-claude": ["厂商动态 / 02", "继续关注 · Claude / Anthropic", "C"],
+      "daily-deepseek": ["厂商动态 / 03", "接下来 · DeepSeek", "D"],
+      "daily-other": ["行业视野", "把视线放宽，看看其他值得关注的动态。", "+"],
+      "daily-editor": ["读后思考", "回看今天的信息，串起事件之间的联系。", "✳"]
+    };
+    if (chapters[id]) {
+      const [label, caption, symbol] = chapters[id];
+      head.classList.add("daily-chapter-head");
+      const intro = el("div", "daily-chapter-intro");
+      intro.append(el("span", "daily-chapter-label", label), el("p", "", caption));
+      const art = brandIcon("daily-chapter-art", id.replace("daily-", ""), symbol);
+      head.append(intro, art);
+    }
     content.appendChild(section);
     const link = el("a", "", heading);
-    link.href = `#${id}`;
+    link.href = sectionUrl(id);
     tocLinks.appendChild(link);
     return section;
   };
@@ -97,6 +140,19 @@
     return seen.size ? wrap : null;
   };
 
+  // Break only at sentence endings or existing newlines; preserve every character.
+  const appendParagraphs = (parent, text, className) => {
+    const pieces = text.match(/[^。！？\n]+[。！？][”’」』]*|[^\n]+(?:\n+|$)|\n+/g) || [text];
+    let paragraph = "";
+    pieces.forEach((piece, index) => {
+      paragraph += piece;
+      if (paragraph.length >= 110 || /\n$/.test(piece) || index === pieces.length - 1) {
+        parent.appendChild(el("p", className, paragraph));
+        paragraph = "";
+      }
+    });
+  };
+
   const renderItem = (item, number = 0) => {
     const card = el("li", "daily-item");
     const top = el("div", "daily-item-top");
@@ -111,11 +167,13 @@
     }
     if (top.childNodes.length) card.appendChild(top);
     card.appendChild(el("h3", "", str(item.title)));
-    if (str(item.summary)) card.appendChild(el("p", "daily-item-summary", str(item.summary)));
+    const summary = str(item.summary);
+    if (summary) appendParagraphs(card, summary, "daily-item-summary");
     if (str(item.analysis)) {
-      const analysis = el("p", "daily-item-analysis");
-      analysis.appendChild(el("strong", "", "观察："));
-      analysis.appendChild(document.createTextNode(str(item.analysis)));
+      const analysis = el("aside", "daily-item-analysis");
+      analysis.setAttribute("aria-label", "编辑观察");
+      analysis.appendChild(el("strong", "daily-analysis-label", "观察"));
+      appendParagraphs(analysis, str(item.analysis), "daily-analysis-paragraph");
       card.appendChild(analysis);
     }
     if (str(item.published_at)) card.appendChild(el("p", "daily-item-meta", `发布时间：${str(item.published_at)}`));
@@ -141,6 +199,30 @@
     const generated = displayTime(meta.generated_at, meta.timezone);
     headMeta.textContent = generated ? `生成时间：${generated}` : "";
     headMeta.hidden = !generated;
+
+    const overview = $("daily-overview");
+    if (overview) {
+      overview.replaceChildren();
+      const groups = [["openai", "OpenAI", "O"], ["claude", "Claude", "C"], ["deepseek", "DeepSeek", "D"], ["other_major_updates", "其他动态", "+"]];
+      const counts = groups.map(([key]) => newsItems(report[key]?.items).length);
+      const max = Math.max(1, ...counts);
+      groups.forEach(([key, label, mark], i) => {
+        const link = el("a", "daily-topic");
+        link.href = sectionUrl(`daily-${key === "other_major_updates" ? "other" : key}`);
+        if (key === "other_major_updates" && !counts[i]) return;
+        link.dataset.topic = key;
+        const icon = brandIcon("daily-topic-icon", key, mark);
+        link.append(icon, el("span", "daily-topic-label", label), el("strong", "", `${counts[i]} 条`));
+        const track = el("span", "daily-topic-track");
+        track.setAttribute("aria-hidden", "true");
+        const fill = el("span");
+        fill.setAttribute("style", `width:${counts[i] / max * 100}%`);
+        track.appendChild(fill);
+        link.appendChild(track);
+        overview.appendChild(link);
+      });
+      overview.hidden = false;
+    }
 
     const glance = report.glance && typeof report.glance === "object" ? report.glance : {};
     const highlights = arr(glance.highlights).filter((value) => str(value)).slice(0, 4);
@@ -170,6 +252,7 @@
     ]) {
       const group = report[key] && typeof report[key] === "object" ? report[key] : {};
       const section = addSection(id, label);
+      section.classList.add("daily-feed");
       const items = newsItems(group.items);
       if (items.length) appendItems(section, items);
       if (str(group.note) || !items.length) {
@@ -180,7 +263,11 @@
     const other = report.other_major_updates && typeof report.other_major_updates === "object"
       ? report.other_major_updates : {};
     const otherItems = newsItems(other.items);
-    if (otherItems.length) appendItems(addSection("daily-other", "Other Major Updates"), otherItems);
+    if (otherItems.length) {
+      const section = addSection("daily-other", "Other Major Updates");
+      section.classList.add("daily-feed");
+      appendItems(section, otherItems);
+    }
 
     const editor = report.editor_note && typeof report.editor_note === "object" ? report.editor_note : {};
     const paragraphs = arr(editor.content).filter((value) => str(value));
@@ -189,7 +276,7 @@
     if (paragraphs.length) {
       const section = addSection("daily-editor", "今日观察");
       const box = el("div", "daily-editor");
-      paragraphs.forEach((value) => box.appendChild(el("p", "", str(value))));
+      paragraphs.forEach((value) => appendParagraphs(box, str(value), ""));
       section.appendChild(box);
     }
 
@@ -212,6 +299,9 @@
     toc.hidden = false;
     content.hidden = false;
     document.title = `${title.textContent} · ${date} · NLP Learning`;
+    // JSON 异步加载完成后，补上首次打开或刷新深链接的章节定位。
+    const target = Array.from(content.children).find((section) => `#${section.id}` === location.hash);
+    if (target) target.scrollIntoView();
   };
 
   const renderHistory = (entries, chosenDate) => {

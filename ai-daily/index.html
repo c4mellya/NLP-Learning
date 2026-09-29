@@ -15,7 +15,7 @@
 <link rel="stylesheet" href="../assets/tokens.css">
 <link rel="stylesheet" href="../assets/site.css">
 <link rel="stylesheet" href="../assets/course.css">
-<link rel="stylesheet" href="daily.css">
+<link rel="stylesheet" href="daily.css?v=14">
 <link rel="stylesheet" href="../assets/iconpark.css">
 </head>
 <body>
@@ -42,11 +42,24 @@
       </aside>
       <div class="daily-document">
         <header class="daily-report-head">
-          <p class="course-eyebrow">AI DAILY / 每日记录</p>
-          <h1 id="daily-title">AI 日报</h1>
-          <time id="daily-date"></time>
-          <p id="daily-head-meta" hidden></p>
+          <div class="daily-head-copy">
+            <p class="course-eyebrow">AI DAILY / 每日记录</p>
+            <h1 id="daily-title">AI 日报</h1><p class="daily-head-deck">看见新进展，读懂下一步。</p>
+            <time id="daily-date"></time>
+            <p id="daily-head-meta" hidden></p>
+          </div>
+          <div class="daily-figure" aria-hidden="true">
+            <span class="daily-figure-label">THE DAILY SIGNAL</span>
+            <div class="daily-figure-orbit daily-figure-orbit-outer"></div>
+            <div class="daily-figure-orbit daily-figure-orbit-inner"></div>
+            <div class="daily-figure-core"><span>AI</span><small>DAILY</small></div>
+            <span class="daily-figure-point daily-figure-point-a"></span>
+            <span class="daily-figure-point daily-figure-point-b"></span>
+            <span class="daily-figure-point daily-figure-point-c"></span>
+            <span class="daily-figure-caption">SCAN <b>·</b> VERIFY <b>·</b> READ</span>
+          </div>
         </header>
+        <nav id="daily-overview" aria-label="本期分类条目数量，点击跳转" hidden></nav>
         <div class="daily-state"><p id="daily-status" role="status">正在加载 AI 日报...</p><a id="daily-latest" href="/ai-daily" hidden>查看最新日报</a></div>
         <details class="daily-toc" id="daily-toc" open hidden><summary>本期目录</summary><nav id="daily-toc-links" aria-label="本期内容目录"></nav></details>
         <article id="daily-content" aria-label="AI 日报正文" hidden></article>
@@ -55,6 +68,7 @@
   </main>
 </div>
 <script src="../assets/site.js?v=3"></script>
-<script src="daily.js"></script>
+<script src="daily.js?v=7"></script>
 </body>
 </html>
+
