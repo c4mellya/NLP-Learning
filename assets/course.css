@@ -1,6 +1,4 @@
 /* 课程共用阅读层：仅管理介绍、章节排版与前后导航；实验组件归各课程。 */
-.course-home-link { color: var(--mut); font-size: var(--text-sm); text-decoration: none; }
-.course-home-link span { margin-left: var(--space-2); color: var(--cold); }
 .course-breadcrumb { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; color: var(--dim); font-size: var(--text-xs); margin-bottom: var(--space-6); }
 .course-breadcrumb a { color: var(--mut); text-decoration: none; }
 .course-intro { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(190px, 1fr); align-items: center; gap: var(--space-7); padding: var(--space-4) 0 var(--space-8); }

@@ -1,20 +1,24 @@
-/* 首页：以语义网络为视觉主角，正文与课程沿用同一字体、色板与操作样式。 */
-.home-hero { display: grid; grid-template-columns: 1fr 1fr; align-items: center; gap: var(--space-12); padding: var(--space-8) 0 64px; }
+/* 首页：把语义网络与介绍文字收进同一视觉区域。 */
+.home-hero { display: grid; grid-template-columns: minmax(0, 1.08fr) minmax(0, .92fr); align-items: center; gap: clamp(32px, 4vw, 64px); margin-bottom: var(--space-12); padding: clamp(28px, 3.2vw, 48px); border: 1px solid var(--line2); border-radius: 20px; background: radial-gradient(circle at 28% 48%, var(--cold-bg), transparent 48%), linear-gradient(135deg, var(--panel), var(--bg2)); box-shadow: var(--shadow); }
 .network-scene { position: relative; min-width: 0; }
-.scene-label { display: flex; align-items: center; gap: var(--space-3); padding: 0 var(--space-3); font-size: var(--text-xs); color: var(--dim); }
+.scene-label { display: inline-flex; align-items: center; gap: var(--space-3); padding: 8px 12px; border: 1px solid var(--line2); border-radius: 999px; background: var(--panel); font: 500 11px/1.4 var(--mono); letter-spacing: .04em; color: var(--dim); }
 .status-dot { width: 6px; height: 6px; background: var(--cold); border-radius: 50%; }
-#learning-network { display: block; width: 100%; height: 440px; position: relative; }
-.hero-copy { min-width: 0; }
-.hero-eyebrow { font-size: var(--text-sm); color: var(--mut); margin: 0 0 var(--space-5); }
-.home-title { font-size: clamp(38px, 4.6vw, 64px); line-height: 1.25; letter-spacing: -.04em; margin: 0 0 var(--space-6); font-weight: 700; }
-.home-lead { font-size: var(--text-base); line-height: 1.85; color: var(--mut); margin: 0 0 var(--space-6); max-width: 36em; }
+#learning-network { display: block; width: 100%; height: 420px; position: relative; }
+.hero-copy { min-width: 0; width: 100%; max-width: 510px; justify-self: start; text-align: left; }
+.hero-eyebrow { display: flex; align-items: center; gap: var(--space-3); font: 500 11px/1.5 var(--mono); letter-spacing: .08em; color: var(--cold-deep); margin: 0 0 var(--space-6); }
+.hero-eyebrow::before { content: ''; width: 26px; height: 1px; flex: 0 0 auto; background: currentColor; }
+.home-title { font-size: clamp(42px, 4.6vw, 68px); line-height: 1.17; letter-spacing: -.05em; margin: 0 0 var(--space-7); font-weight: 700; }
+.home-title span { color: var(--cold-deep); }
+.home-lead { font-size: 17px; line-height: 1.85; color: var(--mut); margin: 0 0 var(--space-8); max-width: 30em; }
 .hero-actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-4); }
+.hero-actions .home-primary { min-height: 50px; padding-inline: 20px; }
 .hero-side-note { font-size: var(--text-xs); color: var(--dim); }
-.learning-path { display: flex; align-items: center; gap: var(--space-5); border-top: 1px solid var(--line2); margin-top: var(--space-8); padding-top: var(--space-6); }
-.learning-path > span { font-size: var(--text-sm); color: var(--ink); }
-.learning-path b { font: var(--text-xs) var(--mono); color: var(--dim); margin-right: var(--space-2); }
+.learning-path { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-top: 1px solid var(--line2); margin-top: var(--space-10); padding-top: var(--space-5); }
+.learning-path > span { min-width: 0; padding: 0 var(--space-3); font-size: var(--text-sm); color: var(--ink); white-space: nowrap; }
+.learning-path > span:first-child { padding-left: 0; }
+.learning-path > span:not(:first-child) { border-left: 1px solid var(--line2); }
+.learning-path b { font: var(--text-xs) var(--mono); color: var(--cold-deep); margin-right: var(--space-2); }
 .learning-path small { display: block; font-size: var(--text-xs); color: var(--mut); padding-top: var(--space-2); }
-.learning-path i { color: var(--dim); font-style: normal; }
 .courses-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: var(--space-6); border-top: 1px solid var(--line2); padding-top: var(--space-8); }
 .courses-heading h2 { font-size: 28px; letter-spacing: -.025em; margin: 0; }
 .courses-heading > p { font-size: var(--text-sm); line-height: 1.75; color: var(--mut); text-align: right; margin: 0; }
@@ -32,19 +36,25 @@
 .home-footer { display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--space-4); margin-top: var(--space-10); color: var(--dim); font-size: var(--text-xs); }
 .home-footer a { color: inherit; text-decoration: none; }
 @media (max-width: 1080px) {
-  .home-hero { gap: var(--space-6); padding-top: var(--space-6); }
-  #learning-network { height: 380px; }
-  .desktop-break { display: none; }
+  .home-hero { gap: var(--space-8); padding: var(--space-8); }
+  #learning-network { height: 360px; }
 }
 @media (max-width: 760px) {
-  .home-hero { grid-template-columns: minmax(0, 1fr); gap: var(--space-6); padding: var(--space-3) 0 var(--space-10); }
+  .home-hero { grid-template-columns: minmax(0, 1fr); gap: var(--space-4); padding: var(--space-6); border-radius: var(--radius); }
   .network-scene { max-width: 480px; width: 100%; margin: auto; }
-  #learning-network { height: 280px; }
-  .home-title { font-size: clamp(36px, 8vw, 56px); }
-  .learning-path { justify-content: space-between; gap: var(--space-2); }
+  #learning-network { height: 260px; }
+  .hero-copy { max-width: none; }
+  .home-title { font-size: clamp(36px, 8vw, 52px); }
+  .home-lead { font-size: var(--text-base); }
+  .learning-path > span { padding-inline: var(--space-2); font-size: var(--text-xs); }
   .course-grid { grid-template-columns: minmax(0, 1fr); }
   .courses-heading { align-items: flex-start; flex-direction: column; gap: var(--space-3); }
   .courses-heading > p { text-align: left; }
   .course-card { padding: var(--space-5); }
   .course-name { font-size: 20px; }
+}
+@media (max-width: 400px) {
+  .scene-label { gap: var(--space-2); padding: 7px 9px; font-size: 10px; letter-spacing: 0; white-space: nowrap; }
+  .hero-eyebrow { gap: var(--space-2); font-size: 10px; letter-spacing: 0; }
+  .hero-eyebrow::before { width: 16px; }
 }

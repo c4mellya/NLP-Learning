@@ -9,6 +9,8 @@
 | [01 · Hermes Agent 六步上手](hermes/) | 安装、快速开始、模型配置、CLI、配置文件、工具调用 |
 | [02 · LLM API 与 Prompt Caching](llm-api/) | 前缀缓存命中了什么、为什么改一个字就失效、三家厂商的计费差、省钱决策单 |
 
+[AI 日报](ai-daily/) 按日期读取独立的日报目录；使用方式与服务器持久化要求见 [ai-daily/README.md](ai-daily/README.md)。
+
 ## 怎么看
 
 打开 [`https://www.camellya-learning.site/`](index.html)，或者在主目录下python -m http.server [指定port]。
@@ -24,6 +26,7 @@ index.html    课程总览
 hermes/       课程 01
 llm-api/      课程 02
 assets/       共用的样式、脚本与图标
+ai-daily/     AI 日报共用页面、索引与 data/ 中的每日 JSON
 ```
 
 课程会陆续增加。

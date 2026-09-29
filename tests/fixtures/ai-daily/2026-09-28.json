@@ -1,0 +1,14 @@
+{
+  "date": "2026-09-28",
+  "title": "AI 日报（测试数据）",
+  "meta": { "search_cutoff": "2026-09-28T07:50:00+08:00", "timezone": "Asia/Shanghai" },
+  "glance": { "summary": "这一天只保留少量测试条目，用于检查缺省和空栏目。" },
+  "top5": [
+    { "brand": "OpenAI", "status": "官方发布", "title": "少量动态测试一", "summary": "Top 5 不必凑满五条。", "sources": [{ "name": "来源甲", "url": "https://example.com/a" }, { "name": "来源乙", "url": "https://example.com/b" }] },
+    { "brand": "其他", "status": "传闻", "title": "少量动态测试二", "summary": "检查无 analysis 的条目。" }
+  ],
+  "openai": { "title": "OpenAI / GPT", "items": [{ "status": "已确认", "title": "详细栏目测试", "summary": "这段详细内容与 Top 5 的摘要不同。", "sources": [{ "name": "来源甲", "url": "https://example.com/a" }] }] },
+  "claude": { "title": "Claude / Anthropic", "items": [], "note": "今日暂无值得单独报道的重大更新。" },
+  "deepseek": { "title": "DeepSeek", "items": [{ "status": "官方预告", "title": "简短测试", "summary": "检查缺少分析和发布时间的字段。" }] },
+  "other_major_updates": { "title": "Other Major Updates", "items": [] }
+}

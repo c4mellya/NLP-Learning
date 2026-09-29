@@ -1,0 +1,46 @@
+{
+  "date": "2026-09-29",
+  "title": "AI 日报（测试数据）",
+  "meta": {
+    "generated_at": "2026-09-29T08:00:00+08:00",
+    "search_cutoff": "2026-09-29T07:50:00+08:00",
+    "timezone": "Asia/Shanghai"
+  },
+  "glance": {
+    "summary": "这是一份用于检查页面布局的模拟日报，不代表真实新闻。",
+    "highlights": ["测试重点一", "测试重点二", "测试重点三"]
+  },
+  "top5": [
+    { "brand": "OpenAI", "status": "官方发布", "title": "测试动态一", "summary": "用于检查精简摘要和来源。", "sources": [{ "name": "示例来源", "url": "https://example.com/one" }] },
+    { "brand": "Claude", "status": "已确认", "title": "测试动态二", "summary": "用于检查第二条 Top 项。", "sources": [{ "name": "示例来源", "url": "https://example.com/two" }] },
+    { "brand": "DeepSeek", "status": "可靠爆料", "title": "测试动态三", "summary": "用于检查传闻类状态的区分。", "analysis": "此项只是视觉测试。", "sources": [{ "name": "示例来源", "url": "https://example.com/three" }] }
+  ],
+  "openai": {
+    "title": "OpenAI / GPT",
+    "items": [
+      { "status": "OpenAI员工动态", "title": "员工动态测试条目", "summary": "检查 OpenAI 员工动态标签。", "analysis": "这里展示与事实分开的观察文字。", "published_at": "2026-09-29T06:00:00+08:00", "sources": [{ "name": "示例来源", "url": "https://example.com/openai" }] }
+    ]
+  },
+  "claude": {
+    "title": "Claude / Anthropic",
+    "items": [
+      { "status": "官方预告", "title": "预告测试条目", "summary": "检查 Claude 栏目和预告状态。", "sources": [{ "name": "示例来源", "url": "https://example.com/claude" }] }
+    ]
+  },
+  "deepseek": {
+    "title": "DeepSeek",
+    "items": [
+      { "status": "已确认", "title": "确认测试条目", "summary": "检查 DeepSeek 栏目。", "sources": [{ "name": "示例来源", "url": "https://example.com/deepseek" }] }
+    ]
+  },
+  "other_major_updates": {
+    "title": "Other Major Updates",
+    "items": [
+      { "brand": "Gemini", "status": "官方发布", "title": "其他动态测试条目", "summary": "检查非固定厂商条目。", "sources": [{ "name": "示例来源", "url": "https://example.com/other" }] }
+    ]
+  },
+  "editor_note": {
+    "title": "今日观察",
+    "content": ["这段文字仅用于检查编辑分析区域。", "第二段用于检查多段文字和间距。"]
+  }
+}
