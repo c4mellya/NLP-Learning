@@ -1,0 +1,33 @@
+<template>
+<main class="home-content" id="main" ref="pageRoot">
+<section aria-labelledby="home-title" class="home-hero">
+<div class="hero-copy"><p class="hero-eyebrow"><span></span> A NOTEBOOK FOR THE AI ERA</p><h1 id="home-title">把好奇心，<br/>变成<span class="hero-blue">行动力<span class="title-period">。</span></span></h1><p class="home-lead">从理解语言，到探索模型，再到构建智能体。<br/>在这里，让每一个「为什么」，都有一次亲手验证。</p><div class="hero-actions"><RouterLink class="home-primary" to="/#courses">开始探索 <span aria-hidden="true" class="ip-icon ip-arrow-up-right"></span></RouterLink><RouterLink class="hero-secondary" :to="resumeTo" id="continue-link">{{ resumeLabel }} <span aria-hidden="true">→</span></RouterLink></div><p class="hero-footnote"><span>02</span> 篇实践笔记 <i>·</i> 无限次好奇与尝试</p></div>
+<div class="idea-figure"><div class="figure-topline"><span>FIG. 001 / THE SHAPE OF LEARNING</span><span aria-hidden="true">+</span></div><div class="idea-canvas-wrap"><canvas aria-label="由蓝色曲线构成的动态知识球，连接语言、模型与行动。" id="learning-network" role="img">语言 → 模型 → 行动</canvas><span class="diagram-tag diagram-tag-nlp">语言 <b>NLP</b></span><span class="diagram-tag diagram-tag-llm">模型 <b>LLM</b></span><span class="diagram-tag diagram-tag-agent">行动 <b>AGENT ↗</b></span><span aria-hidden="true" class="figure-axis axis-x">x</span><span aria-hidden="true" class="figure-axis axis-y">y</span></div><div aria-label="探索学习方向" class="figure-controls"><div><button aria-pressed="true" data-concept="nlp" type="button">NLP</button><span>/</span><button aria-pressed="false" data-concept="llm" type="button">LLM</button><span>/</span><button aria-pressed="false" data-concept="agent" type="button">AGENT</button></div><button aria-label="暂停知识球动画" aria-pressed="false" class="motion-toggle" type="button"><span aria-hidden="true">Ⅱ</span></button></div><p aria-live="polite" class="figure-description" id="concept-description">从词语之间的关系，理解语言的意义。</p></div>
+</section>
+<section aria-label="学习路线" class="learning-path"><div><span class="path-number">01 /</span><div><h2>理解语言 <small>NLP</small></h2><p>从词语、语义到语言的结构。</p></div><span aria-hidden="true" class="path-arrow">→</span></div><div><span class="path-number">02 /</span><div><h2>探索模型 <small>LLM</small></h2><p>看懂生成、推理与计算的逻辑。</p></div><span aria-hidden="true" class="path-arrow">→</span></div><div><span class="path-number">03 /</span><div><h2>构建智能体 <small>AGENT</small></h2><p>把模型与工具，连接到真实任务。</p></div><span aria-hidden="true" class="path-arrow">↗</span></div></section>
+<section aria-labelledby="courses-title" class="courses-section" id="courses"><div class="section-heading"><div><p class="section-eyebrow">THE NOTEBOOK</p><h2 id="courses-title">从一篇笔记开始<span class="section-count">02</span></h2></div><div aria-label="筛选学习笔记" class="course-filters"><button aria-pressed="true" data-filter="all" type="button">全部</button><button aria-pressed="false" data-filter="agent" type="button">Agent</button><button aria-pressed="false" data-filter="llm" type="button">LLM</button></div></div>
+<ul class="course-grid">
+<li data-category="agent"><RouterLink class="course-card" to="/hermes/"><div aria-hidden="true" class="card-art agent-art"><span class="art-caption">OBSERVE → REASON → ACT</span><div class="agent-diagram"><span class="agent-input">TASK <small>输入任务</small></span><span class="diagram-wire"></span><span class="agent-core"><svg viewBox="0 0 40 40"><rect height="17" rx="5" width="20" x="10" y="12"></rect><path d="M20 7v5M15 20h1m8 0h1M16 25h8M6 18v6m28-6v6"></path><circle cx="20" cy="6" r="1"></circle></svg><b>HERMES</b></span><span class="diagram-wire"></span><span class="agent-output">TOOLS <small>调用工具</small></span><span class="agent-loop">↳ <span>验证结果 · 继续思考</span> ↲</span></div><span class="art-coordinate">[ AGENT LOOP / 01 ]</span><span class="art-plus">+</span></div><div class="card-body"><div class="course-meta"><span><i class="tag-dot"></i>AGENT / CLI</span><span>NOTE 01</span></div><h3>Hermes Agent 六步上手</h3><p>让 Agent 完成一次真实任务。从环境搭建、模型配置，到第一次工具调用，走完一条可验证的实践路线。</p><div class="course-bottom"><span>6 个步骤 <i>·</i> 上手实践</span><span aria-label="阅读笔记" class="card-arrow">↗</span></div></div></RouterLink></li>
+<li data-category="llm"><RouterLink class="course-card" to="/llm-api/"><div aria-hidden="true" class="card-art cache-art"><span class="art-caption">LESS RECOMPUTE. MORE POSSIBILITY.</span><div class="cache-diagram"><div><span class="cache-label">REQUEST 01</span><span class="token">P</span><span class="token">R</span><span class="token">E</span><span class="token">F</span><span class="token">I</span><span class="token">X</span><span class="token token-new">A</span></div><div><span class="cache-label">REQUEST 02</span><span class="token reused">P</span><span class="token reused">R</span><span class="token reused">E</span><span class="token reused">F</span><span class="token reused">I</span><span class="token reused">X</span><span class="token token-new">B</span></div><span class="cache-bracket">相同前缀，复用计算 <b>↗</b></span></div><span class="art-coordinate">[ PROMPT CACHE / 02 ]</span><span class="art-plus">+</span></div><div class="card-body"><div class="course-meta"><span><i class="tag-dot"></i>LLM / INFERENCE</span><span>NOTE 02</span></div><h3>LLM API 与 Prompt Caching</h3><p>相同的前缀，更少的重复计算。通过交互动画与成本模拟，看懂缓存命中、失效条件与真正的复用收益。</p><div class="course-bottom"><span>交互演示 <i>·</i> 成本模拟</span><span aria-label="阅读笔记" class="card-arrow">↗</span></div></div></RouterLink></li>
+</ul><p aria-live="polite" class="filter-status" role="status">显示全部 2 篇笔记</p>
+</section>
+<section aria-labelledby="daily-invite-title" class="daily-invitation"><div aria-hidden="true" class="daily-spark">✳</div><div class="daily-invite-copy"><p>THE DAILY SIGNAL <span>持续观察 / 持续思考</span></p><h2 id="daily-invite-title">跟上 AI 的下一步。</h2><span>学习是积累，观察是校准。看看今天有哪些值得关注的新进展。</span></div><RouterLink to="/ai-daily/">阅读 AI 日报 <span aria-hidden="true">↗</span></RouterLink></section>
+<footer class="home-footer"><div><b>NLP Learning</b><span>保持好奇，建立连接。</span></div><RouterLink to="/#main">BACK TO TOP <span aria-hidden="true">↑</span></RouterLink></footer>
+</main>
+</template>
+
+<script setup>
+import { ref } from 'vue'
+import { usePage } from '../composables/useReading.js'
+import { mountHome } from '../features/home.js'
+const pageRoot = ref(null)
+usePage(pageRoot, mountHome, null)
+let resumeTo = '/hermes/', resumeLabel = '从第一篇笔记开始'
+try {
+  const saved = JSON.parse(localStorage.getItem('nlp-learning-position'))
+  if (saved && ['hermes','llm-api'].includes(saved.course)) {
+    resumeTo = '/' + saved.course + '/' + (typeof saved.section === 'string' && /^[\w-]+$/.test(saved.section) ? '#'+saved.section : '')
+    resumeLabel = '继续阅读 · 笔记 ' + (saved.course === 'hermes' ? '01' : '02')
+  }
+} catch {}
+</script>

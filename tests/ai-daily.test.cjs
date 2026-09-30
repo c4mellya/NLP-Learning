@@ -4,7 +4,7 @@ const path = require('node:path');
 const vm = require('node:vm');
 
 const root = path.resolve(__dirname, '..');
-const script = fs.readFileSync(path.join(root, 'ai-daily/daily.js'), 'utf8');
+const script = fs.readFileSync(path.join(root, 'src/features/daily.js'), 'utf8').replace('export function mountDaily', 'function mountDaily') + '\nmountDaily(document, {document,location,fetch,baseUrl: \"\"});';
 const fixture = (name) => JSON.parse(fs.readFileSync(path.join(__dirname, 'fixtures/ai-daily', name), 'utf8'));
 
 function node(tag = 'div') {
@@ -103,8 +103,7 @@ async function open(search = '', files = {}) {
   assert.equal(page.location.assigned, '?date=2026-09-29');
 
   // 按实际 HTML 的 base 解析链接，再重新打开：旧日报的日期和章节必须同时保留。
-  const html = fs.readFileSync(path.join(root, 'ai-daily/index.html'), 'utf8');
-  const base = new URL(html.match(/<base href="([^"]+)"/)[1], page.location.href);
+  const base = page.location;
   for (const link of [...page.nodes['daily-toc-links'].children, ...page.nodes['daily-overview'].children]) {
     const url = new URL(link.href, base);
     assert.equal(url.searchParams.get('date'), '2026-09-28');

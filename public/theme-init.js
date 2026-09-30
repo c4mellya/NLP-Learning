@@ -13,4 +13,10 @@
     theme = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
   }
   document.documentElement.setAttribute("data-theme", theme);
+  var coursesOpen = "true";
+  try {
+    var stored = sessionStorage.getItem("nlp-learning-courses-open");
+    if (stored === "true" || stored === "false") coursesOpen = stored;
+  } catch (_) { /* Use the shared default when storage is unavailable. */ }
+  document.documentElement.setAttribute("data-courses-open", coursesOpen);
 })();

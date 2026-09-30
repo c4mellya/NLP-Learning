@@ -1,16 +1,18 @@
-(function () {
+import { createScope } from '../lib/resourceScope.js';
+export function mountCache(root) {
+ const resources = createScope();
   'use strict';
 
   /* ================= 基础设施 ================= */
   var reduceMQ = window.matchMedia('(prefers-reduced-motion: reduce)');
   var reduced = reduceMQ.matches;
   if (reduceMQ.addEventListener) {
-    reduceMQ.addEventListener('change', function (e) { reduced = e.matches; });
+    resources.on(reduceMQ, 'change', function (e) { reduced = e.matches; });
   }
 
-  function el(id) { return document.getElementById(id); }
-  function all(sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); }
-  function sleep(ms) { return new Promise(function (res) { setTimeout(res, reduced ? 0 : ms); }); }
+  function el(id) { return root.querySelector('#' + id); }
+  function all(sel, container) { return Array.prototype.slice.call((container || root).querySelectorAll(sel)); }
+  function sleep(ms) { return new Promise(function (res) { resources.timeout(res, reduced ? 0 : ms); }); }
   function clamp(v, a, b) { return Math.min(b, Math.max(a, v)); }
   /* 任何不可计算的输入都退化成「—」，页面上不出现 NaN */
   function fmt(n) { return (typeof n === 'number' && isFinite(n)) ? Math.round(n).toLocaleString('en-US') : '—'; }
@@ -170,7 +172,7 @@
       pushSample(amp + (Math.random() - 0.5) * 0.05);
       drawScope();
     }
-    if (t < scope.until) { scope.raf = requestAnimationFrame(scopeFrame); }
+    if (t < scope.until) { scope.raf = resources.frame(scopeFrame); }
     else { scope.raf = 0; }
   }
 
@@ -186,7 +188,7 @@
       drawScope();
       return;
     }
-    if (!scope.raf) { scope.last = 0; scope.raf = requestAnimationFrame(scopeFrame); }
+    if (!scope.raf) { scope.last = 0; scope.raf = resources.frame(scopeFrame); }
   }
 
   function setHeroReadouts(state, equivTarget) {
@@ -211,9 +213,9 @@
       var e = 1 - Math.pow(1 - k, 3);
       var v = from + (to - from) * e;
       node.textContent = isFinite(v) ? v.toFixed(1) : '0.0';
-      if (k < 1) requestAnimationFrame(step);
+      if (k < 1) resources.frame(step);
     }
-    requestAnimationFrame(step);
+    resources.frame(step);
   }
 
   /* ---- TTL 倒计时 ---- */
@@ -251,7 +253,7 @@
     var remain = ttl.deadline - Date.now();
     if (remain <= 0) { ttlExpire(); return; }
     ttlRender(remain);
-    setTimeout(ttlTick, 200);
+    resources.timeout(ttlTick, 200);
   }
 
   function ttlStart(seconds) {
@@ -521,16 +523,16 @@
     el('demoTokCount').textContent = '≈ ' + fmt(demo.snapshot.length);
     demoRefreshGate();
 
-    el('btnReplay').addEventListener('click', demoReplay);
+    resources.on(el('btnReplay'), 'click', demoReplay);
 
-    el('btnChange').addEventListener('click', function () {
+    resources.on(el('btnChange'), 'click', function () {
       if (demo.busy) return;
       inputEl.value = toggleOneChar(inputEl.value);
       demo.dirty = true;
       demoReplay();
     });
 
-    el('btnAppend').addEventListener('click', function () {
+    resources.on(el('btnAppend'), 'click', function () {
       if (demo.busy) return;
       /* F1：这里必须是 inputEl.value.replace(...)，不是 inputEl.replace(...) */
       inputEl.value = inputEl.value.replace(/\s*$/, '') + '\n追问：违约金上限可以调整吗？';
@@ -539,7 +541,7 @@
       demoReplay();
     });
 
-    el('btnReset').addEventListener('click', function () {
+    resources.on(el('btnReset'), 'click', function () {
       if (demo.busy) return;
       inputEl.value = DEMO_PROMPT;
       demo.snapshot = tokenize(DEMO_PROMPT);
@@ -554,7 +556,7 @@
       demoRefreshGate();
     });
 
-    inputEl.addEventListener('input', function () {
+    resources.on(inputEl, 'input', function () {
       if (!demo.dirty) {
         demo.dirty = true;
         el('demoPill').textContent = '已编辑 · 待重放';
@@ -576,7 +578,7 @@
     }
 
     all('[data-provider]').forEach(function (btn) {
-      btn.addEventListener('click', function () {
+      resources.on(btn, 'click', function () {
         demo.provider = btn.getAttribute('data-provider');
         syncProviderUI();
         demoRefreshGate();
@@ -737,7 +739,7 @@
   function simInit() {
     function bind(id, key, fmtFn) {
       var node = el(id);
-      node.addEventListener('input', function () {
+      resources.on(node, 'input', function () {
         var v = Number(node.value);
         if (!isFinite(v)) v = 0;
         sim[key] = v;
@@ -762,14 +764,14 @@
     bind('simRounds', 'rounds', function (v) { return String(v); });
     bind('simInvalid', 'invalid', function (v) { return String(v); });
 
-    el('simReadMult').addEventListener('input', function () {
+    resources.on(el('simReadMult'), 'input', function () {
       var v = Number(el('simReadMult').value);
       if (!isFinite(v) || v < 0) v = 0.5;
       sim.readMult = v;
       el('simReadMultOut').textContent = v.toFixed(2).replace(/0$/, '');
       simRender();
     });
-    el('simMinLen').addEventListener('change', function () {
+    resources.on(el('simMinLen'), 'change', function () {
       var v = Number(el('simMinLen').value);
       if (!isFinite(v)) v = 1024;
       sim.minLen = v;
@@ -777,14 +779,14 @@
     });
 
     var priceEl = el('simPrice');
-    priceEl.addEventListener('input', function () {
+    resources.on(priceEl, 'input', function () {
       var v = Number(priceEl.value);
       sim.price = (isFinite(v) && v >= 0) ? v : 0;
       simRender();
     });
 
     all('[data-simprovider]').forEach(function (btn) {
-      btn.addEventListener('click', function () {
+      resources.on(btn, 'click', function () {
         sim.provider = btn.getAttribute('data-simprovider');
         all('[data-simprovider]').forEach(function (b) {
           var on = b === btn;
@@ -799,7 +801,7 @@
   }
 
   /* ================= 主题切换 ================= */
-  /* 按钮本身（点击、文案、aria、localStorage）由 ../assets/site.js 统一接管；
+  /* 按钮本身（点击、文案、aria、localStorage）由共享主题逻辑统一接管；
      这里只负责让 Canvas 重新按当前 CSS 变量取色，否则切主题后示波器会留旧色。 */
   function currentTheme() {
     return document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
@@ -816,22 +818,22 @@
 
   function themeInit() {
     syncThemePaint();
-    /* site.js 会在切换时改写 data-theme；用 MutationObserver 跟上，不抢它的职责 */
+    /* 公共主题切换逻辑会在切换时改写 data-theme；用 MutationObserver 跟上，不抢它的职责 */
     if (window.MutationObserver) {
-      new MutationObserver(function () { syncThemePaint(); })
+      resources.observer(MutationObserver, function () { syncThemePaint(); })
         .observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
     }
     /* 没手动选过时跟随系统变化 */
     if (window.matchMedia) {
       var mq = window.matchMedia('(prefers-color-scheme: dark)');
       var onSys = function () { syncThemePaint(); };
-      if (mq.addEventListener) mq.addEventListener('change', onSys);
+      if (mq.addEventListener) resources.on(mq, 'change', onSys);
       else if (mq.addListener) mq.addListener(onSys);
     }
   }
 
   /* ================= init ================= */
-  document.addEventListener('DOMContentLoaded', function () {
+  (function initialize() {
     heroRender();
     schematicInit();
     demoInit();
@@ -839,18 +841,20 @@
     readThemeColors();
     themeInit();
     simRender();
-    el('heroReplay').addEventListener('click', function () { heroPlay(true); });
-    el('heroTtlSkip').addEventListener('click', function () {
+    resources.on(el('heroReplay'), 'click', function () { heroPlay(true); });
+    resources.on(el('heroTtlSkip'), 'click', function () {
       ttl.deadline = Date.now() + 2600;   /* 示教快进：几秒后看过期 */
       ttl.expired = false;
       if (!ttl.running) { ttl.running = true; ttlTick(); }
       el('heroTtlNote').textContent = '已快进：倒计时按示教加速走完，观察归零后的状态。';
     });
     var resizeTimer = null;
-    window.addEventListener('resize', function () {
-      if (resizeTimer) clearTimeout(resizeTimer);
-      resizeTimer = setTimeout(drawScope, 120);
+    resources.on(window, 'resize', function () {
+      if (resizeTimer) resources.clearTimeout(resizeTimer);
+      resizeTimer = resources.timeout(drawScope, 120);
     });
-    setTimeout(heroPlay, 500);
-  });
-})();
+    resources.observer(ResizeObserver, drawScope).observe(el('heroWave'));
+    resources.timeout(heroPlay, 500);
+  })();
+return resources.dispose;
+}

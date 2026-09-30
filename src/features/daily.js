@@ -1,9 +1,16 @@
-(() => {
+export function mountDaily(root, options = {}) {
+  let active = true;
+  const document = options.document || window.document;
+  const location = options.location || window.location;
+  const fetch = options.fetch || window.fetch.bind(window);
+  const baseUrl = options.baseUrl ?? "/ai-daily/";
+  const controller = typeof AbortController !== "undefined" ? new AbortController() : null;
+  const cleanups = [];
   "use strict";
 
   const datePattern = /^\d{4}-\d{2}-\d{2}$/;
   const statuses = new Set(["已确认", "官方发布", "官方预告", "OpenAI员工动态", "可靠爆料", "传闻"]);
-  const $ = (id) => document.getElementById(id);
+  const $ = (id) => root.querySelector ? root.querySelector("#" + id) : document.getElementById(id);
   const list = $("daily-list");
   const select = $("daily-select");
   const title = $("daily-title");
@@ -48,6 +55,7 @@
   };
 
   const showStatus = (message, showLatest = false) => {
+    if (!active) return;
     statusNode.textContent = message;
     statusNode.hidden = false;
     latestLink.hidden = !showLatest;
@@ -70,7 +78,7 @@
     if (assets[key]) {
       node.classList.add("daily-brand-logo");
       const img = el("img");
-      img.src = `brands/${assets[key]}`;
+      img.src = `${baseUrl}brands/${assets[key]}`;
       img.alt = "";
       img.width = 40;
       img.height = 40;
@@ -301,14 +309,16 @@
     document.title = `${title.textContent} · ${date} · NLP Learning`;
     // JSON 异步加载完成后，补上首次打开或刷新深链接的章节定位。
     const target = Array.from(content.children).find((section) => `#${section.id}` === location.hash);
-    if (target) target.scrollIntoView();
+    if (options.onReport) options.onReport();
+    else if (target) target.scrollIntoView();
   };
 
   const renderHistory = (entries, chosenDate) => {
+    options.onHistory?.(entries, chosenDate);
     let month = "";
     for (const entry of entries) {
       const currentMonth = entry.date.slice(0, 7);
-      if (currentMonth !== month) {
+      if (list && currentMonth !== month) {
         month = currentMonth;
         list.appendChild(el("p", "daily-month", `${entry.date.slice(0, 4)}年${Number(entry.date.slice(5, 7))}月`));
       }
@@ -316,25 +326,32 @@
       link.href = `?date=${entry.date}`;
       link.title = str(entry.title) || `AI 日报 · ${entry.date}`;
       if (entry.date === chosenDate) link.setAttribute("aria-current", "page");
-      list.appendChild(link);
+      if (list) list.appendChild(link);
       const option = el("option", "", entry.date);
       option.value = entry.date;
       option.selected = entry.date === chosenDate;
       select.appendChild(option);
     }
-    select.addEventListener("change", () => {
-      if (datePattern.test(select.value)) location.assign(`?date=${select.value}`);
-    });
+    const change = () => {
+      if (datePattern.test(select.value)) {
+        if (options.navigate) options.navigate(`/ai-daily/?date=${select.value}`);
+        else location.assign(`?date=${select.value}`);
+      }
+    };
+    select.addEventListener("change", change);
+    cleanups.push(() => select.removeEventListener("change", change));
   };
 
   const start = async () => {
     let index;
     try {
       // 运行时索引可能在同一秒内被替换；避免静态服务器按秒级 Last-Modified 返回旧的 304。
-      const response = await fetch(`index.json?refresh=${Date.now()}`, { cache: "no-store" });
+      const response = await fetch(`${baseUrl}index.json?refresh=${Date.now()}`, { cache: "no-store", signal: controller?.signal });
+      if (!active) return;
       if (response.status === 404) { showStatus("AI 日报暂未生成"); return; }
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       index = await response.json();
+      if (!active) return;
       if (!index || !Array.isArray(index.entries)) throw new Error("invalid index");
     } catch (_) { showStatus("日报数据暂时无法读取"); return; }
 
@@ -357,15 +374,18 @@
 
     try {
       const isLatest = chosen.date === latest;
-      const url = `data/${chosen.date}.json${isLatest ? `?refresh=${Date.now()}` : ""}`;
-      const response = await fetch(url, { cache: isLatest ? "no-store" : "default" });
+      const url = `${baseUrl}data/${chosen.date}.json${isLatest ? `?refresh=${Date.now()}` : ""}`;
+      const response = await fetch(url, { cache: isLatest ? "no-store" : "default", signal: controller?.signal });
+      if (!active) return;
       if (response.status === 404) { showStatus("未找到该日期的 AI 日报", true); return; }
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const report = await response.json();
+      if (!active) return;
       if (!report || typeof report !== "object" || report.date !== chosen.date) throw new Error("invalid report");
       renderReport(report, chosen.date);
     } catch (_) { showStatus("日报数据暂时无法读取", chosen.date !== latest); }
   };
 
-  start();
-})();
+  start().finally(() => { if (active) options.onReady?.(); });
+return () => { active = false; controller?.abort(); cleanups.forEach(fn => fn()); };
+}

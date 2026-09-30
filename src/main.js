@@ -1,0 +1,15 @@
+import { createApp } from 'vue'
+import App from './App.vue'
+import router from './router.js'
+import '../assets/tokens.css'
+import '../assets/site.css'
+import '../assets/course.css'
+import '../hermes/hermes.css'
+import '../llm-api/llm-api.css'
+import '../assets/iconpark.css'
+import '../assets/editorial.css'
+import '../assets/home.css'
+import '../assets/reading.css'
+import '../ai-daily/daily.css'
+
+createApp(App).use(router).mount('#app')

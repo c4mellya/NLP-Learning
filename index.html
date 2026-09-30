@@ -1,84 +1,17 @@
 <!DOCTYPE html>
+
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="color-scheme" content="dark light">
-<title>NLP Learning · 从语言到智能行动</title>
-<meta name="description" content="从 NLP 到 LLM，再到 Agent：理解语言、探索模型、构建能行动的智能体。用学习笔记和交互实验，把概念变成实践。">
-<link rel="icon" type="image/svg+xml" href="assets/logo.svg">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Noto+Sans+SC:wght@400;500;700&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
-
-<script src="assets/theme-init.js?v=3"></script>
-<link rel="stylesheet" href="assets/tokens.css">
-<link rel="stylesheet" href="assets/site.css">
-<link rel="stylesheet" href="assets/home.css?v=9">
-<link rel="stylesheet" href="assets/iconpark.css">
-<link rel="stylesheet" href="assets/editorial.css?v=1">
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<meta content="light dark" name="color-scheme"/>
+<title>NLP Learning · 把好奇心变成行动力</title>
+<meta content="一个关于语言、模型与智能体的开放学习工作台。阅读实践笔记，动手验证概念，跟上 AI 的下一步。" name="description"/>
+<link href="/assets/logo.svg" rel="icon" type="image/svg+xml"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&amp;family=Noto+Sans+SC:wght@400;500;600;700;900&amp;family=Space+Grotesk:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<script src="/theme-init.js"></script>
 </head>
-<body class="home-page">
-<a class="skip-link" href="#main">跳转到正文</a>
-
-<header class="site-top">
-  <div class="site-top-in">
-    <a class="site-brand" href="./" aria-label="NLP Learning 课程总览">
-      <img class="brand-logo" src="assets/logo.svg" width="24" height="24" alt="">
-      <span class="brand-text">NLP Learning</span>
-    </a>
-    <div class="site-top-right">
-      <a class="course-home-link" href="/ai-daily">AI 日报</a>
-      <button class="site-theme" type="button" data-theme-toggle aria-pressed="false"><span class="theme-ic ip-icon ip-moon" aria-hidden="true"></span><span class="theme-word">浅色</span></button>
-    </div>
-  </div>
-</header>
-
-<div class="site-shell is-plain">
-  <main class="site-main" id="main">
-    <div class="home-kicker"><span>THE LEARNING NOTEBOOK / 学习 · 实验 · 记录</span><span>NLP &amp; LLM &amp; AGENT</span></div>
-    <section class="home-hero" aria-labelledby="home-title">
-      <div class="network-scene">
-        <div class="scene-label"><span class="status-dot"></span> A SPACE FOR CONNECTED IDEAS</div>
-        <canvas id="learning-network" role="img" aria-label="缓慢旋转的三维语义网络：语言节点相连，信号沿模型与行动轨道流动。">NLP → LLM → Agent：从语言理解到模型推理，再到工具与行动。</canvas><div class="scene-caption"><span>FIG. 01 — CONNECTED IDEAS</span><span>保持好奇，建立连接。</span></div>
-      </div>
-      <div class="hero-copy">
-        <p class="hero-eyebrow">LANGUAGE → INTELLIGENCE → ACTION</p>
-        <h1 class="home-title" id="home-title">从语言，<br>到<span>智能行动。</span></h1>
-        <p class="home-lead">从 NLP 的语言理解，到 LLM 的生成与推理，再到 Agent 的工具与行动。沿着概念与实践之间的连接，一步步学懂。</p>
-        <div class="hero-actions"><a class="home-primary" href="#courses">探索学习笔记 <span class="ip-icon ip-arrow-up-right" aria-hidden="true"></span></a><span class="hero-side-note">读懂原理 · 动手验证</span></div>
-        <div class="learning-path" aria-label="学习路线"><span><b>01</b> NLP<small>理解语言</small></span><span><b>02</b> LLM<small>生成与推理</small></span><span><b>03</b> AGENT<small>工具与行动</small></span></div>
-      </div>
-    </section>
-    <section class="courses-section" id="courses" aria-labelledby="courses-title">
-      <div class="courses-heading"><div><p class="section-eyebrow">THE NOTEBOOK / 持续探索</p><h2 id="courses-title">从一篇笔记开始</h2></div><p>把抽象的概念，变成亲手验证的理解。</p></div>
-    <ul class="course-grid" aria-labelledby="courses-title">
-      <li>
-        <a class="course-card" href="hermes/" data-status="ready">
-          <span class="course-meta"><span class="n">01</span>Agent / CLI</span>
-          <span class="card-art agent-art" aria-hidden="true"><span>01 / THINK<b>理解任务</b></span><i>→</i><span>02 / ACT<b>调用工具</b></span><i>→</i><span>03 / LEARN<b>验证结果</b></span></span>
-          <span class="course-name">Hermes Agent 六步上手</span>
-          <span class="course-desc">搭建你的第一个 Agent。从安装和模型配置，到 CLI、配置文件与工具调用，走完六步可验证的实践。</span>
-          <span class="course-bottom"><span>6 个步骤 · 上手实践</span><b>阅读讲义 <span class="ip-icon ip-arrow-up-right" aria-hidden="true"></span></b></span>
-        </a>
-      </li>
-      <li>
-        <a class="course-card" href="llm-api/" data-status="ready">
-          <span class="course-meta"><span class="n">02</span>Inference / Cost</span>
-          <span class="card-art cache-art" aria-hidden="true"><span><b>WRITE</b><i></i><i></i><i></i><i></i><i></i><i></i></span><span><b>REUSE</b><i></i><i></i><i></i><i></i><i></i><i></i></span></span>
-          <span class="course-name">LLM API 与 Prompt Caching</span>
-          <span class="course-desc">缓存究竟复用了什么？通过前缀匹配动画与成本模拟器，理解缓存失效、计费差异与复用收益。</span>
-          <span class="course-bottom"><span>交互演示 · 成本模拟</span><b>开始探索 <span class="ip-icon ip-arrow-up-right" aria-hidden="true"></span></b></span>
-        </a>
-      </li>
-    </ul>
-    </section>
-    <section class="daily-invitation" aria-labelledby="daily-invite-title"><div><p class="section-eyebrow">THE DAILY SIGNAL / 保持同步</p><h2 id="daily-invite-title">学习之外，也看看正在发生什么。</h2><p>追踪 AI 新进展，在变化中积累自己的判断。</p></div><a href="ai-daily/">阅读 AI 日报 ↗</a></section>
-    <footer class="home-footer"><span>NLP Learning</span><a href="#main">回到顶部 <span class="ip-icon ip-arrow-up" aria-hidden="true"></span></a></footer>
-  </main>
-</div>
-
-<script src="assets/site.js?v=3"></script>
-<script src="assets/home.js?v=5"></script>
-</body>
+<body><div id="app"></div><script type="module" src="/src/main.js"></script></body>
 </html>
