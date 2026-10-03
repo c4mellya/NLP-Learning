@@ -10,7 +10,7 @@
 <p class="course-intro-desc">LLM API 与 Prompt Caching。从一次缓存命中出发，看懂前缀复用、失效条件与实际成本。</p>
 <div class="course-actions"><RouterLink class="course-primary" to="/llm-api/#t-demo">动手观察 <span aria-hidden="true" class="ip-icon ip-arrow-up-right"></span></RouterLink><RouterLink class="course-secondary" to="/llm-api/#t-sim">探索成本模拟器 <span aria-hidden="true" class="ip-icon ip-arrow-right"></span></RouterLink></div>
 </div>
-<div aria-hidden="true" class="notebook-art cache-cover"><div class="cover-art-head"><span>EXPERIMENT NOTE / 02</span><span>↗</span></div><span class="cover-serial">02</span><div class="prefix-visual"><span class="prefix-label">SAME PREFIX.</span><div class="prefix-row"><i>P</i><i>R</i><i>E</i><i>F</i><i>I</i><i>X</i><b>A</b></div><div class="prefix-row row-reused"><i>P</i><i>R</i><i>E</i><i>F</i><i>I</i><i>X</i><b>B</b></div><div class="prefix-reuse"><span>↳ REUSE COMPUTATION</span><b>↗</b></div></div><div class="cover-art-foot"><span>READ / REUSE / REASON</span><b>KV CACHE</b></div></div>
+<NotebookCover kind="cache" />
 </header>
 <div class="course-meta-strip"><span><b>05</b> 学习小节</span><span>交互演示</span><span>成本模拟</span></div>
 <nav aria-label="笔记阅读路线" class="journey-map llm-journey"><RouterLink to="/llm-api/#t-mech"><span>01</span><b>理解复用机制</b><small>UNDERSTAND</small></RouterLink><RouterLink to="/llm-api/#t-demo"><span>02</span><b>修改输入，观察结果</b><small>EXPERIMENT</small></RouterLink><RouterLink to="/llm-api/#t-sim"><span>03</span><b>计算真实的收益</b><small>CALCULATE</small></RouterLink></nav><details class="course-reading-note"><summary>这份笔记讨论什么</summary><p>大模型 API 的 Prompt Caching（提示词缓存）依赖一个核心条件：<strong class="lead-emphasis">请求具有完全一致的前缀</strong>。前缀保持稳定，才有机会复用已有计算、降低输入成本；前缀发生变化，变化位置及其后续内容就需要重新处理。这份笔记从机制、交互示例和成本模拟三个角度展开，你可以边读边调整参数，观察结论如何变化。</p></details>
@@ -376,6 +376,7 @@
 
 <script setup>
 import { ref } from 'vue'
+import NotebookCover from '../components/NotebookCover.vue'
 import { usePage } from '../composables/useReading.js'
 import { mountCache } from '../features/cache.js'
 const pageRoot = ref(null)

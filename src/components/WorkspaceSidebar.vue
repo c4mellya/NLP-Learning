@@ -1,6 +1,6 @@
 <template>
 <aside ref="rail" @click="onRailClick" aria-label="工作台导航" class="workspace-nav" id="workspace-nav">
-<button type="button" class="workspace-close" aria-label="关闭导航" @click="emit('close')">×</button><RouterLink aria-label="NLP Learning 首页" class="workspace-brand" to="/"><img alt="" height="38" :src="logo" width="38"/><span>NLP Learning<small>AN OPEN NOTEBOOK</small></span></RouterLink>
+<button type="button" class="workspace-close" aria-label="关闭导航" @click="emit('close')">×</button><RouterLink aria-label="NLP Learning 首页" class="workspace-brand" to="/"><span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 40 40"><path d="M9 29V11h5l12 15V11h5v18h-5L14 14v15z"/><path d="M7 7h26v26H7z"/></svg></span><span>NLP Learning<small>AN OPEN NOTEBOOK</small></span></RouterLink>
 <p class="nav-label">WORKSPACE <span>工作台</span></p>
 <nav class="workspace-links">
 <RouterLink  :aria-current="route.path === '/' ? 'page' : undefined" :class="{'is-active': route.path === '/'}" to="/#main"><svg aria-hidden="true" viewBox="0 0 24 24"><rect height="6" rx="1" width="6" x="4" y="4"></rect><rect height="6" rx="1" width="6" x="14" y="4"></rect><rect height="6" rx="1" width="6" x="4" y="14"></rect><rect height="6" rx="1" width="6" x="14" y="14"></rect></svg>学习总览 <span class="nav-arrow">↗</span></RouterLink>
@@ -20,7 +20,6 @@
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
 import { useRoute } from 'vue-router'
-import logo from '../../assets/logo.svg'
 import { workspace } from '../lib/workspace.js'
 const emit = defineEmits(['close'])
 const route = useRoute(), rail = ref(null), group = ref(null), list = ref(null)

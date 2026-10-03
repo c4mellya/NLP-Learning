@@ -4,6 +4,18 @@ import { workspace, finishPage } from '../lib/workspace.js'
 
 export function mountReading(root, course) {
   const resources = createScope()
+  if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    const reveal = resources.observer(IntersectionObserver, entries => {
+      for (const entry of entries) if (entry.isIntersecting) {
+        entry.target.classList.add('is-revealed')
+        reveal.unobserve(entry.target)
+      }
+    }, { threshold: .08 })
+    root.querySelectorAll('[data-reveal], .note[data-step] .note-head, .experiment-section-head, .daily-section-head').forEach(node => {
+      node.classList.add('reveal-ready')
+      reveal.observe(node)
+    })
+  }
   const headings = [...root.querySelectorAll('[data-nav-anchor], .daily-section')]
   workspace.sections = headings.map((node, i) => ({
     id: node.id,

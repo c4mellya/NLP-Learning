@@ -8,8 +8,10 @@ import '../hermes/hermes.css'
 import '../llm-api/llm-api.css'
 import '../assets/iconpark.css'
 import '../assets/editorial.css'
-import '../assets/home.css'
 import '../assets/reading.css'
 import '../ai-daily/daily.css'
+import '../assets/studio.css'
+import '../assets/studio-reading.css'
+import '../assets/studio-shell.css'
 
 createApp(App).use(router).mount('#app')

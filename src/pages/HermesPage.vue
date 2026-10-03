@@ -9,7 +9,7 @@
 <p class="course-intro-desc">Hermes Agent 六步上手。从环境搭建、模型配置到工具调用，建立一条可以亲手验证的实践路线。</p>
 <div class="course-actions"><RouterLink class="course-primary" to="/hermes/#note-install-title">开始第一步 <span aria-hidden="true" class="ip-icon ip-arrow-up-right"></span></RouterLink><a class="course-secondary" href="https://hermes-agent.nousresearch.com/docs/zh-Hans/getting-started/learning-path" rel="noopener" target="_blank">官方学习路径 <span aria-hidden="true" class="ip-icon ip-arrow-up-right"></span></a></div>
 </div>
-<div aria-hidden="true" class="notebook-art agent-cover"><div class="cover-art-head"><span>FIELD GUIDE / 01</span><span>↗</span></div><span class="cover-serial">01</span><div class="agent-cover-orbit"></div><div class="cover-robot"><span class="robot-antenna"></span><div class="robot-face"><i></i><i></i><span></span></div><span class="robot-bracket bracket-left">[</span><span class="robot-bracket bracket-right">]</span></div><div class="cover-label cover-label-a">INPUT <b>理解任务</b></div><div class="cover-label cover-label-b">OUTPUT <b>调用工具 ↗</b></div><div class="cover-art-foot"><span>OBSERVE / REASON / ACT</span><b>HERMES</b></div></div>
+<NotebookCover kind="agent" />
 </header>
 <div class="course-meta-strip"><span><b>06</b> 实践步骤</span><span>命令示例</span><span>逐步验收</span><span class="meta-marker">PRACTICE FIRST <i>↗</i></span></div>
 <nav aria-label="六步实践路线" class="journey-map"><RouterLink to="/hermes/#note-install-title"><span>01</span><b>安装环境</b><small>STEP 01</small></RouterLink><RouterLink to="/hermes/#note-quickstart-title"><span>02</span><b>第一次对话</b><small>STEP 02</small></RouterLink><RouterLink to="/hermes/#note-providers-title"><span>03</span><b>模型配置</b><small>STEP 03</small></RouterLink><RouterLink to="/hermes/#note-cli-title"><span>04</span><b>熟悉 CLI</b><small>STEP 04</small></RouterLink><RouterLink to="/hermes/#note-config-title"><span>05</span><b>管理配置</b><small>STEP 05</small></RouterLink><RouterLink to="/hermes/#note-tools-title"><span>06</span><b>调用工具</b><small>STEP 06</small></RouterLink></nav><details class="course-reading-note"><summary>关于这份讲义与学习方式</summary><p class="note-desc">Hermes 是 Nous Research 开源的自主 agent（MIT、自托管、Python）。这份材料不做「它很厉害」的介绍，只把官方文档里最必要的内容压成一条六步路线：命令能在 Shell 里找到、模型和 Provider 配好、能跑通第一次对话并恢复会话、能看懂状态与 Context、分得清普通配置与 Secret、并且能让它用工具真的产出一个文件。</p><p class="note-desc">每一步都给四样东西：官方文档入口、要做什么、可直接照抄的命令、以及验收方式。<strong>没通过验收就不该往下走。</strong></p></details>
@@ -196,6 +196,7 @@
 
 <script setup>
 import { ref } from 'vue'
+import NotebookCover from '../components/NotebookCover.vue'
 import { usePage } from '../composables/useReading.js'
 import { mountHermes } from '../features/hermes.js'
 const pageRoot = ref(null)

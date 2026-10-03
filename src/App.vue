@@ -4,7 +4,7 @@
   <button aria-label="关闭导航" class="nav-backdrop" :hidden="!menuOpen" type="button" @click="closeMenu()"></button>
   <div ref="frame" class="home-workspace">
     <WorkspaceHeader ref="header" :open="menuOpen" @menu="setMenu(!menuOpen)" />
-    <RouterView v-slot="{ Component, route }"><component :is="Component" :key="route.path" /></RouterView>
+    <RouterView v-slot="{ Component, route }"><Transition name="page" mode="out-in"><component :is="Component" :key="route.path" /></Transition></RouterView>
   </div>
   <div v-if="route.meta.course" class="reading-progress" aria-hidden="true" :style="{transform:`scaleX(${workspace.progress})`}"></div>
 </template>
