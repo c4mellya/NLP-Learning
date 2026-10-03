@@ -35,7 +35,7 @@ npm run preview
 - `src/lib/`：生命周期资源管理等共享工具。
 - `assets/`：共用样式与图标；`public/theme-init.js` 在首次绘制前恢复主题。
 - `assets/studio.css`、`studio-shell.css`、`studio-reading.css`：新的设计系统、导航框架与阅读空间；`NotebookCover.vue` 和 `StudioIcon.vue` 提供共享封面与图标。
-- 首页知识雕塑采用本地 Canvas 参数曲面渲染，支持方向切换、轻微视差和暂停；页面入场动画遵循减少动态效果偏好。
+- 首页知识雕塑采用 WebGL GPU 参数曲面渲染，网格仅上传一次，支持方向切换、轻微视差和暂停；离屏与后台停止绘制，不支持 WebGL 时使用静态 SVG。页面入场动画遵循减少动态效果偏好。
 - `ai-daily/index.json` 与 `ai-daily/data/`：日报索引和每日 JSON 数据。
 
 新增课程时，将正文放入 `src/pages/`，并接入对应路由与公共导航；页面专属交互放入 `src/features/`。

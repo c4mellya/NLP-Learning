@@ -23,6 +23,12 @@ export function mountReading(root, course) {
     n: String(course === 'llm-api' ? i : i + 1).padStart(2, '0'),
     box: node.closest('.note-sec, .note, section[id], article[id]') || node,
   }))
+  if (!headings.length) {
+    workspace.sections = []
+    workspace.current = ''
+    workspace.progress = 0
+    return resources.dispose
+  }
   let frame = 0, locked = false, settleTimer, bailTimer, maxTimer
   function update() {
     frame = 0

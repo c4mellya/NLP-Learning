@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 440 280" fill="none">
+  <defs>
+    <linearGradient id="ribbon" x1="130" y1="65" x2="300" y2="235" gradientUnits="userSpaceOnUse"><stop stop-color="#DEF49B"/><stop offset=".45" stop-color="#ABCD6D"/><stop offset="1" stop-color="#43633A"/></linearGradient>
+    <mask id="hole"><rect width="440" height="280" fill="white"/><ellipse cx="213" cy="128" rx="83" ry="42" fill="black"/></mask>
+  </defs>
+  <g transform="rotate(-32 220 140)" mask="url(#hole)">
+    <ellipse cx="220" cy="145" rx="125" ry="80" fill="url(#ribbon)"/>
+    <ellipse cx="219" cy="139" rx="115" ry="72" stroke="#D9EDA5" stroke-opacity=".25"/>
+    <ellipse cx="217" cy="135" rx="106" ry="65" stroke="#D9EDA5" stroke-opacity=".2"/>
+    <ellipse cx="215" cy="131" rx="97" ry="58" stroke="#D9EDA5" stroke-opacity=".18"/>
+    <ellipse cx="214" cy="129" rx="89" ry="49" stroke="#D9EDA5" stroke-opacity=".15"/>
+  </g>
+</svg>
