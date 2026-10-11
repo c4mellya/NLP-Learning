@@ -1,0 +1,57 @@
+/* Learning: course index, course page, breadcrumbs and lesson-to-lesson navigation. */
+.crumbs ol { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; list-style: none; color: var(--ink-3); font: 400 14px/1.6 var(--f-mono); }
+.crumbs li { display: inline-flex; align-items: center; gap: 12px; }
+.crumbs li + li::before { content: ''; width: 5px; height: 5px; background: var(--signal); }
+.crumbs a { display: inline-flex; align-items: center; min-height: 44px; transition: color .2s var(--ease); }
+.crumbs a:hover { color: var(--ink); }
+.crumbs [aria-current] { color: var(--ink); }
+
+/* Course index */
+.course-list { list-style: none; }
+.course-item { border-bottom: 1px solid var(--line-strong); }
+.course-card { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 16px 48px; padding: clamp(40px, 5vw, 64px) 0 32px; }
+.course-card h2 { font: 800 clamp(52px, 8.4vw, 136px)/.92 var(--f-display); letter-spacing: -.05em; transition: color .3s var(--ease); }
+.course-card p { grid-column: 1; max-width: 32em; color: var(--ink-2); font-size: 18px; }
+.course-card__count { grid-column: 1; color: var(--ink-3); font: 400 14px/1.5 var(--f-mono); }
+.course-card__go { grid-column: 2; grid-row: 1 / span 3; align-self: start; display: grid; place-items: center; width: clamp(64px, 7vw, 104px); aspect-ratio: 1; border: 1px solid var(--line-strong); font-size: clamp(26px, 3vw, 40px); transition: background .3s var(--ease), color .3s var(--ease), border-color .3s var(--ease); }
+.course-card__go span { transform: rotate(-45deg); transition: transform .6s var(--ease-out); }
+.course-card:hover h2 { color: var(--signal-ink); }
+.course-card:hover .course-card__go { background: var(--signal); border-color: var(--signal); color: var(--ink); }
+.course-card:hover .course-card__go span { transform: rotate(0); }
+.course-card__lessons { list-style: none; padding-bottom: 32px; }
+.course-card__lessons a { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 56px; border-top: 1px solid var(--line); font: 600 18px/1.4 var(--f-cn); transition: color .2s var(--ease); }
+.course-card__lessons a:hover { color: var(--signal-ink); }
+.course-card__lessons a:hover .arrow { transform: translateX(6px); }
+.learning-empty { display: grid; gap: 16px; justify-items: start; padding: 48px 0; color: var(--ink-2); }
+
+/* Course page */
+.course-head { display: grid; gap: 18px; padding: clamp(40px, 6vw, 88px) 0 clamp(40px, 5vw, 64px); border-bottom: 1px solid var(--line-strong); }
+.course-head h1 { font: 800 clamp(64px, 11vw, 184px)/.9 var(--f-display); letter-spacing: -.055em; margin-left: -.04em; }
+.course-head h1::after { content: ''; display: inline-block; width: .13em; height: .13em; margin-left: .05em; background: var(--signal); }
+.course-head p { max-width: 34em; color: var(--ink-2); font-size: 19px; }
+.lesson-list { list-style: none; }
+.lesson-card { position: relative; display: grid; gap: 10px; padding: 36px 88px 40px 0; border-bottom: 1px solid var(--line); transition: padding .5s var(--ease-out); }
+.lesson-card::before { content: ''; position: absolute; left: 0; top: 50%; width: 14px; height: 14px; margin-top: -7px; background: var(--signal); transform: scale(0); transition: transform .4s var(--ease-out); }
+.lesson-card h2 { font: 700 clamp(28px, 3.4vw, 48px)/1.2 var(--f-cn); letter-spacing: -.01em; }
+.lesson-card p { color: var(--ink-2); font-size: 18px; }
+.lesson-card__go { position: absolute; right: 0; top: 50%; translate: 0 -50%; font-size: 36px; transition: transform .5s var(--ease-out), color .2s var(--ease); }
+.lesson-card:hover { padding-left: 40px; }
+.lesson-card:hover::before { transform: scale(1); }
+.lesson-card:hover .lesson-card__go { color: var(--signal-ink); transform: translateX(8px); }
+
+/* Between lessons */
+.lesson-nav { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1px; margin-top: clamp(64px, 8vw, 120px); background: var(--line-strong); border: 1px solid var(--line-strong); }
+.lesson-nav__item { display: grid; gap: 8px; padding: 28px 28px 32px; background: var(--paper); transition: background .3s var(--ease), color .3s var(--ease); }
+.lesson-nav__item span { color: var(--ink-3); font: 400 14px/1.5 var(--f-mono); transition: color .3s var(--ease); }
+.lesson-nav__item strong { font: 700 22px/1.4 var(--f-cn); }
+.lesson-nav__item--next { text-align: right; }
+.lesson-nav__item:hover { background: var(--ink); color: var(--paper); }
+.lesson-nav__item:hover span { color: var(--signal); }
+
+@media (max-width: 700px) {
+  .course-card { grid-template-columns: 1fr; }
+  .course-card__go { display: none; }
+  .lesson-card { padding-right: 48px; }
+  .lesson-card:hover { padding-left: 0; }
+  .lesson-card p, .course-card p, .course-head p { font-size: 16px; }
+}

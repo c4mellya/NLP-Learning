@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#eeebe4">
+  <title>Hermes Agent 快速入门 · NLP &amp; Agent · Learning · Lucian</title>
+  <meta name="description" content="从安装、模型连接到工具调用，走通一次文件交付。">    <link rel="icon" href="assets/favicon.ico?v=1" sizes="16x16 32x32 48x48 64x64" />
+  <link rel="icon" type="image/png" href="assets/favicon.png?v=1" sizes="64x64" />
+  <link rel="stylesheet" href="assets/fonts.css">
+  <link rel="stylesheet" href="assets/site.css?v=2">
+    <link rel="stylesheet" href="assets/learning.css?v=2">
+    <link rel="stylesheet" href="assets/lesson-hermes.css?v=2">
+    <script src="assets/main.js?v=1" defer></script>
+  <script src="assets/lessons/hermes.js?v=4" defer></script>
+</head>
+<body class="learning-lesson hermes-lab">
+  <a class="hx-skip" href="#main" data-scroll>跳到讲义正文</a>
+  <div class="hx-reading-line" aria-hidden="true"><span id="hx-reading-fill"></span></div>
+  <header class="site-header">
+    <div class="shell site-header__bar">
+      <a class="site-brand" href="#main" aria-label="Lucian · 朱晨辉，回到讲义开头">
+        <span class="site-brand__mark">Lucian<i aria-hidden="true"></i></span>
+        <span class="site-brand__name">朱晨辉</span>
+      </a>
+      <nav class="site-nav" id="site-nav" aria-label="主导航">
+        <ul>
+                              <li>
+                        <a class="site-nav__link" href="#main">概览</a>
+                      </li>
+                                        <li>
+                        <a class="site-nav__link" href="#installation" aria-current="page">讲义</a>
+                      </li>
+                              <li>
+                        <a class="site-nav__link" href="#tool-system">工具调用</a>
+                      </li>
+                  </ul>
+      </nav>
+      <div class="site-header__tools">
+        <button class="site-motion" type="button" data-motion-toggle aria-pressed="true" aria-label="暂停动态效果"><span aria-hidden="true"></span></button>
+        <button class="site-menu" type="button" aria-label="打开菜单" aria-expanded="false" aria-controls="site-nav"><span aria-hidden="true"></span><span aria-hidden="true"></span></button>
+      </div>
+    </div>
+  </header>
+  <main class="hx-main" id="main" tabindex="-1">
+    <header class="hx-hero shell">
+      <nav class="crumbs" aria-label="面包屑">
+  <ol>
+        <li>
+            <span>Learning</span>
+          </li>
+        <li>
+            <span>NLP &amp; Agent</span>
+          </li>
+        <li>
+            <span aria-current="page">Hermes Agent 快速入门</span>
+          </li>
+      </ol>
+</nav>
+      <div class="hx-hero-grid">
+        <div class="hx-hero-copy">
+          <h1 class="learning-lesson-title">Hermes Agent 快速入门</h1>
+          <p>让一句请求，变成一个可验证的文件。<br />从安装开始，亲手走通一次 Agent 工作流。</p>
+          <div class="hx-hero-actions"><a class="btn btn-solid" href="#installation">从安装开始 <svg class="hx-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14m-5-5 5 5-5 5"/></svg></a><a class="line-link" href="https://hermes-agent.nousresearch.com/docs/zh-Hans/getting-started/learning-path" target="_blank" rel="noopener noreferrer">官方学习路径 <svg class="hx-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M7 7h10v10"/></svg></a></div>
+          <div class="hx-hero-route" aria-label="教程主线"><span>连接模型</span><svg class="hx-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14m-5-5 5 5-5 5"/></svg><span>调用工具</span><svg class="hx-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14m-5-5 5 5-5 5"/></svg><span>验证产物</span></div>
+        </div>
+        <figure class="hx-preview" id="hx-hero-demo" data-phase="4">
+          <div class="hx-board-head"><span><svg class="hx-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H5v18h14V8Zm0 0v5h5M8 12h8M8 16h5"/></svg> 两行数据，一次交付</span><span class="hx-muted">教学演示</span></div>
+          <div class="hx-preview-route">
+            <div class="hx-mini-file"><div class="hx-file-title">sales.csv</div><table aria-label="示例输入"><tbody><tr><td>Software</td><td>299</td></tr><tr><td>Media</td><td>88</td></tr></tbody></table><span class="hx-mini-caption">输入</span></div>
+            <div class="hx-preview-engine"><div class="hx-engine-symbol"><svg class="hx-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="3"/><path d="M9 2v4m6-4v4m-6 12v4m6-4v4M2 9h4m-4 6h4m12-6h4m-4 6h4"/><rect x="10" y="10" width="4" height="4" rx="1"/></svg></div><span>Hermes</span><i class="hx-signal-line" aria-hidden="true"></i></div>
+            <div class="hx-mini-file hx-mini-result"><div class="hx-file-title">summary.md</div><div class="hx-mini-answer"><span>总金额</span><strong>387</strong><small>平均 193.50</small></div><span class="hx-mini-caption">输出</span></div>
+          </div>
+          <div class="hx-preview-terminal"><span class="hx-terminal-prompt">&gt;</span><span id="hx-hero-line">读回文件，确认计算与产物一致。</span></div>
+          <figcaption class="hx-preview-foot"><span id="hx-hero-status" role="status">结果示例 · 可重放整个过程</span><button class="hx-text-button" type="button" id="hx-hero-play"><svg class="hx-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 5 10 7-10 7Z"/></svg> 重放工具调用</button></figcaption>
+        </figure>
+      </div>
+    </header>
+
+    <div class="hx-course-shell shell">
+      <aside class="hx-sidebar">
+        <details class="hx-toc" id="hx-toc" open>
+          <summary>本页路线 <svg class="hx-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m8 10 4 4 4-4"/></svg></summary>
+          <nav aria-label="本页目录"><ol><li><a href="#installation" data-chapter-link><span class="hx-toc-point" aria-hidden="true"></span>安装</a></li><li><a href="#quick-start" data-chapter-link><span class="hx-toc-point" aria-hidden="true"></span>首次对话</a></li><li><a href="#provider-config" data-chapter-link><span class="hx-toc-point" aria-hidden="true"></span>连接模型</a></li><li><a href="#cli-tools" data-chapter-link><span class="hx-toc-point" aria-hidden="true"></span>命令实验</a></li><li><a href="#config-management" data-chapter-link><span class="hx-toc-point" aria-hidden="true"></span>配置文件</a></li><li><a href="#tool-system" data-chapter-link><span class="hx-toc-point" aria-hidden="true"></span>工具调用</a></li></ol></nav>
+          <a class="hx-toc-back" href="#main">← 返回讲义开头</a>
+        </details>
+      </aside>
+      <article class="hx-lessons">
+        <section class="hx-chapter" id="installation" aria-labelledby="hx-install-title">
+          <header class="hx-chapter-head"><div><h2 id="hx-install-title">先让命令跑起来。</h2></div><a class="hx-doc-link" href="https://hermes-agent.nousresearch.com/docs/getting-started/installation" target="_blank" rel="noopener noreferrer">安装文档 <svg class="hx-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M7 7h10v10"/></svg></a></header>
+          <p class="hx-chapter-lead">选你的系统，安装，然后确认 Shell 能找到 <code>hermes</code>。</p>
+          <div class="hx-install-grid">
+            <div class="hx-install-console">
+              <div class="hx-tabs" role="tablist" aria-label="安装平台" id="hx-install-tabs"><button type="button" role="tab" id="hx-install-unix" aria-selected="true" aria-controls="hx-install-panel" tabindex="0" data-install="unix">macOS / Linux / WSL2</button><button type="button" role="tab" id="hx-install-windows" aria-selected="false" aria-controls="hx-install-panel" tabindex="-1" data-install="windows">Windows</button><button type="button" role="tab" id="hx-install-desktop" aria-selected="false" aria-controls="hx-install-panel" tabindex="-1" data-install="desktop">图形安装</button></div>
+              <div role="tabpanel" id="hx-install-panel" aria-labelledby="hx-install-unix" tabindex="0">
+                <div class="hx-console-head"><span id="hx-install-shell">Shell</span><button type="button" class="hx-copy" data-copy="hx-install-command" aria-label="复制安装命令"><svg class="hx-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V4H4v12h4"/></svg><span>复制命令</span></button></div>
+                <pre class="hx-console-code"><code id="hx-install-command">curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash</code></pre>
+                <div class="hx-install-after"><span>重开终端后</span><pre><code id="hx-install-verify">command -v hermes
+hermes
+hermes doctor</code></pre></div>
+              </div>
+              <p class="hx-panel-note" id="hx-install-note">非 Windows 平台先准备 Git；Linux 还需要 curl 与 xz-utils。安装后重开终端。</p>
+            </div>
+            <div class="hx-diagnostic" id="hx-diagnostic" data-state="ready">
+              <div class="hx-diagnostic-head"><svg class="hx-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="m7 9 3 3-3 3m6 0h4"/></svg><span>启动检查</span><span class="hx-muted">模拟</span></div>
+              <ol class="hx-check-route"><li><span class="hx-check-dot">✓</span><div><strong>找到命令</strong><code>hermes</code></div></li><li><span class="hx-check-dot">✓</span><div><strong>进入交互界面</strong><span>CLI / TUI</span></div></li><li><span class="hx-check-dot">✓</span><div><strong>检查环境</strong><code>hermes doctor</code></div></li></ol>
+              <p class="hx-diagnostic-status" id="hx-diagnostic-status" role="status">演示：命令入口与启动链路可用。</p>
+              <div class="hx-diagnostic-actions"><button type="button" class="hx-text-button" data-diagnostic="ready" aria-pressed="true">正常示例</button><button type="button" class="hx-text-button" data-diagnostic="path" aria-pressed="false">PATH 缺失时？</button></div>
+            </div>
+          </div>
+          <details class="hx-reference"><summary>安装方式、常见错误与验收 <svg class="hx-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m8 10 4 4 4-4"/></svg></summary><div class="hx-reference-body"><p>macOS / Windows 可选图形安装；Linux、macOS、WSL2、Termux 可用 Shell 脚本。执行在线安装脚本前先阅读官方说明。代码目录与用户数据目录 <code>~/.hermes/</code> 的职责不同。</p><pre class="hx-reference-code"><code># macOS / Linux / WSL2 / Termux：
+curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash
+# Windows PowerShell（二选一，不要混用）：
+irm https://hermes-agent.nousresearch.com/install.ps1 | iex</code></pre><p>按当前 Shell 重新载入配置，例如 <code>source ~/.bashrc</code> 或 <code>source ~/.zshrc</code>，也可直接重开终端。</p><div class="hx-table-scroll" tabindex="0" role="region" aria-label="安装排错表"><table class="hx-table"><thead><tr><th scope="col">现象</th><th scope="col">检查与处理</th></tr></thead><tbody><tr><td><code>command not found</code></td><td>检查 <code>command -v hermes</code> 与 <code>echo $PATH</code>；Windows 用 <code>Get-Command hermes</code> 和 <code>$env:PATH</code>。</td></tr><tr><td>缺少 API Key</td><td>运行 <code>hermes model</code> 完成认证；只在 Secret 存储录入凭据。</td></tr><tr><td>配置缺失</td><td>先运行 <code>hermes doctor</code>，按提示补齐，再执行 <code>hermes config check</code>。</td></tr></tbody></table></div><p class="hx-gate"><strong>验收</strong> 命令可执行、交互界面可启动、doctor 可诊断；能说明安装入口与用户目录的用途。</p></div></details>
+        </section>
+
+        <section class="hx-chapter" id="quick-start" aria-labelledby="hx-dialogue-title">
+          <header class="hx-chapter-head"><div><h2 id="hx-dialogue-title">连上模型，聊两轮。</h2></div><a class="hx-doc-link" href="https://hermes-agent.nousresearch.com/docs/zh-Hans/getting-started/quickstart" target="_blank" rel="noopener noreferrer">快速开始 <svg class="hx-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M7 7h10v10"/></svg></a></header>
+          <p class="hx-chapter-lead">不只收到一条回复，还要能继续追问、退出并恢复。</p>
+          <div class="hx-dialogue-workspace">
+            <div class="hx-dialogue-tabs" role="tablist" aria-label="首次对话流程" aria-orientation="vertical"><button type="button" role="tab" id="hx-dialogue-tab-0" aria-selected="true" aria-controls="hx-dialogue-panel" tabindex="0" data-dialogue="0"><span aria-hidden="true">1</span>配置模型</button><button type="button" role="tab" id="hx-dialogue-tab-1" aria-selected="false" aria-controls="hx-dialogue-panel" tabindex="-1" data-dialogue="1"><span aria-hidden="true">2</span>启动对话</button><button type="button" role="tab" id="hx-dialogue-tab-2" aria-selected="false" aria-controls="hx-dialogue-panel" tabindex="-1" data-dialogue="2"><span aria-hidden="true">3</span>继续追问</button><button type="button" role="tab" id="hx-dialogue-tab-3" aria-selected="false" aria-controls="hx-dialogue-panel" tabindex="-1" data-dialogue="3"><span aria-hidden="true">4</span>恢复会话</button></div>
+            <div id="hx-dialogue-panel" role="tabpanel" aria-labelledby="hx-dialogue-tab-0" tabindex="0">
+              <div class="hx-dialogue-command"><pre><code id="hx-dialogue-code">hermes model
+# 可选的 Portal 初始化入口
+hermes setup --portal</code></pre><button type="button" class="hx-copy" data-copy="hx-dialogue-code" aria-label="复制当前对话步骤的命令"><svg class="hx-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V4H4v12h4"/></svg><span>复制</span></button></div>
+              <div class="hx-dialogue-screen"><div class="hx-screen-head"><span id="hx-dialogue-kind">配置向导</span><span class="hx-muted">演示内容</span></div><div id="hx-dialogue-lines" class="hx-dialogue-lines"><div class="hx-dialogue-row"><span>Provider</span><p>&lt;provider-name&gt;</p></div><div class="hx-dialogue-row"><span>Model</span><p>&lt;model-id&gt;</p></div><div class="hx-dialogue-row"><span>认证</span><p>在本机完成 Key / OAuth 配置</p></div></div></div>
+              <div class="hx-dialogue-foot"><p id="hx-dialogue-note">先配置服务和认证，再启动对话。</p><button type="button" id="hx-dialogue-next" class="hx-text-button">下一步 <svg class="hx-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14m-5-5 5 5-5 5"/></svg></button></div>
+            </div>
+          </div>
+          <details class="hx-reference"><summary>Provider 选择与验收 <svg class="hx-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m8 10 4 4 4-4"/></svg></summary><div class="hx-reference-body"><p>可用 Nous Portal、OpenRouter、Anthropic、DeepSeek 或本地服务。具体模型、认证与功能以服务商文档为准。</p><p>学习工具调用时建议选择上下文至少 64K token 的模型。对话、工具定义与结果都占上下文。本地推理需配置上下文，例如 llama.cpp 的 <code>--ctx-size 65536</code>。</p><p class="hx-gate"><strong>验收</strong> 配置正确的 Provider / Model，在同一会话中完成至少两轮对话；用 <code>hermes -c</code> 恢复会话。</p></div></details>
+        </section>
+
+        <section class="hx-chapter" id="provider-config" aria-labelledby="hx-wiring-title">
+          <header class="hx-chapter-head"><div><h2 id="hx-wiring-title">一条请求，五处配置。</h2></div><a class="hx-doc-link" href="https://hermes-agent.nousresearch.com/docs/integrations/providers" target="_blank" rel="noopener noreferrer">Provider 文档 <svg class="hx-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M7 7h10v10"/></svg></a></header>
+          <p class="hx-chapter-lead">点击图中的配置，看看它负责哪一段连接。</p>
+          <figure class="hx-wiring-board">
+            <div class="hx-wiring" id="hx-wiring" data-active="provider">
+              <svg class="hx-wire-svg" viewBox="0 0 660 310" preserveAspectRatio="none" aria-hidden="true"><path class="hx-wire" d="M100 155C160 155 160 70 245 70H490"/><path class="hx-wire" d="M100 155C160 155 160 244 245 244H565"/><path class="hx-wire hx-wire-active" id="hx-active-wire" d="M100 155C160 155 160 70 245 70" pathLength="1"/></svg>
+              <div class="hx-wire-hub"><svg class="hx-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="3"/><path d="M9 2v4m6-4v4m-6 12v4m6-4v4M2 9h4m-4 6h4m12-6h4m-4 6h4"/><rect x="10" y="10" width="4" height="4" rx="1"/></svg><strong>Hermes</strong></div>
+              <button type="button" class="hx-wire-node hx-wire-provider" data-connect="provider" aria-pressed="true" aria-controls="hx-connection-detail"><strong>Provider</strong><span>服务来源</span></button><button type="button" class="hx-wire-node hx-wire-model" data-connect="model" aria-pressed="false" aria-controls="hx-connection-detail"><strong>Model</strong><span>推理模型</span></button><button type="button" class="hx-wire-node hx-wire-endpoint" data-connect="endpoint" aria-pressed="false" aria-controls="hx-connection-detail"><strong>Base URL</strong><span>请求地址</span></button><button type="button" class="hx-wire-node hx-wire-auth" data-connect="auth" aria-pressed="false" aria-controls="hx-connection-detail"><strong>Key / OAuth</strong><span>访问权限</span></button><button type="button" class="hx-wire-node hx-wire-mode" data-connect="mode" aria-pressed="false" aria-controls="hx-connection-detail"><strong>API mode</strong><span>接口协议</span></button>              <span class="hx-wire-caption">模型决定如何推理；Hermes 负责执行工具。</span>
+            </div>
+            <figcaption class="hx-connection-detail" id="hx-connection-detail" aria-live="polite"><div><h3 id="hx-connection-title">Provider · 服务来源</h3><p id="hx-connection-body">请求交给哪家服务？Provider 决定模型服务或兼容接口的来源。</p></div><div class="hx-field-pair"><code id="hx-connection-field">model.provider</code><span id="hx-connection-value">&lt;provider-name&gt;</span></div></figcaption>
+          </figure>
+          <div class="hx-two-entries"><div><code>hermes model</code><span>Shell 中：新增服务、认证与配置</span></div><div><code>/model</code><span>会话内：查看或切换已配置项</span></div></div>
+          <details class="hx-reference"><summary>明确指定模型验证，以及认证和接口排错 <svg class="hx-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m8 10 4 4 4-4"/></svg></summary><div class="hx-reference-body"><pre class="hx-reference-code"><code>hermes model
+hermes config
+hermes chat --provider &lt;provider-name&gt; --model &lt;model-id&gt; -q "请回复：配置验证成功"
+hermes
+# 进入会话后：
+/model</code></pre><ul><li>认证失败：检查 Provider、Key / OAuth 状态和 Secret 存储位置，不打印凭据。</li><li>模型不存在：核对模型标识与 Provider 实际开放的模型。</li><li>接口或网络错误：检查 Base URL 路径、API mode 与目标服务是否兼容。</li></ul><p class="hx-gate"><strong>验收</strong> 解释五个配置的职责；安全配置提供的 API，明确指定 Provider / Model 后得到验证回复。</p></div></details>
+        </section>
+
+        <section class="hx-chapter" id="cli-tools" aria-labelledby="hx-cli-title">
+          <header class="hx-chapter-head"><div><h2 id="hx-cli-title">读懂你的 Agent。</h2></div><a class="hx-doc-link" href="https://hermes-agent.nousresearch.com/docs/zh-Hans/user-guide/cli" target="_blank" rel="noopener noreferrer">CLI 文档 <svg class="hx-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M7 7h10v10"/></svg></a></header>
+          <p class="hx-chapter-lead">选一个命令，观察它揭示的会话信息。</p>
+          <div class="hx-command-workspace">
+            <div id="cmd-list" class="hx-command-tabs" role="tablist" aria-label="CLI 命令" aria-orientation="vertical"><button type="button" class="cmd-item cmd-tab" id="cmd-tab-help" role="tab" aria-selected="true" aria-controls="cmd-panel" tabindex="0" data-cmd="help">/help<svg class="hx-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14m-5-5 5 5-5 5"/></svg></button><button type="button" class="cmd-item cmd-tab" id="cmd-tab-model" role="tab" aria-selected="false" aria-controls="cmd-panel" tabindex="-1" data-cmd="model">/model<svg class="hx-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14m-5-5 5 5-5 5"/></svg></button><button type="button" class="cmd-item cmd-tab" id="cmd-tab-tools" role="tab" aria-selected="false" aria-controls="cmd-panel" tabindex="-1" data-cmd="tools">/tools<svg class="hx-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14m-5-5 5 5-5 5"/></svg></button><button type="button" class="cmd-item cmd-tab" id="cmd-tab-status" role="tab" aria-selected="false" aria-controls="cmd-panel" tabindex="-1" data-cmd="status">/status<svg class="hx-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14m-5-5 5 5-5 5"/></svg></button><button type="button" class="cmd-item cmd-tab" id="cmd-tab-context" role="tab" aria-selected="false" aria-controls="cmd-panel" tabindex="-1" data-cmd="context">/context<svg class="hx-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14m-5-5 5 5-5 5"/></svg></button><button type="button" class="cmd-item cmd-tab" id="cmd-tab-title" role="tab" aria-selected="false" aria-controls="cmd-panel" tabindex="-1" data-cmd="title">/title<svg class="hx-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14m-5-5 5 5-5 5"/></svg></button></div>
+            <div id="cmd-panel" class="hx-command-detail" role="tabpanel" aria-labelledby="cmd-tab-help" tabindex="0"><div class="hx-command-entry"><code id="hx-cmd-entry">/help</code><span>占位输出</span><button type="button" class="hx-copy" data-copy="hx-cmd-entry" aria-label="复制所选斜杠命令"><svg class="hx-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V4H4v12h4"/></svg><span>复制</span></button></div><pre class="hx-command-output" id="cmd-output">/help      查看命令索引
+/model     查看或切换模型
+/tools     查看可用工具
+/status    查看会话状态
+/context   查看 Context 用量
+/title     设置会话标题</pre><div class="hx-command-explainer"><p id="cmd-role">查看当前会话支持的命令。</p><p id="cmd-note">命令随版本变化，以本机实际输出为准。</p></div></div>
+          </div>
+          <div class="hx-context-strip" aria-label="Context 的组成示意，不表示真实使用比例"><span>Context</span><div><span>系统规则</span><span>对话记录</span><span>工具结果</span></div><span class="hx-muted">都会占用 token</span></div>
+          <div class="hx-keyboard"><div><kbd>Alt</kbd> + <kbd>Enter</kbd><span>换行（或 Ctrl + J）</span></div><div><kbd>Ctrl</kbd> + <kbd>C</kbd><span>中断当前生成</span></div><div><kbd>Tab</kbd><span>补全候选项</span></div></div>
+          <details class="hx-reference"><summary>启动方式、快捷键与验收 <svg class="hx-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m8 10 4 4 4-4"/></svg></summary><div class="hx-reference-body"><pre class="hx-reference-code"><code>hermes                           # 交互入口
+hermes --tui                     # TUI 入口
+hermes chat -q "请概括当前任务"    # 单次问题
+hermes sessions list             # 已保存会话
+hermes --continue                # 恢复最近会话
+hermes --resume &lt;session-id&gt;      # 恢复指定会话</code></pre><p><kbd>Enter</kbd> 发送；<kbd>Ctrl + G</kbd> 调用外部编辑器；<kbd>Ctrl + D</kbd> 退出；Unix 下 <kbd>Ctrl + Z</kbd> 挂起。</p><p>命名用 <code>/title 我的项目</code>；其他会话命令见 <code>hermes sessions --help</code>。中断后检查会话状态。</p><p class="hx-gate"><strong>验收</strong> 能解释 Provider / Model、工具摘要、token 使用和压缩状态；完成多行输入、中断和恢复。</p></div></details>
+        </section>
+
+        <section class="hx-chapter" id="config-management" aria-labelledby="hx-config-title">
+          <header class="hx-chapter-head"><div><h2 id="hx-config-title">设置归设置，密钥归密钥。</h2></div><a class="hx-doc-link" href="https://hermes-agent.nousresearch.com/docs/zh-Hans/user-guide/configuration" target="_blank" rel="noopener noreferrer">配置文档 <svg class="hx-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M7 7h10v10"/></svg></a></header>
+          <p class="hx-chapter-lead">打开一个文件，辨认哪些内容可以分享，哪些绝不能公开。</p>
+          <div class="hx-file-workspace">
+            <div class="hx-file-tree"><div class="hx-tree-root"><svg class="hx-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7V4h6l3 3h9v13H3Z"/></svg><code>~/.hermes/</code></div><div role="tablist" aria-label="配置文件" aria-orientation="vertical" id="file-tree"><button type="button" class="file-item file-tab" id="file-tab-config" role="tab" aria-selected="true" aria-controls="file-panel" tabindex="0" data-file="config.yaml"><svg class="hx-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H5v18h14V8Zm0 0v5h5M8 12h8M8 16h5"/></svg><span>config.yaml</span></button><button type="button" class="file-item file-tab" id="file-tab-env" role="tab" aria-selected="false" aria-controls="file-panel" tabindex="-1" data-file=".env"><svg class="hx-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3m-4 4v3"/></svg><span>.env</span></button><button type="button" class="file-item file-tab" id="file-tab-auth" role="tab" aria-selected="false" aria-controls="file-panel" tabindex="-1" data-file="auth.json"><svg class="hx-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3m-4 4v3"/></svg><span>auth.json</span></button><button type="button" class="file-item file-tab" id="file-tab-soul" role="tab" aria-selected="false" aria-controls="file-panel" tabindex="-1" data-file="SOUL.md"><svg class="hx-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H5v18h14V8Zm0 0v5h5M8 12h8M8 16h5"/></svg><span>SOUL.md</span></button></div><div class="hx-tree-other"><span><svg class="hx-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7V4h6l3 3h9v13H3Z"/></svg> sessions/</span><span><svg class="hx-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7V4h6l3 3h9v13H3Z"/></svg> memories/</span><span><svg class="hx-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7V4h6l3 3h9v13H3Z"/></svg> skills/</span><span><svg class="hx-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7V4h6l3 3h9v13H3Z"/></svg> logs/</span></div></div>
+            <div class="hx-file-panel" id="file-panel" role="tabpanel" aria-labelledby="file-tab-config" tabindex="0" data-secret="false"><div class="hx-file-panel-head"><span id="file-name">config.yaml</span><span class="hx-file-tag" id="hx-file-tag">普通配置</span><button type="button" class="hx-copy" data-copy="file-code" aria-label="复制文件教学示例"><svg class="hx-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V4H4v12h4"/></svg><span>复制</span></button></div><pre class="hx-file-code" id="file-code">model:
+  provider: &lt;provider-name&gt;
+  default: &lt;model-id&gt;
+  base_url: https://provider.example/v1
+  api_mode: &lt;api-mode&gt;
+terminal:
+  backend: local</pre><p class="hx-file-desc" id="file-desc">服务商、模型、端点、协议、终端后端。</p></div>
+          </div>
+          <p class="hx-small-note"><svg class="hx-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3m-4 4v3"/></svg> 仅显示教学占位符。</p>
+          <div class="hx-priority"><h3>配置覆盖顺序</h3><ol><li><strong>CLI 参数</strong><span>单次覆盖</span></li><li><strong>config.yaml</strong><span>普通配置</span></li><li><strong>.env</strong><span>环境变量 / Secret</span></li><li><strong>内置默认值</strong><span>未设置时回退</span></li></ol><p>从左到右，优先级由高到低。<code>.env</code> 不公开分享。</p></div>
+          <details class="hx-reference"><summary>配置命令与验收 <svg class="hx-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m8 10 4 4 4-4"/></svg></summary><div class="hx-reference-body"><pre class="hx-reference-code"><code>hermes config
+hermes config edit
+hermes config set model.default &lt;model-id&gt;
+hermes config set terminal.backend docker
+hermes config check</code></pre><p>普通配置可引用环境变量，如 <code>api_key: ${PROVIDER_API_KEY}</code>。</p><ul><li>普通配置：Provider、Model、Base URL、终端后端、工具选项。</li><li>Secret：API Key、Token、OAuth 凭据。不进入公开仓库、截图或日志。</li><li>检查 Git 忽略规则，泄露后轮换凭据。</li></ul><p class="hx-gate"><strong>验收</strong> 说明四个核心文件与优先级；修改非敏感值并检查配置，不展示 Secret。</p></div></details>
+        </section>
+
+        <section class="hx-chapter hx-tools-chapter" id="tool-system" aria-labelledby="hx-loop-title">
+          <header class="hx-chapter-head"><div><h2 id="hx-loop-title">看一次完整的工具调用。</h2></div><a class="hx-doc-link" href="https://hermes-agent.nousresearch.com/docs/zh-Hans/user-guide/features/tools" target="_blank" rel="noopener noreferrer">工具文档 <svg class="hx-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M7 7h10v10"/></svg></a></header>
+          <p class="hx-chapter-lead">同一份 CSV。从一句请求，到一个被重新验证的文件。</p>
+          <div class="hx-story-controls"><span>教学工作台</span><div><button type="button" class="hx-follow" id="hx-follow" aria-pressed="true">随滚动推进</button><button type="button" class="hx-text-button" id="hx-loop-replay"><svg class="hx-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10a8 8 0 1 1 1 8M4 4v6h6"/></svg> 重放流程</button></div></div>
+          <div class="hx-sticky-story" id="hx-story">
+            <div class="hx-loop-stage" id="hx-loop-stage" data-phase="0">
+              <div class="hx-loop-stage-head"><span id="hx-loop-stage-label">理解任务</span><span class="hx-loop-tool" id="hx-loop-tool">模型规划</span></div>
+              <div class="hx-loop-graphic" aria-label="工具循环示意：模型规划，Hermes 执行工具，结果回到模型">
+                <svg viewBox="0 0 420 180" preserveAspectRatio="none" class="hx-loop-svg" role="img" aria-label="模型、Hermes 和工具之间的往返路径"><path class="hx-loop-path" d="M70 90C130 10 285 10 350 90C285 170 130 170 70 90Z"/><path class="hx-loop-current" d="M70 90C130 10 285 10 350 90C285 170 130 170 70 90Z" pathLength="1"/></svg><span class="hx-loop-flow-label hx-loop-request">调用请求</span><span class="hx-loop-flow-label hx-loop-response">工具结果回到模型</span>
+                <div class="hx-loop-model"><svg class="hx-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="3"/><path d="M9 2v4m6-4v4m-6 12v4m6-4v4M2 9h4m-4 6h4m12-6h4m-4 6h4"/><rect x="10" y="10" width="4" height="4" rx="1"/></svg><span>模型</span></div><div class="hx-loop-center"><strong>Hermes</strong><span>执行与编排</span></div><div class="hx-loop-tools"><svg class="hx-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="m7 9 3 3-3 3m6 0h4"/></svg><span>工具</span></div>
+              </div>
+              <div class="hx-loop-file"><span><svg class="hx-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H5v18h14V8Zm0 0v5h5M8 12h8M8 16h5"/></svg><strong id="hx-loop-file-name">sales.csv</strong></span><span id="hx-loop-file-state">待处理</span></div>
+              <pre class="hx-loop-log" id="hx-loop-log">&gt; 读取 sales.csv，统计并写入 summary.md
+
+计划：读取 → 计算 → 写入 → 复核</pre>
+              <p class="hx-loop-caption" id="hx-loop-caption">明确输入、计算和交付物。</p>
+              <div class="hx-loop-step-buttons" role="group" aria-label="手动查看工具调用阶段"><button type="button" data-loop-phase="0" aria-pressed="true" aria-label="查看理解任务阶段"><span aria-hidden="true">1</span></button><button type="button" data-loop-phase="1" aria-pressed="false" aria-label="查看读取输入阶段"><span aria-hidden="true">2</span></button><button type="button" data-loop-phase="2" aria-pressed="false" aria-label="查看计算结果阶段"><span aria-hidden="true">3</span></button><button type="button" data-loop-phase="3" aria-pressed="false" aria-label="查看写入文件阶段"><span aria-hidden="true">4</span></button><button type="button" data-loop-phase="4" aria-pressed="false" aria-label="查看重新验证阶段"><span aria-hidden="true">5</span></button></div>
+              <span class="sr-only" id="hx-loop-status" role="status"></span>
+            </div>
+            <div class="hx-story-steps">
+              <div class="hx-story-step is-current" data-story-phase="0"><span class="hx-story-dot" aria-hidden="true"></span><h3>先明确要交付什么。</h3><div class="hx-task-quote">“读取 sales.csv，统计记录数、总金额和平均金额。写入 summary.md，重新读回验证。”</div><p>输入、计算、输出与验证，都写进任务要求。</p></div>
+              <div class="hx-story-step" data-story-phase="1"><span class="hx-story-dot" aria-hidden="true"></span><h3>读取，而不是猜测。</h3><table class="hx-source-table" aria-label="CSV 两条记录"><thead><tr><th scope="col">category</th><th scope="col">amount</th></tr></thead><tbody><tr><td>Software</td><td>299</td></tr><tr><td>Media</td><td>88</td></tr></tbody></table><p>读取工具把实际文件内容交回模型。</p></div>
+              <div class="hx-story-step" data-story-phase="2"><span class="hx-story-dot" aria-hidden="true"></span><h3>让计算留下证据。</h3><div class="hx-equation"><span>299 + 88</span><b>= 387</b></div><p>2 条记录，平均金额为 193.50。工具输出成为下一步的依据。</p></div>
+              <div class="hx-story-step" data-story-phase="3"><span class="hx-story-dot" aria-hidden="true"></span><h3>把结果交付为文件。</h3><div class="hx-output-specimen"><svg class="hx-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H5v18h14V8Zm0 0v5h5M8 12h8M8 16h5"/></svg><div><strong>summary.md</strong><span>记录数、总金额、平均金额、分类</span></div></div><p>由可用文件工具或 terminal 写入，不只在聊天里描述结果。</p></div>
+              <div class="hx-story-step" data-story-phase="4"><span class="hx-story-dot" aria-hidden="true"></span><h3>“完成了”不是验收。</h3><div class="hx-verify-stamp"><svg class="hx-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg><span>重新读取 · 数值一致</span></div><p>人工核对文件存在、数值正确，并记录本次实际调用的工具。</p><dl class="hx-verify-ledger" aria-label="预期验收结果"><div><dt>记录数</dt><dd>2</dd></div><div><dt>总金额</dt><dd>387</dd></div><div><dt>平均金额</dt><dd>193.50</dd></div><div><dt>分类</dt><dd>Software / Media</dd></div></dl></div>
+            </div>
+          </div>
+          <div class="hx-practice-command"><div class="hx-practice-command-head"><h3>在你自己的终端里试一次</h3><button type="button" class="hx-copy" data-copy="hx-practice-code" aria-label="复制 CSV 练习命令"><svg class="hx-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V4H4v12h4"/></svg><span>复制命令</span></button></div><pre class="hx-reference-code"><code id="hx-practice-code"># Bash：先创建两条示例记录
+printf "category,amount\nSoftware,299\nMedia,88\n" &gt; sales.csv
+hermes
+# 进入交互界面后输入：
+# 读取 sales.csv，统计记录数、总金额和平均金额，
+# 将结果写入 summary.md；重新读取验证，并说明实际使用的工具。</code></pre><details class="hx-inline-details"><summary>Windows PowerShell 的准备命令</summary><pre class="hx-reference-code"><code>"category,amount`nSoftware,299`nMedia,88" | Set-Content -Encoding utf8 sales.csv
+hermes
+# 完成任务后在 PowerShell 验证：
+Get-Content summary.md</code></pre></details><p>Bash 中用 <code>cat summary.md</code> 复核。网页只演示过程，真实文件需要在你自己的运行环境中生成。</p></div>
+          <details class="hx-reference"><summary>工具类型与验收 <svg class="hx-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m8 10 4 4 4-4"/></svg></summary><div class="hx-reference-body"><div class="hx-table-scroll" tabindex="0" role="region" aria-label="工具分类表"><table class="hx-table"><thead><tr><th scope="col">工具类别</th><th scope="col">职责</th></tr></thead><tbody><tr><td>terminal / process</td><td>执行命令与管理进程</td></tr><tr><td>read_file / patch</td><td>读取与修改文件</td></tr><tr><td>web_search / browser</td><td>检索与浏览网页</td></tr><tr><td>memory / session_search</td><td>查找记忆与历史会话</td></tr><tr><td>vision / image / speech</td><td>图像与语音能力</td></tr><tr><td>delegation / skills</td><td>委派与可复用技能</td></tr></tbody></table></div><pre class="hx-reference-code"><code>hermes tools
+hermes chat --toolsets "web,terminal"
+hermes config set agent.toolsets "web,file,terminal"</code></pre><p>实际能力以 <code>/tools</code> 输出为准。<code>local</code> 在本机执行；<code>docker</code> 放入容器，但仍需审查权限。</p><p>另一练习：让 Hermes 查找项目里最大的 10 个文件。</p><p class="hx-gate"><strong>验收</strong> 读入真实 CSV，得到 2 条记录、总金额 387、平均 193.50、Software / Media；产物真实存在并被读回复核。</p></div></details>
+        </section>
+        <footer class="hx-lesson-end"><div><svg class="hx-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg><h2>一次交付，把六个环节串起来。</h2></div><p>能启动、能对话、能解释配置，也能亲手检查工具产物。<br />下一步再探索技能、记忆、消息平台与任务自动化。</p><div><a class="line-link" href="https://hermes-agent.nousresearch.com/docs/zh-Hans" target="_blank" rel="noopener noreferrer">继续阅读官方文档 <svg class="hx-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M7 7h10v10"/></svg></a></div></footer>
+      </article>
+    </div>
+    <nav class="lesson-nav shell" aria-label="讲义导航">
+  <a class="lesson-nav__item lesson-nav__item--course" href="#main"><span>返回开头</span><strong>本篇讲义</strong></a>
+</nav>
+  </main>
+  <footer class="site-footer">
+    <div class="shell site-footer__row">
+      <nav class="site-footer__nav" aria-label="页脚导航">
+                                        <a href="#installation">讲义正文</a>
+                        <a href="https://hermes-agent.nousresearch.com/docs/zh-Hans" target="_blank" rel="noopener noreferrer">官方文档</a>
+              </nav>
+      <p>© 2026 朱晨辉</p>
+    </div>
+    <p class="site-footer__sign" aria-hidden="true"><span style="--i:0">L</span><span style="--i:1">u</span><span style="--i:2">c</span><span style="--i:3">i</span><span style="--i:4">a</span><span style="--i:5">n</span><i></i></p>
+  </footer>
+  <div class="hx-toast" id="hx-toast" role="status" aria-live="polite"></div>
+  <noscript><p class="shell hx-noscript">交互演示需要 JavaScript。正文、默认示例、参考命令与验收说明仍可阅读；展开参考区查看其他安装方式。</p></noscript>
+  <script type="application/json" id="hx-lesson-data">{"install":{"unix":{"label":"macOS \/ Linux \/ WSL2","shell":"Shell","code":"curl -fsSL https:\/\/hermes-agent.nousresearch.com\/install.sh | bash","note":"非 Windows 平台先准备 Git；Linux 还需要 curl 与 xz-utils。安装后重开终端。","verify":"command -v hermes\nhermes\nhermes doctor"},"windows":{"label":"Windows","shell":"PowerShell","code":"irm https:\/\/hermes-agent.nousresearch.com\/install.ps1 | iex","note":"在原生 PowerShell 中安装，不要混用 Bash 命令。完成后重新打开终端。","verify":"Get-Command hermes\nhermes\nhermes doctor"},"desktop":{"label":"图形安装","shell":"Desktop 安装器","code":"# macOS \/ Windows\n# 从官方安装页选择对应的 Desktop 安装器\n# 安装后重新打开终端，运行：\nhermes","note":"图形安装的下载入口与当前支持情况，以官方安装文档为准。","verify":"hermes\nhermes doctor"}},"dialogue":[{"label":"配置模型","code":"hermes model\n# 可选的 Portal 初始化入口\nhermes setup --portal","kind":"配置向导","lines":[{"key":"Provider","text":"\u003Cprovider-name\u003E"},{"key":"Model","text":"\u003Cmodel-id\u003E"},{"key":"认证","text":"在本机完成 Key \/ OAuth 配置"}],"note":"先配置服务和认证，再启动对话。"},{"label":"启动对话","code":"hermes\n# 或选择 TUI\nhermes --tui","kind":"第一轮对话","lines":[{"key":"你","text":"工具调用和普通聊天有什么不同？"},{"key":"Hermes","text":"模型提出工具调用，Hermes 执行并把结果交回模型。"}],"note":"核对启动信息中的 Provider \/ Model。"},{"label":"继续追问","code":"hermes chat -q \u0022请用三点解释工具调用，并给出一个可验证示例\u0022","kind":"连续对话示例","lines":[{"key":"你","text":"给一个可以人工验证的任务。"},{"key":"Hermes","text":"读取两行 CSV，计算总金额，写入文件，再重新读取核对。"}],"note":"实际练习时在同一会话中继续追问。"},{"label":"恢复会话","code":"hermes sessions list\nhermes --continue\n# 简写：hermes -c","kind":"恢复最近会话","lines":[{"key":"Shell","text":"hermes --continue"},{"key":"会话","text":"加载已保存的对话与工具调用记录"}],"note":"压缩后保留整理过的上下文。"}],"connections":{"provider":{"title":"Provider · 服务来源","body":"请求交给哪家服务？Provider 决定模型服务或兼容接口的来源。","field":"model.provider","value":"\u003Cprovider-name\u003E"},"model":{"title":"Model · 推理模型","body":"由哪个模型推理？标识必须与服务商实际开放的模型一致。","field":"model.default","value":"\u003Cmodel-id\u003E"},"endpoint":{"title":"Base URL · 请求地址","body":"请求发到哪里？使用本地或兼容 API 时，尤其要检查端点和路径。","field":"model.base_url","value":"https:\/\/provider.example\/v1"},"auth":{"title":"API Key \/ OAuth · 访问权限","body":"凭什么允许访问？Key 放在 Secret 存储，OAuth 凭据由认证流程管理。","field":"Secret \/ 认证存储","value":"不写入公开配置或聊天记录"},"mode":{"title":"API mode · 接口协议","body":"用什么请求与响应格式？API mode 必须与目标服务兼容。","field":"model.api_mode","value":"\u003Capi-mode\u003E"}},"commands":{"help":{"label":"\/help","role":"查看当前会话支持的命令。","output":"\/help      查看命令索引\n\/model     查看或切换模型\n\/tools     查看可用工具\n\/status    查看会话状态\n\/context   查看 Context 用量\n\/title     设置会话标题","note":"命令随版本变化，以本机实际输出为准。"},"model":{"label":"\/model","role":"查看或切换已配置的模型。","output":"Provider   \u003Cprovider-name\u003E\nModel      \u003Cmodel-id\u003E\n可选项     \u003Cconfigured-models\u003E","note":"新增服务用 Shell 中的 hermes model。"},"tools":{"label":"\/tools","role":"查看实际能调用的工具。","output":"terminal    执行受控命令\nprocess     管理已启动进程\nread_file   读取指定文件\npatch       修改指定文件\n其他        \u003Cconfigured-tools\u003E","note":"执行任务前先检查工具权限。"},"status":{"label":"\/status","role":"核对会话、模型、工具与文件摘要。","output":"Session     \u003Csession-state\u003E\nProvider    \u003Cprovider-name\u003E\nModel       \u003Cmodel-id\u003E\nTools       \u003Cenabled-toolsets\u003E\nFiles       \u003Cfile-summary\u003E","note":"异常时先检查会话状态，再运行 hermes doctor。"},"context":{"label":"\/context","role":"查看已用 token、上限与压缩状态。","output":"Used        \u003Cused-tokens\u003E\nLimit       \u003Ccontext-limit\u003E\nUsage       \u003Cusage-percent\u003E\nCompaction  \u003Ccompaction-state\u003E","note":"接近上限时，检查压缩是否保留了关键信息。"},"title":{"label":"\/title","role":"给当前会话命名。","output":"\u003E \/title CSV 汇总练习\n\n\u003C会话标题已更新\u003E","note":"用 hermes sessions list 查找会话。"}},"files":{"config.yaml":{"code":"model:\n  provider: \u003Cprovider-name\u003E\n  default: \u003Cmodel-id\u003E\n  base_url: https:\/\/provider.example\/v1\n  api_mode: \u003Capi-mode\u003E\nterminal:\n  backend: local","desc":"服务商、模型、端点、协议、终端后端。","tag":"普通配置","secret":false},".env":{"code":"# 教学占位符，不能替换成真实 Key 发给他人\nPROVIDER_API_KEY=your_api_key_here","desc":"API Key、Token 等 Secret。不要展示或提交仓库。","tag":"不公开","secret":true},"auth.json":{"code":"OAuth 认证存储\n\n由认证流程管理。\n本演示不显示任何凭据字段或内容。","desc":"OAuth 凭据。由认证流程管理。","tag":"不公开","secret":true},"SOUL.md":{"code":"# Agent 身份\n\n描述角色、表达方式与行为边界。\n\n不要在这里保存敏感凭据。","desc":"描述 Agent 身份与行为。","tag":"行为说明","secret":false}},"loop":[{"label":"理解任务","tool":"模型规划","log":"\u003E 读取 sales.csv，统计并写入 summary.md\n\n计划：读取 → 计算 → 写入 → 复核","caption":"明确输入、计算和交付物。","file":"sales.csv"},{"label":"读取输入","tool":"read_file","log":"read_file → sales.csv\n\ncategory,amount\nSoftware,299\nMedia,88","caption":"工具返回两条记录，结果进入模型上下文。","file":"sales.csv"},{"label":"计算结果","tool":"terminal \/ 计算工具","log":"记录数   2\n总金额   299 + 88 = 387\n平均值   387 ÷ 2 = 193.50","caption":"计算需要真实执行或核算，不只生成“已完成”的回复。","file":"sales.csv"},{"label":"写入文件","tool":"文件工具 \/ terminal","log":"写入 → summary.md\n\n记录数：2\n总金额：387\n平均金额：193.50\n分类：Software、Media","caption":"把结果保存为文件，让交付物可被人工检查。","file":"summary.md"},{"label":"重新验证","tool":"read_file","log":"read_file → summary.md\n\n✓ 记录数 2\n✓ 总金额 387\n✓ 平均金额 193.50\n✓ Software \/ Media","caption":"重新读回产物，核对数值与文件是否真的存在。","file":"summary.md"}]}</script>
+</body>
+</html>

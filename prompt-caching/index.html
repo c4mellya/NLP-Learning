@@ -1,0 +1,332 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#eeebe4">
+  <title>Prompt Caching 与稳定前缀 · NLP &amp; Agent · Learning · Lucian</title>
+  <meta name="description" content="改一个字，整段缓存失效：从 KV 前缀复用到 OpenAI 与 Anthropic 的两种写法。">    <link rel="icon" href="assets/favicon.ico?v=1" sizes="16x16 32x32 48x48 64x64" />
+  <link rel="icon" type="image/png" href="assets/favicon.png?v=1" sizes="64x64" />
+  <link rel="stylesheet" href="assets/fonts.css">
+  <link rel="stylesheet" href="assets/site.css?v=2">
+    <link rel="stylesheet" href="assets/learning.css?v=2">
+    <link rel="stylesheet" href="assets/lesson-caching.css?v=2">
+    <script src="assets/main.js?v=1" defer></script>
+  <script src="assets/lessons/caching.js?v=1" defer></script>
+</head>
+<body class="learning-lesson caching-lab">
+  <header class="site-header">
+    <div class="shell site-header__bar">
+      <a class="site-brand" href="#main" aria-label="Lucian · 朱晨辉，回到讲义开头">
+        <span class="site-brand__mark">Lucian<i aria-hidden="true"></i></span>
+        <span class="site-brand__name">朱晨辉</span>
+      </a>
+      <nav class="site-nav" id="site-nav" aria-label="主导航">
+        <ul>
+                              <li>
+                        <a class="site-nav__link" href="#main">概览</a>
+                      </li>
+                                        <li>
+                        <a class="site-nav__link" href="#prefix" aria-current="page">讲义</a>
+                      </li>
+                              <li>
+                        <a class="site-nav__link" href="#api">参考资料</a>
+                      </li>
+                  </ul>
+      </nav>
+      <div class="site-header__tools">
+        <button class="site-motion" type="button" data-motion-toggle aria-pressed="true" aria-label="暂停动态效果"><span aria-hidden="true"></span></button>
+        <button class="site-menu" type="button" aria-label="打开菜单" aria-expanded="false" aria-controls="site-nav"><span aria-hidden="true"></span><span aria-hidden="true"></span></button>
+      </div>
+    </div>
+  </header>
+  <main class="pc" id="main" tabindex="-1">
+    <header class="pc-hero shell">
+      <nav class="crumbs" aria-label="面包屑">
+  <ol>
+        <li>
+            <span>Learning</span>
+          </li>
+        <li>
+            <span>NLP &amp; Agent</span>
+          </li>
+        <li>
+            <span aria-current="page">Prompt Caching 与稳定前缀</span>
+          </li>
+      </ol>
+</nav>
+      <div class="pc-hero-grid">
+        <div class="pc-hero-copy">
+          <h1 class="pc-title"><span class="pc-title__en" lang="en">Prompt Caching</span><span class="pc-title__cn">为什么前缀稳定能省钱</span></h1>
+          <p>模型按顺序读 prompt。开头和上一次一模一样，算过的部分就能直接复用；改动一个字，从那里往后全部重新计算。</p>
+          <div class="pc-hero-actions">
+            <a class="btn btn-solid" href="#prefix">动手改一个字 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M5 12h14m-5-5 5 5-5 5"/></svg></a>
+            <a class="line-link" href="#api">对比两家 API</a>
+          </div>
+        </div>
+        <figure class="pc-hero-demo" id="pc-hero">
+          <div class="pc-board-head"><strong>两次请求，只差一个数字</strong><span>示意</span></div>
+          <div class="pc-hero-lines" data-hero-lines aria-hidden="true">
+                        <div class="pc-hero-row"><span class="pc-hero-role">system</span><span class="pc-hero-text"><span class="is-hit">当</span><span class="is-hit">前</span><span class="is-hit">时</span><span class="is-hit">间</span> <span class="is-hit">0</span><span class="is-hit">7</span><span class="is-hit">:</span><span class="is-hit">1</span><span class="is-hit">9</span><span class="is-hit">:</span><span class="is-hit">4</span><span class="is-miss is-fork">7</span></span></div>
+                        <div class="pc-hero-row"><span class="pc-hero-role">system</span><span class="pc-hero-text"><span class="is-hit">你</span><span class="is-hit">是</span><span class="is-hit">课</span><span class="is-hit">程</span><span class="is-hit">助</span><span class="is-hit">教</span><span class="is-hit">，</span><span class="is-hit">只</span><span class="is-hit">依</span><span class="is-hit">据</span><span class="is-hit">参</span><span class="is-hit">考</span><span class="is-hit">资</span><span class="is-hit">料</span><span class="is-hit">回</span><span class="is-hit">答</span><span class="is-hit">。</span></span></div>
+                        <div class="pc-hero-row"><span class="pc-hero-role">资料</span><span class="pc-hero-text"><span class="is-hit">前</span><span class="is-hit">缀</span><span class="is-hit">缓</span><span class="is-hit">存</span><span class="is-hit">复</span><span class="is-hit">用</span><span class="is-hit">相</span><span class="is-hit">同</span><span class="is-hit">开</span><span class="is-hit">头</span><span class="is-hit">的</span><span class="is-hit">计</span><span class="is-hit">算</span><span class="is-hit">结</span><span class="is-hit">果</span><span class="is-hit">，</span><span class="is-hit">只</span><span class="is-hit">有</span><span class="is-hit">逐</span><span class="is-hit">字</span><span class="is-hit">一</span><span class="is-hit">致</span><span class="is-hit">才</span><span class="is-hit">会</span><span class="is-hit">命</span><span class="is-hit">中</span><span class="is-hit">。</span></span></div>
+                        <div class="pc-hero-row"><span class="pc-hero-role">user</span><span class="pc-hero-text"><span class="is-hit">为</span><span class="is-hit">什</span><span class="is-hit">么</span><span class="is-hit">改</span><span class="is-hit">一</span><span class="is-hit">个</span><span class="is-hit">字</span><span class="is-hit">就</span><span class="is-hit">会</span><span class="is-hit">失</span><span class="is-hit">效</span><span class="is-hit">？</span></span></div>
+                      </div>
+          <figcaption class="pc-hero-foot">
+            <div class="pc-hero-meter"><span>命中缓存</span><strong data-hero-pct>16%</strong></div>
+            <p data-hero-status>时间戳在最前面：改了 1 个字符，后面的内容全部重新计算。</p>
+            <div class="pc-hero-scenes" role="group" aria-label="时间戳的位置">
+              <button type="button" class="pc-toggle pc-toggle--night" data-hero-scene="head" aria-pressed="true">时间戳在开头</button>
+              <button type="button" class="pc-toggle pc-toggle--night" data-hero-scene="tail" aria-pressed="false">时间戳在末尾</button>
+            </div>
+          </figcaption>
+        </figure>
+      </div>
+    </header>
+
+    <section class="pc-chapter shell" id="prefix" aria-labelledby="pc-prefix-title">
+      <header class="pc-chapter-head"><h2 id="pc-prefix-title">改一个字，后面全部重算。</h2></header>
+      <p class="pc-lead">左边是一次请求的四段内容，按发送顺序排列。随便改一处，右边会实时和上一次请求对比：分叉点之前命中缓存，之后重新计算。</p>
+
+      <div class="pc-lab" id="pc-lab" data-provider="openai">
+        <div class="pc-editors">
+          <div class="pc-scenarios" role="group" aria-label="常见改动">
+            <button type="button" class="pc-toggle" data-scenario="stamp">在规则开头写入当前时间</button>
+            <button type="button" class="pc-toggle" data-scenario="swap">调换两个工具的顺序</button>
+            <button type="button" class="pc-toggle" data-scenario="question">换一个问题</button>
+          </div>
+                    <div class="pc-field">
+            <div class="pc-field__head">
+              <label for="pc-seg-tools">工具定义</label>
+              <label class="pc-bp"><input type="checkbox" data-bp="tools" /> cache_control</label>
+            </div>
+            <textarea id="pc-seg-tools" data-seg="tools" rows="3" spellcheck="false">search_notes(query) → 在课程笔记中检索段落
+read_file(path) → 读取指定文件</textarea>
+          </div>
+                    <div class="pc-field">
+            <div class="pc-field__head">
+              <label for="pc-seg-system">系统规则</label>
+              <label class="pc-bp"><input type="checkbox" data-bp="system" /> cache_control</label>
+            </div>
+            <textarea id="pc-seg-system" data-seg="system" rows="3" spellcheck="false">你是《大模型与自然语言处理》课程助教。只依据参考资料回答；资料没有的内容，直接说明不知道。回答先给结论，再给一个可以验证的例子。</textarea>
+          </div>
+                    <div class="pc-field">
+            <div class="pc-field__head">
+              <label for="pc-seg-docs">参考资料</label>
+              <label class="pc-bp"><input type="checkbox" data-bp="docs" checked /> cache_control</label>
+            </div>
+            <textarea id="pc-seg-docs" data-seg="docs" rows="4" spellcheck="false">Prompt Caching 复用相同前缀已经算过的结果。缓存只在前缀逐字一致时命中，任何一处改动都会让之后的内容重新计算。把稳定的工具定义、系统规则和参考资料放在前面，把每次变化的问题放在最后。</textarea>
+          </div>
+                    <div class="pc-field">
+            <div class="pc-field__head">
+              <label for="pc-seg-question">用户问题</label>
+              <label class="pc-bp"><input type="checkbox" data-bp="question" /> cache_control</label>
+            </div>
+            <textarea id="pc-seg-question" data-seg="question" rows="2" spellcheck="false">为什么在 system 开头写时间戳会让缓存失效？</textarea>
+          </div>
+                  </div>
+
+        <div class="pc-board" aria-labelledby="pc-board-title">
+          <div class="pc-board__head">
+            <h3 id="pc-board-title" class="sr-only">这次请求的缓存情况</h3>
+            <div class="pc-providers" role="group" aria-label="缓存规则">
+              <button type="button" class="pc-toggle" data-provider="openai" aria-pressed="true">OpenAI</button>
+              <button type="button" class="pc-toggle" data-provider="anthropic" aria-pressed="false">Anthropic</button>
+            </div>
+            <span class="pc-muted">模拟</span>
+          </div>
+          <div class="pc-board__stat"><strong data-hit>—</strong><span>/ <b data-total>—</b> token 命中</span></div>
+          <p class="pc-status" role="status" data-status>需要 JavaScript 才能实时对比；下方的原理与代码可以直接阅读。</p>
+          <div class="pc-grid" data-grid aria-hidden="true"></div>
+          <ul class="pc-legend">
+            <li><i class="pc-cell is-hit"></i>命中缓存</li>
+            <li data-legend="write"><i class="pc-cell is-write"></i>写入缓存</li>
+            <li><i class="pc-cell is-miss"></i>重新计算</li>
+          </ul>
+          <pre class="pc-usage" data-usage aria-label="响应中的用量字段"></pre>
+          <div class="pc-cost">
+            <div class="pc-cost__track" aria-hidden="true"><span class="pc-cost__fill" data-cost-fill></span></div>
+            <p data-cost-text>这次输入成本 ≈ 不用缓存时的 —</p>
+          </div>
+          <div class="pc-board__actions">
+            <button type="button" class="btn btn-solid" data-send>发送这次请求</button>
+            <button type="button" class="btn" data-expire>6 分钟后再发</button>
+            <button type="button" class="pc-text-button" data-reset>恢复示例</button>
+          </div>
+        </div>
+      </div>
+      <p class="pc-note">演示用简化规则切分 token，长度按 1:16 缩小：真实服务从 1024 tokens 起才缓存，OpenAI 以 128 tokens 为步长匹配。成本按 OpenAI GPT-4.1（缓存输入为常规价的 1/4）与 Anthropic（写入 1.25×、读取 0.1×）的倍率估算。</p>
+
+      <div class="pc-principle">
+        <div class="pc-formula" aria-label="第 j 个 token 的 K 和 V 只由前 j 个 token 决定">
+          <code>K<sub>j</sub>, V<sub>j</sub> = f(x<sub>1</sub>, …, x<sub>j</sub>)</code>
+          <code>x<sub>i</sub> 变了 ⇒ 所有 j ≥ i 都要重算</code>
+        </div>
+        <div class="pc-principle__text">
+          <h3>为什么必须从头一致</h3>
+          <p>解码器用的是因果注意力：第 <em>j</em> 个 token 的 Key 和 Value 只由它自己和前面的 token 决定。服务端把一段前缀算好的结果保存下来，下次遇到同样的开头，就跳过这段计算，从分叉处接着算。</p>
+          <p>反过来，第 <em>i</em> 个 token 一变，后面每个 token 都在注意力里“看过”它，它们的结果全部过期。所以缓存只能匹配前缀，不能跳过中间的改动去复用后半段。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="pc-chapter shell" id="api" aria-labelledby="pc-api-title">
+      <header class="pc-chapter-head">
+        <h2 id="pc-api-title">同一件事，两种 API 写法。</h2>
+        <div class="pc-doc-links"><a class="line-link" href="https://platform.openai.com/docs/guides/prompt-caching" target="_blank" rel="noopener noreferrer">OpenAI 文档 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M7 17 17 7M7 7h10v10"/></svg></a><a class="line-link" href="https://docs.anthropic.com/en/docs/build-with-claude/prompt-caching" target="_blank" rel="noopener noreferrer">Anthropic 文档 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M7 17 17 7M7 7h10v10"/></svg></a></div>
+      </header>
+      <p class="pc-lead">OpenAI 自动缓存，你只需要让开头保持稳定；Anthropic 要求你在内容块上标出断点，并为写入多付一点钱。</p>
+      <div class="pc-code-pair">
+        <figure class="pc-code">
+          <figcaption>OpenAI · 自动缓存</figcaption>
+<pre><code>resp = client.chat.completions.create(
+    model="gpt-4.1",
+    messages=[
+        {"role": "system", "content": RULES + DOCS},  # 稳定前缀
+        {"role": "user", "content": question},         # 每次变化
+    ],
+    prompt_cache_key="course-ta",  # 可选：相同前缀尽量路由到一起
+)
+resp.usage.prompt_tokens_details.cached_tokens</code></pre>
+        </figure>
+        <figure class="pc-code">
+          <figcaption>Anthropic · 显式断点</figcaption>
+<pre><code>resp = client.messages.create(
+    model="claude-sonnet-4-5",
+    max_tokens=1024,
+    system=[
+        {"type": "text", "text": RULES},
+        {"type": "text", "text": DOCS,
+         "cache_control": {"type": "ephemeral"}},  # 缓存到这里为止
+    ],
+    messages=[{"role": "user", "content": question}],
+)
+resp.usage.cache_read_input_tokens</code></pre>
+        </figure>
+      </div>
+      <div class="pc-table-scroll" tabindex="0" role="region" aria-label="OpenAI 与 Anthropic 缓存规则对比">
+        <table class="pc-table">
+          <thead><tr><th scope="col"><span class="sr-only">项目</span></th><th scope="col">OpenAI</th><th scope="col">Anthropic</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">开启方式</th><td>支持的模型自动开启，不用改代码</td><td>在 tools、system 或 messages 的内容块上加 <code>cache_control</code>，最多 4 个断点</td></tr>
+            <tr><th scope="row">前缀顺序</th><td>按请求内容的先后，tools 也算在内</td><td>固定为 tools → system → messages；改 tools 会让后面全部失效</td></tr>
+            <tr><th scope="row">最短长度</th><td>1024 tokens</td><td>随模型不同，见官方表格</td></tr>
+            <tr><th scope="row">如何匹配</th><td>最长的相同前缀，以 128 tokens 为步长</td><td>在断点处查找；没命中时向前回溯约 20 个内容块</td></tr>
+            <tr><th scope="row">有效期</th><td>闲置 5–10 分钟后清除，最长约 1 小时；部分模型可设 <code>prompt_cache_retention</code> 延长</td><td>默认 5 分钟，每次命中重新计时；可设 <code>"ttl": "1h"</code></td></tr>
+            <tr><th scope="row">价格</th><td>命中部分按折扣价，没有写入费</td><td>写入 1.25×（1 小时缓存为 2×），读取 0.1×</td></tr>
+            <tr><th scope="row">用量字段</th><td><code>prompt_tokens_details.cached_tokens</code></td><td><code>cache_creation_input_tokens</code>、<code>cache_read_input_tokens</code>、<code>input_tokens</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="pc-note">Anthropic 的 <code>input_tokens</code> 只统计最后一个断点之后的部分，三项相加才是总输入。数值会随官方更新变化，以上方文档为准。</p>
+    </section>
+
+    <section class="pc-chapter shell" id="agent" aria-labelledby="pc-agent-title">
+      <header class="pc-chapter-head"><h2 id="pc-agent-title">Agent 每一轮都重发全部上下文。</h2></header>
+      <p class="pc-lead">工具定义、规则和历史只增不改，新一轮只多出末尾一段，前面全部命中。一个时间戳放错位置，每轮都在付写入费，却一次也读不到。</p>
+      <div class="pc-turns" id="pc-turns" data-scenario="stable">
+        <div class="pc-turns__plot">
+          <div class="pc-turns__chart" aria-hidden="true">
+                        <div class="pc-bar" style="--t: 38.24; --r: 0"><span class="pc-bar__read"></span><span class="pc-bar__write"></span></div>
+                        <div class="pc-bar" style="--t: 47.06; --r: 81.25"><span class="pc-bar__read"></span><span class="pc-bar__write"></span></div>
+                        <div class="pc-bar" style="--t: 55.88; --r: 84.21"><span class="pc-bar__read"></span><span class="pc-bar__write"></span></div>
+                        <div class="pc-bar" style="--t: 64.71; --r: 86.36"><span class="pc-bar__read"></span><span class="pc-bar__write"></span></div>
+                        <div class="pc-bar" style="--t: 73.53; --r: 88"><span class="pc-bar__read"></span><span class="pc-bar__write"></span></div>
+                        <div class="pc-bar" style="--t: 82.35; --r: 89.29"><span class="pc-bar__read"></span><span class="pc-bar__write"></span></div>
+                        <div class="pc-bar" style="--t: 91.18; --r: 90.32"><span class="pc-bar__read"></span><span class="pc-bar__write"></span></div>
+                        <div class="pc-bar" style="--t: 100; --r: 91.18"><span class="pc-bar__read"></span><span class="pc-bar__write"></span></div>
+                      </div>
+          <ol class="pc-turns__labels" aria-hidden="true"><li>1</li><li>2</li><li>3</li><li>4</li><li>5</li><li>6</li><li>7</li><li>8</li></ol>
+          <ul class="pc-legend pc-legend--plain"><li><i class="pc-cell is-hit"></i>读取缓存</li><li><i class="pc-cell is-write"></i>写入缓存</li></ul>
+        </div>
+        <div class="pc-turns__side">
+          <div class="pc-scenarios" role="group" aria-label="前缀是否稳定">
+            <button type="button" class="pc-toggle" data-turns="stable" aria-pressed="true">前缀稳定</button>
+            <button type="button" class="pc-toggle" data-turns="stamp" aria-pressed="false">开头带时间戳</button>
+          </div>
+          <p class="pc-turns__value"><strong data-turns-value>31%</strong></p>
+          <p class="pc-turns__caption" role="status" data-turns-caption>8 轮累计输入成本，相对完全不用缓存。</p>
+          <p class="pc-note">示意：固定前缀 6000 token，每轮追加 1800 token，断点放在最新一条消息上，按 Anthropic 5 分钟缓存的倍率计算。</p>
+        </div>
+      </div>
+      <ul class="pc-rules">
+        <li><strong>在 system 里写当前时间、请求 ID、随机示例</strong><p>移到最后一条消息，或者干脆不写。</p></li>
+        <li><strong>工具列表每轮增删、序列化顺序不固定</strong><p>固定工具集和字段顺序；工具一变，后面的缓存全部失效。</p></li>
+        <li><strong>改写或删除历史消息</strong><p>历史只追加。必须压缩上下文时，接受这一轮重新写入。</p></li>
+        <li><strong>把检索结果插到规则中间</strong><p>放在稳定内容之后、问题之前。</p></li>
+        <li><strong>中途切换模型</strong><p>缓存不在模型之间共享，换模型就从头计算。</p></li>
+      </ul>
+    </section>
+
+    <section class="pc-chapter shell" id="practice" aria-labelledby="pc-practice-title">
+      <header class="pc-chapter-head"><h2 id="pc-practice-title">用真实请求验证一次。</h2></header>
+      <ol class="pc-steps">
+        <li>准备一份超过最短可缓存长度的固定资料，保存为 <code>course_notes.md</code>。</li>
+        <li>连续发送两次，只改问题，读响应里的用量字段。</li>
+        <li>在资料开头加一个字符，再发一次，看命中回到 0。</li>
+      </ol>
+      <div class="pc-practice">
+        <div class="pc-tabs" role="tablist" aria-label="SDK">
+                    <button type="button" role="tab" id="pc-tab-openai" aria-selected="true" aria-controls="pc-panel-openai" tabindex="0">OpenAI</button>
+                    <button type="button" role="tab" id="pc-tab-anthropic" aria-selected="false" aria-controls="pc-panel-anthropic" tabindex="-1">Anthropic</button>
+                  </div>
+                <div class="pc-panel" role="tabpanel" id="pc-panel-openai" aria-labelledby="pc-tab-openai" tabindex="0">
+          <div class="pc-panel__head"><span>Python</span><button type="button" class="pc-copy" data-copy="pc-code-openai">复制代码</button></div>
+          <pre><code id="pc-code-openai">from openai import OpenAI
+
+client = OpenAI()
+RULES = open(&quot;course_notes.md&quot;, encoding=&quot;utf-8&quot;).read()  # 需超过 1024 tokens
+
+for question in [&quot;什么是前缀缓存？&quot;, &quot;为什么时间戳要放在最后？&quot;]:
+    resp = client.chat.completions.create(
+        model=&quot;gpt-4.1&quot;,
+        messages=[
+            {&quot;role&quot;: &quot;system&quot;, &quot;content&quot;: RULES},
+            {&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: question},
+        ],
+    )
+    usage = resp.usage
+    print(usage.prompt_tokens, usage.prompt_tokens_details.cached_tokens)</code></pre>
+          <p class="pc-panel__expect">第一次 cached_tokens 为 0；第二次接近 RULES 的长度。缓存按最佳努力路由，没有命中时隔几秒再发一次。</p>
+        </div>
+                <div class="pc-panel" role="tabpanel" id="pc-panel-anthropic" aria-labelledby="pc-tab-anthropic" tabindex="0" hidden>
+          <div class="pc-panel__head"><span>Python</span><button type="button" class="pc-copy" data-copy="pc-code-anthropic">复制代码</button></div>
+          <pre><code id="pc-code-anthropic">import anthropic
+
+client = anthropic.Anthropic()
+RULES = open(&quot;course_notes.md&quot;, encoding=&quot;utf-8&quot;).read()  # 需超过模型的最短可缓存长度
+
+for question in [&quot;什么是前缀缓存？&quot;, &quot;为什么时间戳要放在最后？&quot;]:
+    resp = client.messages.create(
+        model=&quot;claude-sonnet-4-5&quot;,
+        max_tokens=512,
+        system=[{&quot;type&quot;: &quot;text&quot;, &quot;text&quot;: RULES,
+                 &quot;cache_control&quot;: {&quot;type&quot;: &quot;ephemeral&quot;}}],
+        messages=[{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: question}],
+    )
+    u = resp.usage
+    print(u.cache_creation_input_tokens, u.cache_read_input_tokens, u.input_tokens)</code></pre>
+          <p class="pc-panel__expect">第一次 cache_creation_input_tokens 大于 0；第二次变为 0，cache_read_input_tokens 等于 RULES 的长度。</p>
+        </div>
+                <p class="sr-only" role="status" data-copy-status></p>
+      </div>
+      <p class="pc-gate"><strong>验收</strong>第二次请求读到缓存；开头改一个字符后命中归零；能说清两家用量字段各自统计什么。在 Hermes 中，可以用 <code>/usage</code> 观察多轮对话的 token 消耗。</p>
+    </section>
+
+    <nav class="lesson-nav shell" aria-label="讲义导航">
+  <a class="lesson-nav__item lesson-nav__item--course" href="#main"><span>返回开头</span><strong>本篇讲义</strong></a>
+</nav>
+  </main>
+  <footer class="site-footer">
+    <div class="shell site-footer__row">
+      <nav class="site-footer__nav" aria-label="页脚导航">
+                                        <a href="#prefix">讲义正文</a>
+                        <a href="https://platform.claude.com/docs/en/build-with-claude/prompt-caching" target="_blank" rel="noopener noreferrer">官方文档</a>
+              </nav>
+      <p>© 2026 朱晨辉</p>
+    </div>
+    <p class="site-footer__sign" aria-hidden="true"><span style="--i:0">L</span><span style="--i:1">u</span><span style="--i:2">c</span><span style="--i:3">i</span><span style="--i:4">a</span><span style="--i:5">n</span><i></i></p>
+  </footer>
+  <script type="application/json" id="pc-data">{"hero":{"head":[["system","当前时间 07:19:4§"],["system","你是课程助教，只依据参考资料回答。"],["资料","前缀缓存复用相同开头的计算结果，只有逐字一致才会命中。"],["user","为什么改一个字就会失效？"]],"tail":[["system","你是课程助教，只依据参考资料回答。"],["资料","前缀缓存复用相同开头的计算结果，只有逐字一致才会命中。"],["user","为什么改一个字就会失效？"],["user","当前时间 07:19:4§"]]},"questions":["为什么在 system 开头写时间戳会让缓存失效？","前缀缓存和 KV Cache 是什么关系？","工具定义放在哪里最稳定？","对话历史被压缩后会发生什么？"],"previousQuestion":"前缀缓存和 KV Cache 是什么关系？","segments":{"tools":{"label":"工具定义","grid":"tools","text":"search_notes(query) → 在课程笔记中检索段落\nread_file(path) → 读取指定文件"},"system":{"label":"系统规则","grid":"system","text":"你是《大模型与自然语言处理》课程助教。只依据参考资料回答；资料没有的内容，直接说明不知道。回答先给结论，再给一个可以验证的例子。"},"docs":{"label":"参考资料","grid":"参考资料","text":"Prompt Caching 复用相同前缀已经算过的结果。缓存只在前缀逐字一致时命中，任何一处改动都会让之后的内容重新计算。把稳定的工具定义、系统规则和参考资料放在前面，把每次变化的问题放在最后。"},"question":{"label":"用户问题","grid":"用户问题","text":"为什么在 system 开头写时间戳会让缓存失效？"}},"turnPercent":{"stable":31,"stamp":125}}</script>
+</body>
+</html>
